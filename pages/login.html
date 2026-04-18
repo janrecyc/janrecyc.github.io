@@ -1,0 +1,74 @@
+<!-- pages/login.html -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - Scrap POS</title>
+    <!-- โหลด Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-600 mb-2">♻️ Scrap POS</h1>
+            <p class="text-slate-500">ระบบจัดการร้านรับซื้อของเก่า</p>
+        </div>
+
+        <!-- กล่องแสดง Error -->
+        <div id="error-msg" class="hidden bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm text-center"></div>
+
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label class="block text-slate-700 font-medium mb-1">อีเมลผู้ใช้งาน</label>
+                <input type="email" id="email" required 
+                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-lg">
+            </div>
+            <div>
+                <label class="block text-slate-700 font-medium mb-1">รหัสผ่าน</label>
+                <input type="password" id="password" required 
+                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-lg">
+            </div>
+            <button type="submit" id="submit-btn" 
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-lg transition duration-200">
+                เข้าสู่ระบบ
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        // สังเกต path ../js/auth.js เพราะไฟล์นี้อยู่ในโฟลเดอร์ pages
+        import { login } from '../js/auth.js';
+
+        const form = document.getElementById('login-form');
+        const errorMsg = document.getElementById('error-msg');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // ป้องกันหน้าเว็บรีเฟรช
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // UI สถานะโหลด
+            submitBtn.textContent = 'กำลังตรวจสอบ...';
+            submitBtn.disabled = true;
+            errorMsg.classList.add('hidden');
+
+            const { data, error } = await login(email, password);
+
+            if (error) {
+                // กรณีรหัสผิด
+                errorMsg.textContent = '❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+                errorMsg.classList.remove('hidden');
+                submitBtn.textContent = 'เข้าสู่ระบบ';
+                submitBtn.disabled = false;
+            } else {
+                // กรณีสำเร็จ เด้งไปหน้ารับซื้อ
+                window.location.replace('./buy.html');
+            }
+        });
+    </script>
+</body>
+</html>

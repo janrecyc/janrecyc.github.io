@@ -1,0 +1,35 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrap POS - Routing...</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f8fafc; margin: 0; }
+        .loader-text { font-size: 1.25rem; color: #475569; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="loader-text">🔄 กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...</div>
+
+    <!-- ใช้ type="module" เพื่อให้ใช้ import ได้ -->
+    <script type="module">
+        import { checkSession } from './js/auth.js';
+
+        async function initRoute() {
+            const { session } = await checkSession();
+            
+            if (session) {
+                // ถ้ามี Session (Login แล้ว) เด้งไปหน้ารับซื้อ
+                window.location.replace('./pages/buy.html');
+            } else {
+                // ถ้ายังไม่ Login เด้งไปหน้า Login
+                window.location.replace('./pages/login.html');
+            }
+        }
+
+        initRoute();
+    </script>
+</body>
+</html>

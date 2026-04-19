@@ -1,0 +1,75 @@
+<!-- pages/buy.html -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รับซื้อของเข้า - Scrap POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ซ่อนลูกศรในช่องตัวเลข */
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* แต่ง Scrollbar ให้ดูสะอาด */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-100 flex h-screen overflow-hidden">
+    
+    <!-- Sidebar -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main POS Layout: แบ่งซ้าย (เลือกของ) ขวา (บิล) -->
+    <main class="ml-64 flex-1 flex h-full">
+        
+        <!-- ซ้าย: รายการสินค้า (Item Grid) -->
+        <section class="w-7/12 flex flex-col p-6 border-r border-slate-300 bg-white">
+            <header class="mb-4 flex justify-between items-end">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800">📥 รับซื้อของเข้า</h1>
+                    <p class="text-slate-500">เลือกรายการสินค้าเพื่อเพิ่มลงบิล</p>
+                </div>
+            </header>
+            
+            <!-- ตารางปุ่มกดสินค้า -->
+            <div id="item-grid" class="flex-1 overflow-y-auto grid grid-cols-3 gap-4 content-start pb-20">
+                <!-- ข้อมูลจะถูก Render จาก JS -->
+                <div class="col-span-3 text-center text-slate-400 py-10">กำลังโหลดรายการสินค้า...</div>
+            </div>
+        </section>
+
+        <!-- ขวา: บิลรับซื้อปัจจุบัน (Cart) -->
+        <section class="w-5/12 bg-slate-50 flex flex-col h-full shadow-inner relative">
+            <header class="bg-slate-800 text-white p-4 text-center shadow-md z-10">
+                <h2 class="text-xl font-bold">📄 บิลรับซื้อปัจจุบัน</h2>
+            </header>
+
+            <!-- รายการในบิล -->
+            <div id="cart-container" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <!-- รายการบิลจะถูกเพิ่มตรงนี้ -->
+                <div id="empty-cart-msg" class="text-center text-slate-400 mt-20 flex flex-col items-center">
+                    <span class="text-4xl mb-2">🛒</span>
+                    <p>ยังไม่มีสินค้าในบิล</p>
+                </div>
+            </div>
+
+            <!-- สรุปยอด และ ปุ่มจ่ายเงิน -->
+            <div class="bg-white border-t-4 border-green-500 p-6 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-10">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-slate-500 font-medium">น้ำหนักสุทธิรวม</span>
+                    <span class="text-xl font-bold text-slate-800"><span id="total-weight">0.00</span> กก.</span>
+                </div>
+                <div class="flex justify-between items-end mb-4">
+                    <span class="text-slate-500 font-medium text-lg">ยอดที่ต้องจ่าย</span>
+                    <span class="text-4xl font-extrabold text-green-600">฿ <span id="total-amount">0.00</span></span>
+                </div>
+                <button id="checkout-btn" disabled class="w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 flex justify-center items-center gap-2">
+                    💵 บันทึกและจ่ายเงิน
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="../js/buy.js"></script>
+</body>
+</html>

@@ -3,16 +3,14 @@ import { supabase } from './config.js';
 import { checkSession } from './auth.js';
 import { renderSidebar } from '../components/sidebar.js';
 
-// ตัวแปรเก็บสิทธิ์การใช้งาน (เพื่อเช็คว่าจะให้แก้ไขราคาได้ไหม)
 let userRole = 'cashier';
 
-// เมื่อหน้าเว็บโหลดเสร็จ
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. เช็ค Login และดึง Sidebar
+    // 1. เช็ค Login
     const { session } = await checkSession();
     if (!session) return window.location.replace('login.html');
     
-    // ดึงสิทธิ์ User จากตาราง public.users
+    // ดึงสิทธิ์ User
     const { data: userData } = await supabase
         .from('users')
         .select('role')
@@ -21,17 +19,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (userData) userRole = userData.role;
 
-    // เรนเดอร์ Sidebar (สมมติว่าคุณมีฟังก์ชันนี้แล้วตามคำตอบก่อนหน้า)
+    // เรนเดอร์ Sidebar (มันจะไปฝังใน div ที่ซ่อนอยู่บนมือถืออัตโนมัติ)
     renderSidebar('sidebar-container');
 
     // 2. ดึงข้อมูลราคามาแสดง
     await loadPrices();
 
-    // 3. เปิดระบบรับฟัง Realtime!
+    // 3. เปิดระบบรับฟัง Realtime
     subscribeToRealtime();
 });
 
-// ฟังก์ชันดึงข้อมูลแบบ Join ตาราง items เพื่อเอาชื่อสินค้า
 async function loadPrices() {
     const { data, error } = await supabase
         .from('prices')
@@ -42,63 +39,72 @@ async function loadPrices() {
             updated_at,
             items (name)
         `)
-        .order('items(name)', { ascending: true }); // เรียงตามชื่อ
+        .order('items(name)', { ascending: true });
 
     if (error) {
         console.error('Error fetching prices:', error);
         return;
     }
 
-    renderTable(data);
+    renderCards(data); // เปลี่ยนชื่อเรียกเป็น renderCards
 }
 
-// ฟังก์ชันสร้างแถวในตาราง
-function renderTable(pricesData) {
-    const tbody = document.getElementById('price-table-body');
+// 📌 สร้าง Card แทนการสร้างตาราง
+function renderCards(pricesData) {
+    const container = document.getElementById('price-card-container');
     
-    // ตรวจสอบสิทธิ์: ถ้าเป็น Cashier ให้ Disable ช่อง Input และซ่อนปุ่ม
     const isReadOnly = userRole !== 'admin' ? 'disabled' : '';
     const hideAction = userRole !== 'admin' ? 'hidden' : '';
 
-    tbody.innerHTML = pricesData.map(row => `
-        <tr id="row-${row.item_id}" class="hover:bg-slate-50 transition-colors duration-300 group">
-            <td class="p-4 font-bold text-slate-700 text-lg">${row.items.name}</td>
-            <td class="p-4">
-                <input type="number" id="buy-${row.item_id}" value="${row.buy_price}" ${isReadOnly}
-                       class="w-full bg-slate-100 focus:bg-white border-2 border-transparent focus:border-green-400 rounded-lg px-3 py-2 text-lg font-semibold text-blue-600 outline-none transition disabled:bg-transparent disabled:text-slate-600">
-            </td>
-            <td class="p-4">
-                <input type="number" id="sell-${row.item_id}" value="${row.sell_price}" ${isReadOnly}
-                       class="w-full bg-slate-100 focus:bg-white border-2 border-transparent focus:border-green-400 rounded-lg px-3 py-2 text-lg font-semibold text-red-600 outline-none transition disabled:bg-transparent disabled:text-slate-600">
-            </td>
-            <td class="p-4 text-sm text-slate-500" id="time-${row.item_id}">
-                ${formatTime(row.updated_at)}
-            </td>
-            <td class="p-4 text-center">
-                <button data-id="${row.item_id}" class="save-btn bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition ${hideAction} opacity-0 group-hover:opacity-100">
-                    💾 บันทึก
-                </button>
-            </td>
-        </tr>
+    container.innerHTML = pricesData.map(row => `
+        <div id="card-${row.item_id}" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 relative transition-all duration-300">
+            
+            <!-- ชื่อสินค้า & เวลา -->
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                <h3 class="font-bold text-lg text-slate-800">${row.items.name}</h3>
+                <span class="text-[11px] text-slate-500 flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-md" id="time-${row.item_id}">
+                    <i class="ph ph-clock"></i> ${formatTime(row.updated_at)}
+                </span>
+            </div>
+
+            <!-- กล่องกรอกราคา (ออกแบบให้กดง่ายบนมือถือ) -->
+            <div class="flex gap-3 mb-1">
+                <div class="flex-1 bg-slate-50 rounded-xl p-2 border border-slate-100 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                    <label class="text-[10px] text-slate-500 uppercase tracking-wide font-medium block text-center mb-1">รับซื้อ (฿/kg)</label>
+                    <input type="number" id="buy-${row.item_id}" value="${row.buy_price}" ${isReadOnly}
+                           class="w-full bg-transparent text-xl font-bold text-blue-600 text-center outline-none disabled:text-slate-400">
+                </div>
+                
+                <div class="flex-1 bg-slate-50 rounded-xl p-2 border border-slate-100 focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-100 transition-all">
+                    <label class="text-[10px] text-slate-500 uppercase tracking-wide font-medium block text-center mb-1">ขายออก (฿/kg)</label>
+                    <input type="number" id="sell-${row.item_id}" value="${row.sell_price}" ${isReadOnly}
+                           class="w-full bg-transparent text-xl font-bold text-green-600 text-center outline-none disabled:text-slate-400">
+                </div>
+            </div>
+
+            <!-- ปุ่มเซฟ (ซ่อนถ้าไม่ใช่ Admin, ปุ่มใหญ่กดมือเดียวง่าย) -->
+            <button data-id="${row.item_id}" class="save-btn w-full mt-3 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white py-3 rounded-xl text-sm font-medium transition-all flex justify-center items-center gap-2 ${hideAction}">
+                <i class="ph ph-floppy-disk text-lg"></i> บันทึกราคา
+            </button>
+        </div>
     `).join('');
 }
 
-// เทคนิค Event Delegation: ดักจับคลิกที่ปุ่มเซฟทั้งหมดผ่าน Tbody
-document.getElementById('price-table-body').addEventListener('click', async (e) => {
-    // หาว่าคลิกโดนปุ่มที่มีคลาส save-btn ไหม
+// 📌 ดักจับ Event คลิกปุ่มเซฟ
+document.getElementById('price-card-container').addEventListener('click', async (e) => {
     if (e.target.closest('.save-btn')) {
         const btn = e.target.closest('.save-btn');
         const itemId = btn.dataset.id;
         
-        // ดึงค่าที่เถ้าแก่พิมพ์
         const buyVal = document.getElementById(`buy-${itemId}`).value;
         const sellVal = document.getElementById(`sell-${itemId}`).value;
 
-        // เปลี่ยนปุ่มเป็นสถานะโหลด
-        btn.innerHTML = '⏳...';
+        // สถานะกำลังโหลด
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="ph ph-spinner-gap animate-spin text-lg"></i> กำลังบันทึก...';
         btn.disabled = true;
+        btn.classList.add('opacity-70');
 
-        // อัปเดตลง Database (ตัวเวลาอัปเดตให้ฐานข้อมูลจัดการ หรือส่งไปจาก Client ก็ได้)
         const { error } = await supabase
             .from('prices')
             .update({ 
@@ -109,20 +115,21 @@ document.getElementById('price-table-body').addEventListener('click', async (e) 
             .eq('item_id', itemId);
 
         btn.disabled = false;
-        btn.innerHTML = '💾 บันทึก';
+        btn.classList.remove('opacity-70');
+        btn.innerHTML = originalHtml;
 
         if (error) {
             showToast('เกิดข้อผิดพลาด: ' + error.message, true);
         } else {
             showToast('บันทึกราคาเรียบร้อย');
-            // ไม่ต้องทำอะไรเพิ่มกับ UI ตรงนี้ เพราะเดี๋ยว Realtime Subscription จะรับไม้ต่อเอง!
         }
     }
 });
 
-// 🚀 พลังของ Supabase Realtime
+// 📌 Supabase Realtime
 function subscribeToRealtime() {
-    const statusBadge = document.getElementById('connection-status');
+    const desktopStatus = document.getElementById('desktop-connection-status');
+    const mobileStatus = document.getElementById('mobile-connection-status');
 
     supabase.channel('prices-update-channel')
         .on(
@@ -131,57 +138,62 @@ function subscribeToRealtime() {
             (payload) => {
                 const newData = payload.new;
                 
-                // หา Element บนหน้าจอให้เจอ
-                const row = document.getElementById(`row-${newData.item_id}`);
+                // ค้นหา Card และ Input
+                const card = document.getElementById(`card-${newData.item_id}`);
                 const buyInput = document.getElementById(`buy-${newData.item_id}`);
                 const sellInput = document.getElementById(`sell-${newData.item_id}`);
                 const timeCell = document.getElementById(`time-${newData.item_id}`);
 
-                if (row && buyInput && sellInput) {
-                    // ปรับค่าใน Input ให้ตรงกับที่ Database ส่งมาใหม่
-                    // (เช็คก่อนว่าค่าต่างกันจริงๆ ค่อยเปลี่ยน ป้องกัน Cursor เด้งเวลาเถ้าแก่กำลังพิมพ์)
+                if (card && buyInput && sellInput) {
                     if (parseFloat(buyInput.value) !== newData.buy_price) buyInput.value = newData.buy_price;
                     if (parseFloat(sellInput.value) !== newData.sell_price) sellInput.value = newData.sell_price;
                     
-                    timeCell.innerText = formatTime(newData.updated_at);
+                    timeCell.innerHTML = `<i class="ph ph-clock"></i> ${formatTime(newData.updated_at)}`;
 
-                    // ยิง Effect สีเขียวให้รู้ว่าราคาอัปเดตแล้ว!
-                    row.classList.remove('flash-update'); // รีเซ็ตคลาส
-                    void row.offsetWidth; // บังคับให้เบราว์เซอร์ Reflow เพื่อให้ Animation ทำงานซ้ำได้
-                    row.classList.add('flash-update');
+                    // ยิง Effect แฟลชสีเขียวที่ Card
+                    card.classList.remove('flash-update');
+                    void card.offsetWidth;
+                    card.classList.add('flash-update');
                 }
             }
         )
         .subscribe((status) => {
-            // อัปเดต UI สถานะการเชื่อมต่อ
             if (status === 'SUBSCRIBED') {
-                statusBadge.innerHTML = '🟢 เชื่อมต่อ Realtime แล้ว';
-                statusBadge.className = 'flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium';
+                // อัปเดต UI ให้สีเขียวทั้งจอคอมและมือถือ
+                if(desktopStatus) {
+                    desktopStatus.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-green-500"></div> เชื่อมต่อ Realtime แล้ว';
+                    desktopStatus.className = 'flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium';
+                }
+                if(mobileStatus) {
+                    mobileStatus.innerHTML = '<div class="w-2 h-2 rounded-full bg-green-400"></div> Realtime';
+                    mobileStatus.className = 'flex items-center gap-1 bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-[10px] font-medium border border-green-500/30';
+                }
             }
         });
 }
 
-// --- ฟังก์ชันช่วยเหลือ (Utils) ---
-
-// รูปแบบเวลาให้อ่านง่าย เช่น "14:30 น. (12 ก.พ.)"
+// --- Utils ---
 function formatTime(isoString) {
     if (!isoString) return '-';
     const date = new Date(isoString);
     return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
 }
 
-// ฟังก์ชันโชว์ Toast แถบแจ้งเตือนมุมขวาล่าง
 function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
     const msgElement = document.getElementById('toast-msg');
     
-    toast.className = `fixed bottom-5 right-5 transform transition-all duration-300 px-6 py-3 rounded-lg shadow-xl z-50 flex items-center gap-2 ${isError ? 'bg-red-600' : 'bg-slate-800 text-white'}`;
-    msgElement.innerText = message;
+    // จัดการสี
+    if(isError) {
+        toast.classList.replace('bg-slate-800', 'bg-red-600');
+        toast.innerHTML = `<i class="ph-fill ph-warning-circle text-white text-xl"></i> <span id="toast-msg">${message}</span>`;
+    } else {
+        toast.classList.replace('bg-red-600', 'bg-slate-800');
+        toast.innerHTML = `<i class="ph-fill ph-check-circle text-green-400 text-xl"></i> <span id="toast-msg">${message}</span>`;
+    }
     
-    // เด้งขึ้น
     toast.classList.remove('translate-y-20', 'opacity-0');
     
-    // หายไปหลังผ่านไป 3 วิ
     setTimeout(() => {
         toast.classList.add('translate-y-20', 'opacity-0');
     }, 3000);

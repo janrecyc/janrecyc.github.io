@@ -4,9 +4,9 @@ import { checkSession } from './auth.js';
 import { renderSidebar } from '../components/sidebar.js';
 
 // --- State Management ---
-let globalPrices = []; // เก็บราคาล่าสุด
-let cart = []; // เก็บของในตะกร้า
-let currentUser = null; // เก็บ ID คนใช้งาน
+let globalPrices = []; 
+let cart = []; 
+let currentUser = null; 
 
 document.addEventListener('DOMContentLoaded', async () => {
     const { session } = await checkSession();
@@ -18,69 +18,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
 });
 
-// 1. โหลดข้อมูลสินค้าและราคาจากฐานข้อมูล
+// 1. โหลดข้อมูลสินค้าและราคา
 async function loadItemsAndPrices() {
     const { data, error } = await supabase
         .from('prices')
-        .select(`
-            item_id, 
-            buy_price, 
-            items (id, name, default_deduction_percent)
-        `);
+        .select(`item_id, buy_price, items (id, name, default_deduction_percent)`);
 
-    if (error) return alert('โหลดข้อมูลราคาล้มเหลว');
+    if (error) {
+        showToast('โหลดข้อมูลราคาล้มเหลว', 'error');
+        return;
+    }
     
     globalPrices = data;
     renderItemGrid();
 }
 
-// 2. สร้างปุ่มให้กดเลือกฝั่งซ้าย
+// 2. สร้างปุ่มสินค้า (UI ใหม่ สวยๆ กดง่าย)
 function renderItemGrid() {
     const grid = document.getElementById('item-grid');
     grid.innerHTML = globalPrices.map(p => `
-        <button class="item-btn bg-white border-2 border-slate-200 hover:border-green-500 hover:shadow-md rounded-xl p-4 flex flex-col items-center justify-center transition" data-id="${p.item_id}">
-            <span class="text-xl font-bold text-slate-800 mb-1">${p.items.name}</span>
-            <span class="text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full text-sm">฿ ${p.buy_price} / กก.</span>
+        <button class="item-btn group bg-white border border-slate-200 hover:border-blue-500 rounded-2xl p-3 flex flex-col items-center justify-center transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10 active:scale-95 relative overflow-hidden" data-id="${p.item_id}">
+            <!-- สีแต่งขอบด้านบน -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-slate-100 group-hover:bg-blue-500 transition-colors"></div>
+            
+            <div class="w-12 h-12 bg-slate-50 group-hover:bg-blue-50 text-slate-400 group-hover:text-blue-500 rounded-full flex items-center justify-center mb-2 transition-colors">
+                <i class="ph-fill ph-package text-2xl"></i>
+            </div>
+            
+            <span class="text-[13px] font-bold text-slate-700 text-center leading-tight mb-2 h-8 flex items-center">${p.items.name}</span>
+            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md text-center w-full truncate border border-green-100">฿ ${p.buy_price}</span>
         </button>
     `).join('');
 }
 
-// 3. จัดการ Event ต่างๆ
 function setupEventListeners() {
-    // ดักคลิกเลือกสินค้า (Event Delegation)
     document.getElementById('item-grid').addEventListener('click', (e) => {
         const btn = e.target.closest('.item-btn');
         if (btn) addToCart(btn.dataset.id);
     });
 
-    // ดักการพิมพ์ตัวเลขในบิล เพื่อคำนวณสดๆ
     document.getElementById('cart-container').addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT') {
             const rowId = e.target.dataset.rowid;
-            const field = e.target.dataset.field; // 'gross' หรือ 'deduct'
+            const field = e.target.dataset.field; 
             updateCartItem(rowId, field, e.target.value);
         }
     });
 
-    // ดักลบรายการ
     document.getElementById('cart-container').addEventListener('click', (e) => {
-        if (e.target.classList.contains('del-btn')) {
-            removeFromCart(e.target.dataset.rowid);
-        }
+        const delBtn = e.target.closest('.del-btn');
+        if (delBtn) removeFromCart(delBtn.dataset.rowid);
     });
 
-    // ปุ่มชำระเงิน
     document.getElementById('checkout-btn').addEventListener('click', processCheckout);
 }
 
-// 4. เพิ่มของลงตะกร้า (สร้าง Unique ID ให้แต่ละบรรทัด เพราะอาจซื้อของชนิดเดียวกัน 2 รอบได้)
 function addToCart(itemId) {
     const itemData = globalPrices.find(p => p.item_id === itemId);
     if (!itemData) return;
 
-    const rowId = 'row_' + Date.now(); // สร้าง ID จำลองให้แต่ละบรรทัด
+    const rowId = 'row_' + Date.now(); 
     
-    cart.push({
+    cart.unshift({ // ใช้ unshift เพื่อให้ของใหม่ไปอยู่บนสุดของบิล
         rowId: rowId,
         itemId: itemId,
         name: itemData.items.name,
@@ -93,58 +92,63 @@ function addToCart(itemId) {
 
     renderCart();
     
-    // Auto-focus ไปที่ช่องกรอกน้ำหนักล่าสุด
     setTimeout(() => {
         const inputs = document.querySelectorAll(`input[data-rowid="${rowId}"][data-field="gross"]`);
         if (inputs.length > 0) inputs[0].focus();
     }, 50);
 }
 
-// 5. วาดตะกร้าใหม่
+// 5. วาดตะกร้าใหม่ (UI บิลใหม่ พิมพ์ง่าย กรอบชัดเจน)
 function renderCart() {
     const container = document.getElementById('cart-container');
     const emptyMsg = document.getElementById('empty-cart-msg');
     
+    document.getElementById('cart-count').innerText = `${cart.length} รายการ`;
+
     if (cart.length === 0) {
         emptyMsg.style.display = 'flex';
-        // เคลียร์ UI ให้หมด
-        const cardElements = container.querySelectorAll('.cart-item-card');
-        cardElements.forEach(el => el.remove());
+        container.querySelectorAll('.cart-item-card').forEach(el => el.remove());
     } else {
         emptyMsg.style.display = 'none';
         
-        // วาดเฉพาะสิ่งที่ต้องวาด (วิธีแบบง่าย: วาดใหม่หมด)
         const html = cart.map((c, index) => `
-            <div class="cart-item-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative">
-                <button class="del-btn absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full font-bold shadow-md" data-rowid="${c.rowId}">✕</button>
+            <div class="cart-item-card bg-white p-3 rounded-2xl shadow-sm border border-slate-200 relative animate-[fadeIn_0.3s_ease-out]">
+                <!-- ปุ่มลบสวยๆ -->
+                <button class="del-btn absolute -top-2 -right-2 bg-red-100 hover:bg-red-500 text-red-500 hover:text-white border border-white w-7 h-7 flex items-center justify-center rounded-full transition-colors shadow-sm" data-rowid="${c.rowId}">
+                    <i class="ph-bold ph-x text-xs"></i>
+                </button>
                 
-                <div class="flex justify-between items-center mb-3">
-                    <span class="font-bold text-lg text-slate-700">${index + 1}. ${c.name}</span>
-                    <span class="text-sm text-slate-500">@ ${c.price} ฿/กก.</span>
+                <!-- หัวข้อสินค้าในบิล -->
+                <div class="flex justify-between items-center mb-2 pr-4 border-b border-slate-100 pb-2">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <div class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></div>
+                        <span class="font-bold text-sm lg:text-base text-slate-800 truncate">${c.name}</span>
+                    </div>
+                    <span class="text-[11px] lg:text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded shrink-0">@ ${c.price} ฿</span>
                 </div>
                 
-                <div class="flex gap-3 mb-2">
-                    <div class="flex-1">
-                        <label class="text-xs text-slate-500 font-medium">รวม (กก.)</label>
-                        <input type="number" step="0.1" data-rowid="${c.rowId}" data-field="gross" value="${c.gross}" class="w-full bg-slate-100 border focus:border-green-400 rounded-lg px-2 py-2 text-lg font-bold text-slate-800 outline-none">
+                <!-- กล่องกรอกตัวเลข -->
+                <div class="flex gap-2 mb-2">
+                    <div class="flex-1 bg-slate-50 rounded-xl p-1.5 border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                        <label class="text-[10px] text-slate-500 block text-center mb-0.5">รวม (กก.)</label>
+                        <!-- ใช้ inputmode="decimal" เพื่อเรียกคีย์บอร์ดตัวเลขบนมือถือขึ้นมาทันที -->
+                        <input type="number" step="0.1" inputmode="decimal" data-rowid="${c.rowId}" data-field="gross" value="${c.gross}" placeholder="0" class="w-full bg-transparent text-center px-1 py-1 text-lg font-bold text-slate-800 outline-none placeholder:text-slate-300">
                     </div>
-                    <div class="flex-1">
-                        <label class="text-xs text-red-400 font-medium">หักขยะ (กก.)</label>
-                        <input type="number" step="0.1" data-rowid="${c.rowId}" data-field="deduct" value="${c.deduct}" class="w-full bg-red-50 border focus:border-red-400 rounded-lg px-2 py-2 text-lg font-bold text-red-600 outline-none">
+                    <div class="flex-1 bg-red-50/50 rounded-xl p-1.5 border border-red-100 focus-within:border-red-400 focus-within:ring-2 focus-within:ring-red-100 transition-all">
+                        <label class="text-[10px] text-red-400 block text-center mb-0.5">หักขยะ (กก.)</label>
+                        <input type="number" step="0.1" inputmode="decimal" data-rowid="${c.rowId}" data-field="deduct" value="${c.deduct}" placeholder="0" class="w-full bg-transparent text-center px-1 py-1 text-lg font-bold text-red-600 outline-none placeholder:text-red-200">
                     </div>
                 </div>
                 
-                <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100 mt-2">
-                    <span class="text-sm font-semibold text-slate-600">สุทธิ: <span id="net-${c.rowId}">${c.net.toFixed(2)}</span> กก.</span>
-                    <span class="text-lg font-bold text-green-600">฿ <span id="sub-${c.rowId}">${c.subtotal.toFixed(2)}</span></span>
+                <!-- สรุปบรรทัด -->
+                <div class="flex justify-between items-center bg-green-50/50 px-3 py-2 rounded-xl border border-green-100">
+                    <span class="text-xs font-semibold text-slate-600">สุทธิ <span id="net-${c.rowId}" class="text-slate-800">${c.net.toFixed(2)}</span> กก.</span>
+                    <span class="text-sm lg:text-base font-bold text-green-600">฿ <span id="sub-${c.rowId}">${c.subtotal.toLocaleString('th-TH', {minimumFractionDigits:2})}</span></span>
                 </div>
             </div>
         `).join('');
         
-        // อัปเดต HTML (ระวัง: การทำ innerHTML แบบนี้จะทำให้สูญเสีย Focus ถ้ายัดลงไปตรงๆ)
-        // เพื่อแก้ปัญหาพิมพ์แล้วหลุด Focus เราจะอัปเดต DOM แบบเจาะจงในฟังก์ชัน updateCartItem แทน
         if(container.querySelectorAll('.cart-item-card').length !== cart.length) {
-            // ถ้าจำนวนของเปลี่ยน ค่อยวาดใหม่หมด
             container.innerHTML = '<div id="empty-cart-msg" style="display:none;"></div>' + html;
         }
     }
@@ -152,24 +156,20 @@ function renderCart() {
     updateTotalSummary();
 }
 
-// 6. คำนวณเมื่อมีการพิมพ์ตัวเลข (ไม่กระตุก Focus)
 function updateCartItem(rowId, field, value) {
     const itemIndex = cart.findIndex(c => c.rowId === rowId);
     if (itemIndex === -1) return;
 
-    const numVal = parseFloat(value) || 0;
-    cart[itemIndex][field] = value; // เก็บเป็น String ก่อนเพื่อกันเวลาพิมพ์ "0."
+    cart[itemIndex][field] = value; 
 
-    // คำนวณ
     const gross = parseFloat(cart[itemIndex].gross) || 0;
     const deduct = parseFloat(cart[itemIndex].deduct) || 0;
     
-    cart[itemIndex].net = Math.max(0, gross - deduct); // ห้ามติดลบ
+    cart[itemIndex].net = Math.max(0, gross - deduct); 
     cart[itemIndex].subtotal = cart[itemIndex].net * cart[itemIndex].price;
 
-    // อัปเดต UI เฉพาะจุดที่เปลี่ยน (DOM Targeted Update) ทำให้พิมพ์ลื่นมาก
     document.getElementById(`net-${rowId}`).innerText = cart[itemIndex].net.toFixed(2);
-    document.getElementById(`sub-${rowId}`).innerText = cart[itemIndex].subtotal.toFixed(2);
+    document.getElementById(`sub-${rowId}`).innerText = cart[itemIndex].subtotal.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
 
     updateTotalSummary();
 }
@@ -179,7 +179,6 @@ function removeFromCart(rowId) {
     renderCart();
 }
 
-// 7. สรุปยอดรวมด้านล่างสุด
 function updateTotalSummary() {
     let totalWeight = 0;
     let totalAmount = 0;
@@ -190,27 +189,22 @@ function updateTotalSummary() {
     });
 
     document.getElementById('total-weight').innerText = totalWeight.toFixed(2);
-    document.getElementById('total-amount').innerText = totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('total-amount').innerText = totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     const btn = document.getElementById('checkout-btn');
-    // เปิดปุ่มถ้ามียอดเงิน และของในตะกร้าต้องไม่มีบรรทัดที่น้ำหนักเป็น 0
     const isValid = cart.length > 0 && cart.every(c => c.net > 0);
     btn.disabled = !isValid;
 }
 
-// ==========================================
-// 🚀 8. CORE LOGIC: การบันทึกข้อมูลลงฐานข้อมูล
-// ==========================================
+// 8. Checkout
 async function processCheckout() {
     const btn = document.getElementById('checkout-btn');
-    btn.innerHTML = '⏳ กำลังบันทึก...';
+    btn.innerHTML = '<i class="ph ph-spinner-gap animate-spin text-2xl"></i> กำลังบันทึก...';
     btn.disabled = true;
 
-    // หาผลรวมยอดบิล
     const grandTotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
 
     try {
-        // --- STEP 1: สร้างหัวบิล (transactions) ---
         const { data: txData, error: txError } = await supabase
             .from('transactions')
             .insert({
@@ -225,52 +219,70 @@ async function processCheckout() {
         if (txError) throw new Error('บันทึกหัวบิลล้มเหลว: ' + txError.message);
         const txId = txData.id;
 
-        // --- STEP 2: บันทึกรายการย่อย (transaction_lines) ---
-        // เราใช้ .map แปลงข้อมูล cart เป็นรูปแบบที่ DB ต้องการ
         const linesData = cart.map(c => ({
             transaction_id: txId,
             item_id: c.itemId,
             gross_weight: parseFloat(c.gross),
             deduction_weight: parseFloat(c.deduct) || 0,
             unit_price: c.price
-            // net_weight และ subtotal ไม่ต้องส่งไป! เพราะ DB Generate ให้เอง (ตามที่คุณออกแบบ)
         }));
 
         const { error: linesError } = await supabase.from('transaction_lines').insert(linesData);
-        if (linesError) throw new Error('บันทึกรายละเอียดบิลล้มเหลว: ' + linesError.message);
+        if (linesError) throw new Error('บันทึกรายละเอียดล้มเหลว: ' + linesError.message);
 
-        // --- STEP 3: อัปเดตสต๊อก (inventory_ledger) ---
-        // *หมายเหตุสำหรับระดับ Senior: ในระบบจริง ควรดึงยอดยกมา (balance) ล่าสุดก่อน
-        // แต่เพื่อความเรียบง่ายในโปรเจกต์นี้ เราจะถือว่า Database จัดการ Sum ให้ตอนดูรายงาน
-        // เราจึง Insert เข้าไปแบบตรงๆ
         const inventoryData = cart.map(c => ({
             item_id: c.itemId,
             transaction_id: txId,
-            change_weight: c.net, // รับซื้อ ของเข้า = ค่าบวก
-            balance_weight: c.net // (จำลอง) ในของจริงต้องไป Query balance เก่ามาบวก
+            change_weight: c.net,
+            balance_weight: c.net
         }));
         await supabase.from('inventory_ledger').insert(inventoryData);
 
-        // --- STEP 4: อัปเดตกระแสเงินสด (cash_flow) ---
         await supabase.from('cash_flow').insert({
             transaction_id: txId,
             amount_in: 0,
-            amount_out: grandTotal, // จ่ายเงินออก
-            balance: 0 // (จำลอง) ของจริงต้องดึงเงินกะปัจจุบันมาลบ
+            amount_out: grandTotal,
+            balance: 0 
         });
 
-        // 🟢 บันทึกสำเร็จทั้งหมด!
-        alert('✅ บันทึกบิลสำเร็จ!');
-        
-        // ล้างตะกร้า เตรียมรับบิลใหม่
+        // สำเร็จ! เคลียร์บิล โชว์ Toast
         cart = [];
         renderCart();
-        btn.innerHTML = '💵 บันทึกและจ่ายเงิน';
+        btn.innerHTML = '<i class="ph-fill ph-money text-2xl group-disabled:opacity-50"></i> บันทึกและจ่ายเงิน';
+        
+        showToast('บันทึกบิลสำเร็จ!', 'success');
 
     } catch (err) {
         console.error(err);
-        alert('❌ เกิดข้อผิดพลาด:\n' + err.message);
-        btn.innerHTML = '💵 บันทึกและจ่ายเงิน';
-        updateTotalSummary(); // เปิดปุ่มคืน
+        showToast(err.message, 'error');
+        btn.innerHTML = '<i class="ph-fill ph-money text-2xl group-disabled:opacity-50"></i> บันทึกและจ่ายเงิน';
+        updateTotalSummary(); 
     }
+}
+
+// --- ฟังก์ชันช่วยเหลือ (Utils) ---
+
+// แจ้งเตือนสวยๆ จากขอบบนจอ (ลงมาตรงกลาง)
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const msgElement = document.getElementById('toast-msg');
+    const iconElement = document.getElementById('toast-icon');
+    
+    if (type === 'error') {
+        toast.className = 'fixed top-5 left-1/2 -translate-x-1/2 transform transition-all duration-300 px-6 py-3 rounded-full shadow-2xl z-[100] flex items-center gap-2 whitespace-nowrap text-sm font-medium pointer-events-none bg-red-600 text-white';
+        iconElement.innerHTML = '<i class="ph-fill ph-warning-circle text-white text-xl"></i>';
+    } else {
+        toast.className = 'fixed top-5 left-1/2 -translate-x-1/2 transform transition-all duration-300 px-6 py-3 rounded-full shadow-2xl z-[100] flex items-center gap-2 whitespace-nowrap text-sm font-medium pointer-events-none bg-slate-800 text-white border border-slate-700';
+        iconElement.innerHTML = '<i class="ph-fill ph-check-circle text-green-400 text-xl"></i>';
+    }
+    
+    msgElement.innerText = message;
+    
+    // เด้งลงมา
+    toast.classList.remove('-translate-y-20', 'opacity-0');
+    
+    // หายไปหลัง 3 วิ
+    setTimeout(() => {
+        toast.classList.add('-translate-y-20', 'opacity-0');
+    }, 3000);
 }

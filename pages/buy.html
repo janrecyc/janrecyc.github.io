@@ -3,73 +3,159 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>รับซื้อของเข้า - Scrap POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        /* ซ่อนลูกศรในช่องตัวเลข */
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        /* แต่ง Scrollbar ให้ดูสะอาด */
-        ::-webkit-scrollbar { width: 6px; }
+        input[type="number"] { -moz-appearance: textfield; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* แต่ง Scrollbar ของบิลให้บางๆ สวยๆ บนคอม */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-100 flex h-screen overflow-hidden">
+<body class="bg-[#f8fafc] flex h-screen overflow-hidden text-slate-800">
     
-    <!-- Sidebar -->
-    <div id="sidebar-container"></div>
+    <!-- Sidebar (จอใหญ่) -->
+    <div id="sidebar-container" class="hidden lg:block w-64 h-full bg-[#1e293b] shrink-0 z-50 shadow-xl relative"></div>
 
-    <!-- Main POS Layout: แบ่งซ้าย (เลือกของ) ขวา (บิล) -->
-    <main class="ml-64 flex-1 flex h-full">
+    <main class="flex-1 flex flex-col h-full relative w-full overflow-hidden">
         
-        <!-- ซ้าย: รายการสินค้า (Item Grid) -->
-        <section class="w-7/12 flex flex-col p-6 border-r border-slate-300 bg-white">
-            <header class="mb-4 flex justify-between items-end">
-                <div>
-                    <h1 class="text-3xl font-bold text-slate-800">📥 รับซื้อของเข้า</h1>
-                    <p class="text-slate-500">เลือกรายการสินค้าเพื่อเพิ่มลงบิล</p>
+        <!-- Header (มือถือ) -->
+        <header class="lg:hidden bg-white px-4 py-3 flex justify-between items-center shadow-sm z-20 shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                    <i class="ph-fill ph-download-simple text-lg"></i>
                 </div>
-            </header>
-            
-            <!-- ตารางปุ่มกดสินค้า -->
-            <div id="item-grid" class="flex-1 overflow-y-auto grid grid-cols-3 gap-4 content-start pb-20">
-                <!-- ข้อมูลจะถูก Render จาก JS -->
-                <div class="col-span-3 text-center text-slate-400 py-10">กำลังโหลดรายการสินค้า...</div>
+                <h1 class="text-lg font-bold text-slate-800">รับซื้อของเข้า</h1>
             </div>
-        </section>
+            <div class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-medium">กดเลือกสินค้าเพื่อเพิ่มบิล</div>
+        </header>
 
-        <!-- ขวา: บิลรับซื้อปัจจุบัน (Cart) -->
-        <section class="w-5/12 bg-slate-50 flex flex-col h-full shadow-inner relative">
-            <header class="bg-slate-800 text-white p-4 text-center shadow-md z-10">
-                <h2 class="text-xl font-bold">📄 บิลรับซื้อปัจจุบัน</h2>
-            </header>
-
-            <!-- รายการในบิล -->
-            <div id="cart-container" class="flex-1 overflow-y-auto p-4 space-y-3">
-                <!-- รายการบิลจะถูกเพิ่มตรงนี้ -->
-                <div id="empty-cart-msg" class="text-center text-slate-400 mt-20 flex flex-col items-center">
-                    <span class="text-4xl mb-2">🛒</span>
-                    <p>ยังไม่มีสินค้าในบิล</p>
-                </div>
+        <!-- Header (คอมพิวเตอร์) -->
+        <header class="hidden lg:flex bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] px-8 py-5 justify-between items-center z-20 shrink-0">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-3 text-slate-800">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
+                        <i class="ph-fill ph-download-simple text-xl"></i>
+                    </div>
+                    ระบบรับซื้อของเข้า
+                </h1>
+                <p class="text-slate-500 text-sm mt-1 ml-[52px]">คลิกเลือกรายการสินค้าด้านซ้ายเพื่อเพิ่มลงบิล</p>
             </div>
-
-            <!-- สรุปยอด และ ปุ่มจ่ายเงิน -->
-            <div class="bg-white border-t-4 border-green-500 p-6 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-10">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-slate-500 font-medium">น้ำหนักสุทธิรวม</span>
-                    <span class="text-xl font-bold text-slate-800"><span id="total-weight">0.00</span> กก.</span>
-                </div>
-                <div class="flex justify-between items-end mb-4">
-                    <span class="text-slate-500 font-medium text-lg">ยอดที่ต้องจ่าย</span>
-                    <span class="text-4xl font-extrabold text-green-600">฿ <span id="total-amount">0.00</span></span>
-                </div>
-                <button id="checkout-btn" disabled class="w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 flex justify-center items-center gap-2">
-                    💵 บันทึกและจ่ายเงิน
-                </button>
+            <!-- เผื่อใส่ชื่อคนใช้งาน หรือวันที่ตรงนี้ได้ในอนาคต -->
+            <div class="bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 flex items-center gap-2">
+                <i class="ph ph-calendar-blank"></i> <span id="current-date">วันนี้</span>
             </div>
-        </section>
+        </header>
+
+        <!-- 🛒 พื้นที่ทำงาน (POS Workarea) -->
+        <!-- มือถือ: แบ่งบน(สินค้า) 55% ล่าง(บิล) 45% | คอม: ซ้าย(สินค้า) 60% ขวา(บิล) 40% -->
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden pb-[calc(env(safe-area-inset-bottom)+70px)] lg:pb-0">
+
+            <!-- ฝั่งสินค้า (Item Grid) -->
+            <section class="flex-1 lg:w-[55%] xl:w-[65%] flex flex-col bg-[#f8fafc] overflow-hidden relative border-b lg:border-b-0 lg:border-r border-slate-200 shadow-[inset_-4px_0_10px_-10px_rgba(0,0,0,0.1)]">
+                <div id="item-grid" class="flex-1 overflow-y-auto p-3 lg:p-6 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 content-start">
+                    <!-- Loading State -->
+                    <div class="col-span-full text-center text-slate-400 py-20 flex flex-col items-center justify-center">
+                        <i class="ph ph-spinner-gap animate-spin text-5xl mb-3 text-blue-400"></i>
+                        <span class="font-medium">กำลังโหลดรายการสินค้า...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ฝั่งบิล (Cart) -->
+            <section class="h-[45vh] lg:h-full lg:w-[45%] xl:w-[35%] bg-white flex flex-col z-10 shrink-0">
+                
+                <header class="bg-slate-50 text-slate-700 p-2 lg:p-4 text-center border-b border-slate-200 flex justify-between items-center px-4 shrink-0">
+                    <h2 class="text-sm lg:text-lg font-bold flex items-center gap-2">
+                        <i class="ph-fill ph-receipt text-blue-500 text-lg lg:text-xl"></i> บิลปัจจุบัน
+                    </h2>
+                    <span class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium" id="cart-count">0 รายการ</span>
+                </header>
+
+                <!-- รายการในบิล -->
+                <div id="cart-container" class="flex-1 overflow-y-auto p-2 lg:p-4 space-y-2 bg-slate-50/50">
+                    <div id="empty-cart-msg" class="text-center text-slate-400 h-full flex flex-col items-center justify-center">
+                        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                            <i class="ph-fill ph-shopping-cart text-4xl text-slate-300"></i>
+                        </div>
+                        <p class="font-medium">ยังไม่มีสินค้าในบิล</p>
+                        <p class="text-xs mt-1">แตะเลือกสินค้าจากเมนูด้านบน</p>
+                    </div>
+                </div>
+
+                <!-- สรุปยอด และ ปุ่มจ่ายเงิน (ลอยติดขอบล่างเสมอ) -->
+                <div class="bg-white border-t border-slate-200 p-3 lg:p-5 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.05)] shrink-0 z-20">
+                    <div class="flex justify-between items-center mb-1 lg:mb-2">
+                        <span class="text-xs lg:text-sm text-slate-500 font-medium">น้ำหนักสุทธิรวม</span>
+                        <span class="text-sm lg:text-lg font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-lg"><span id="total-weight">0.00</span> กก.</span>
+                    </div>
+                    <div class="flex justify-between items-end mb-3 lg:mb-4">
+                        <span class="text-sm lg:text-lg text-slate-500 font-medium pb-1">ยอดที่ต้องจ่าย</span>
+                        <div class="flex items-start text-green-600">
+                            <span class="text-lg lg:text-2xl font-bold mr-1 mt-1">฿</span>
+                            <span class="text-3xl lg:text-[40px] font-black leading-none tracking-tight" id="total-amount">0.00</span>
+                        </div>
+                    </div>
+                    
+                    <button id="checkout-btn" disabled class="group w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none text-white text-lg lg:text-xl font-bold py-3.5 lg:py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                        <i class="ph-fill ph-money text-2xl group-disabled:opacity-50"></i> บันทึกและจ่ายเงิน
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- 📱 Bottom Navigation -->
+        <nav class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom)] z-50">
+            <div class="flex overflow-x-auto hide-scrollbar scroll-smooth">
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-2.5 text-blue-600 bg-blue-50/50 border-t-2 border-blue-600 -mt-[1px]">
+                    <i class="ph-fill ph-download-simple text-2xl mb-1"></i>
+                    <span class="text-[10px] font-bold">รับซื้อ</span>
+                </a>
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-2.5 text-slate-400 hover:text-blue-600 active:bg-slate-50 transition">
+                    <i class="ph ph-upload-simple text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium">ขายออก</span>
+                </a>
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-2.5 text-slate-400 hover:text-blue-600 active:bg-slate-50 transition">
+                    <i class="ph ph-recycle text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium whitespace-nowrap">คัดแยก</span>
+                </a>
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-2.5 text-slate-400 hover:text-blue-600 active:bg-slate-50 transition">
+                    <i class="ph ph-chart-line-up text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium whitespace-nowrap">บอร์ดราคา</span>
+                </a>
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-2.5 text-slate-400 hover:text-blue-600 active:bg-slate-50 transition">
+                    <i class="ph ph-package text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium">สต๊อก</span>
+                </a>
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-2.5 text-slate-400 hover:text-blue-600 active:bg-slate-50 transition">
+                    <i class="ph ph-money text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium whitespace-nowrap">ปิดกะ</span>
+                </a>
+                <div class="shrink-0 w-2"></div>
+            </div>
+        </nav>
+
+        <!-- แจ้งเตือน Toast -->
+        <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 transform -translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl z-[100] flex items-center gap-2 whitespace-nowrap text-sm font-medium pointer-events-none">
+            <span id="toast-icon"><i class="ph-fill ph-check-circle text-green-400 text-xl"></i></span>
+            <span id="toast-msg">แจ้งเตือน</span>
+        </div>
     </main>
 
     <script type="module" src="../js/buy.js"></script>
+    <script>
+        // เซ็ตวันที่ให้ Header แบบง่ายๆ
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    </script>
 </body>
 </html>

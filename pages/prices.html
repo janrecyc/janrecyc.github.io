@@ -1,3 +1,4 @@
+<!-- pages/prices.html -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -24,6 +25,10 @@
             0% { background-color: #bbf7d0; border-color: #22c55e; transform: scale(1.02); }
             100% { background-color: white; border-color: #e2e8f0; transform: scale(1); }
         }
+
+        /* ซ่อน Scrollbar สำหรับเมนูแนวนอนมือถือ */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-50 flex h-screen overflow-hidden text-slate-800">
@@ -63,7 +68,7 @@
         <div class="p-4 lg:p-8 overflow-y-auto flex-1 pb-safe">
             <!-- คอนเทนเนอร์สำหรับใส่ Card -->
             <div id="price-card-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                <!-- โหลดดิ่งเริ่มต้น -->
+                <!-- โหลดดิ้งเริ่มต้น -->
                 <div class="col-span-full p-8 text-center text-slate-400 flex flex-col items-center justify-center h-40">
                     <i class="ph ph-spinner-gap animate-spin text-4xl mb-2"></i>
                     กำลังโหลดข้อมูลราคา...
@@ -71,28 +76,53 @@
             </div>
         </div>
 
-        <!-- 📱 Bottom Navigation (แทน Sidebar บนมือถือ) -->
-        <nav class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)] z-20">
-            <a href="#" class="flex flex-col items-center justify-center w-full py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
-                <i class="ph ph-download-simple text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">รับซื้อ</span>
-            </a>
-            <a href="#" class="flex flex-col items-center justify-center w-full py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
-                <i class="ph ph-upload-simple text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">ขายออก</span>
-            </a>
-            <a href="#" class="flex flex-col items-center justify-center w-full py-3 text-green-600 bg-green-50/50">
-                <i class="ph-fill ph-chart-line-up text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">บอร์ดราคา</span>
-            </a>
-            <a href="#" class="flex flex-col items-center justify-center w-full py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
-                <i class="ph ph-package text-2xl mb-1"></i>
-                <span class="text-[10px] font-medium">สต๊อก</span>
-            </a>
+        <!-- 📱 Bottom Navigation (แทน Sidebar บนมือถือ - เลื่อนซ้ายขวาได้) -->
+        <nav class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)] z-40">
+            <div class="flex overflow-x-auto hide-scrollbar scroll-smooth">
+                
+                <!-- 1. รับซื้อของเข้า -->
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
+                    <i class="ph ph-download-simple text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium">รับซื้อ</span>
+                </a>
+
+                <!-- 2. ขายออกโรงงาน -->
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
+                    <i class="ph ph-upload-simple text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium">ขายออก</span>
+                </a>
+
+                <!-- 3. คัดแยก / แปรรูป -->
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
+                    <i class="ph ph-recycle text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium whitespace-nowrap">คัดแยก</span>
+                </a>
+
+                <!-- 4. บอร์ดราคาตลาด (Active สีเขียว) -->
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-3 text-green-600 bg-green-50/50">
+                    <i class="ph-fill ph-chart-line-up text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium whitespace-nowrap">บอร์ดราคา</span>
+                </a>
+
+                <!-- 5. สต๊อกคงเหลือ -->
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
+                    <i class="ph ph-package text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium">สต๊อก</span>
+                </a>
+
+                <!-- 6. เงินสดย่อย / ปิดกะ -->
+                <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center justify-center py-3 text-slate-400 hover:text-green-600 active:bg-slate-50 transition">
+                    <i class="ph ph-money text-2xl mb-1"></i>
+                    <span class="text-[10px] font-medium whitespace-nowrap">ปิดกะ</span>
+                </a>
+
+                <!-- ช่องว่างเผื่อท้ายสุด -->
+                <div class="shrink-0 w-2"></div>
+            </div>
         </nav>
 
         <!-- แจ้งเตือน Toast (ปรับให้อยู่เหนือ Bottom Nav บนมือถือ) -->
-        <div id="toast" class="fixed bottom-24 lg:bottom-5 right-1/2 translate-x-1/2 lg:right-5 lg:translate-x-0 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white px-6 py-3 rounded-full shadow-xl z-50 flex items-center gap-2 whitespace-nowrap text-sm font-medium">
+        <div id="toast" class="fixed bottom-24 lg:bottom-5 right-1/2 translate-x-1/2 lg:right-5 lg:translate-x-0 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white px-6 py-3 rounded-full shadow-xl z-50 flex items-center gap-2 whitespace-nowrap text-sm font-medium pointer-events-none">
             <i class="ph-fill ph-check-circle text-green-400 text-xl"></i> <span id="toast-msg">บันทึกสำเร็จ</span>
         </div>
     </main>

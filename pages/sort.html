@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คัดแยกสินค้า - Scrap POS</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+
+        body { font-family: 'Prompt', sans-serif; }
+        html, body { overscroll-behavior: none; }
+
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { scrollbar-width: none; }
+    </style>
+</head>
+
+<body class="bg-[#f8fafc] flex flex-col h-[100dvh] text-slate-800">
+
+<!-- HEADER -->
+<header class="shrink-0 bg-white px-4 py-3 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+            <i class="ph-fill ph-recycle text-lg"></i>
+        </div>
+        <h1 class="text-lg font-bold">คัดแยกสินค้า</h1>
+    </div>
+</header>
+
+<!-- CONTENT -->
+<div class="flex-1 overflow-y-auto p-3 space-y-3">
+
+    <!-- INPUT -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-200">
+        <h2 class="font-bold mb-3">📦 สินค้าต้นทาง</h2>
+
+        <select id="input-item"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 mb-3">
+            <option>-- โหลดข้อมูล... --</option>
+        </select>
+
+        <input type="number" id="input-weight" placeholder="น้ำหนัก (กก.)"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xl font-bold text-blue-600">
+    </section>
+
+    <!-- OUTPUT -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-200">
+        
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="font-bold">✨ สินค้าที่ได้</h2>
+            <button id="add-output-btn"
+                class="bg-slate-800 text-white px-3 py-2 rounded-lg text-sm">
+                + เพิ่ม
+            </button>
+        </div>
+
+        <div id="output-container" class="space-y-2"></div>
+
+        <!-- SUMMARY -->
+        <div class="mt-4 space-y-2 text-sm">
+
+            <div class="flex justify-between">
+                <span>น้ำหนักรวม</span>
+                <span id="total-output-weight">0.00</span>
+            </div>
+
+            <div id="loss-container" class="flex justify-between bg-slate-100 px-3 py-1 rounded">
+                <span>สูญหาย</span>
+                <span id="loss-weight">0.00</span>
+            </div>
+
+            <button id="submit-sort-btn" disabled
+                class="w-full mt-3 bg-blue-600 text-white py-3 rounded-xl disabled:bg-gray-300">
+                💾 บันทึก
+            </button>
+
+        </div>
+
+    </section>
+
+</div>
+
+<!-- 🔻 NAV -->
+<nav class="sticky bottom-0 bg-white border-t z-50">
+    <div class="flex overflow-x-auto hide-scrollbar">
+
+        <a href="buy.html" class="min-w-[70px] text-center py-2 text-slate-400">
+            <i class="ph ph-download-simple text-xl"></i>
+            <div class="text-[10px]">รับซื้อ</div>
+        </a>
+
+        <a href="#" class="min-w-[70px] text-center py-2 text-slate-400">
+            <i class="ph ph-upload-simple text-xl"></i>
+            <div class="text-[10px]">ขายออก</div>
+        </a>
+
+        <a href="sort.html" class="min-w-[70px] text-center py-2 text-blue-600">
+            <i class="ph-fill ph-recycle text-xl"></i>
+            <div class="text-[10px] font-bold">คัดแยก</div>
+        </a>
+
+        <a href="prices.html" class="min-w-[70px] text-center py-2 text-slate-400">
+            <i class="ph ph-chart-line-up text-xl"></i>
+            <div class="text-[10px]">ราคา</div>
+        </a>
+
+    </div>
+</nav>
+
+<script type="module" src="../js/sort.js"></script>
+
+</body>
+</html>

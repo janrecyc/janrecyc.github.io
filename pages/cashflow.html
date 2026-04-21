@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เงินสด - Scrap POS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+body { font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { scrollbar-width: none; }
+</style>
+</head>
+
+<body class="bg-[#f8fafc] flex flex-col h-[100dvh] text-slate-800">
+
+<main class="flex-1 flex flex-col overflow-hidden">
+
+<!-- HEADER -->
+<header class="bg-white px-4 py-3 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+            <i class="ph-fill ph-money text-lg"></i>
+        </div>
+        <h1 class="font-bold">เงินสดในลิ้นชัก</h1>
+    </div>
+</header>
+
+<!-- CONTENT -->
+<div class="flex-1 overflow-y-auto p-3 space-y-3 pb-24">
+
+    <!-- BALANCE -->
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white text-center shadow">
+        <p class="text-slate-400 text-sm">ยอดเงินปัจจุบัน</p>
+        <div class="text-3xl font-bold text-green-400 mt-1">
+            ฿ <span id="current-balance">0.00</span>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border">
+        <div class="space-y-3">
+
+            <select id="cash-type" class="w-full bg-slate-50 border rounded-lg px-3 py-3 font-bold">
+                <option value="cash_in">📥 เติมเงิน</option>
+                <option value="cash_out">📤 เบิกเงิน</option>
+            </select>
+
+            <input type="number" id="cash-amount" placeholder="0.00"
+                class="w-full bg-white border rounded-lg px-3 py-3 text-2xl font-bold text-center">
+
+            <button id="submit-cash-btn"
+                class="w-full bg-blue-600 text-white py-3 rounded-xl active:scale-95">
+                บันทึก
+            </button>
+
+        </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border">
+        <h3 class="font-bold mb-3">ประวัติ</h3>
+
+        <div id="cash-history" class="space-y-2 text-sm">
+            <div class="text-center text-slate-400 py-6">กำลังโหลด...</div>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<!-- NAV -->
+<nav class="sticky bottom-0 bg-white border-t z-50">
+<div class="flex overflow-x-auto hide-scrollbar">
+
+<a href="buy.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-download-simple text-xl"></i>
+<div class="text-[10px]">รับซื้อ</div>
+</a>
+
+<a href="sell.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-upload-simple text-xl"></i>
+<div class="text-[10px]">ขายออก</div>
+</a>
+
+<a href="sort.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-recycle text-xl"></i>
+<div class="text-[10px]">คัดแยก</div>
+</a>
+
+<a href="prices.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-chart-line-up text-xl"></i>
+<div class="text-[10px]">ราคา</div>
+</a>
+
+<a href="cashflow.html" class="min-w-[76px] py-2 text-center text-blue-600 bg-blue-50">
+<i class="ph-fill ph-money text-xl"></i>
+<div class="text-[10px] font-bold">เงินสด</div>
+</a>
+
+</div>
+</nav>
+
+<!-- TOAST -->
+<div id="toast"
+class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded opacity-0">
+<span id="toast-msg"></span>
+</div>
+
+<script type="module" src="../js/cash.js"></script>
+</body>
+</html>

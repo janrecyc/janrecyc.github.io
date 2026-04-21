@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Scrap POS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+body { font-family: 'Prompt', sans-serif; }
+.hide-scrollbar::-webkit-scrollbar { display:none; }
+</style>
+</head>
+
+<body class="bg-[#f8fafc] flex flex-col h-[100dvh] text-slate-800">
+
+<main class="flex-1 flex flex-col overflow-hidden">
+
+<!-- HEADER -->
+<header class="bg-white px-4 py-3 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+            <i class="ph-fill ph-chart-line-up text-lg"></i>
+        </div>
+        <h1 class="font-bold">Dashboard</h1>
+    </div>
+    <span id="date-display" class="text-xs text-slate-500"></span>
+</header>
+
+<!-- CONTENT -->
+<div class="flex-1 overflow-y-auto p-3 space-y-3 pb-24">
+
+    <!-- SUMMARY -->
+    <div class="grid grid-cols-2 gap-3">
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm border">
+            <p class="text-xs text-slate-500">ซื้อวันนี้</p>
+            <div class="text-xl font-bold text-red-500">
+                ฿ <span id="today-buy">0.00</span>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm border">
+            <p class="text-xs text-slate-500">ขายวันนี้</p>
+            <div class="text-xl font-bold text-green-600">
+                ฿ <span id="today-sell">0.00</span>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm border col-span-2">
+            <p class="text-xs text-slate-500">เงินสดในลิ้นชัก</p>
+            <div class="text-2xl font-bold text-blue-600">
+                ฿ <span id="drawer-cash">0.00</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHART -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border">
+        <h3 class="font-bold mb-2 text-sm">ยอดรับซื้อย้อนหลัง 7 วัน</h3>
+        <canvas id="buyChart" class="h-40"></canvas>
+    </div>
+
+</div>
+</main>
+
+<!-- NAV -->
+<nav class="sticky bottom-0 bg-white border-t z-50">
+<div class="flex overflow-x-auto hide-scrollbar">
+
+<a href="buy.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-download-simple text-xl"></i>
+<div class="text-[10px]">รับซื้อ</div>
+</a>
+
+<a href="sell.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-upload-simple text-xl"></i>
+<div class="text-[10px]">ขาย</div>
+</a>
+
+<a href="sort.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-recycle text-xl"></i>
+<div class="text-[10px]">คัดแยก</div>
+</a>
+
+<a href="prices.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-chart-line-up text-xl"></i>
+<div class="text-[10px]">ราคา</div>
+</a>
+
+<a href="cashflow.html" class="min-w-[76px] py-2 text-center text-slate-400">
+<i class="ph ph-money text-xl"></i>
+<div class="text-[10px]">เงินสด</div>
+</a>
+
+<a href="dashboard.html" class="min-w-[76px] py-2 text-center text-blue-600 bg-blue-50">
+<i class="ph-fill ph-chart-line-up text-xl"></i>
+<div class="text-[10px] font-bold">ภาพรวม</div>
+</a>
+
+</div>
+</nav>
+
+<script type="module" src="../js/dashboard.js"></script>
+</body>
+</html>

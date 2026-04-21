@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ขายออกโรงงาน - Scrap POS</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="../styles/print.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+
+        body { font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
+        html, body { overscroll-behavior: none; }
+
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { scrollbar-width: none; }
+    </style>
+</head>
+
+<body class="bg-[#f8fafc] flex flex-col h-[100dvh] text-slate-800">
+
+<!-- HEADER -->
+<header class="shrink-0 bg-white px-4 py-3 flex justify-between items-center shadow-sm ticket-header">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+            <i class="ph-fill ph-upload-simple text-lg"></i>
+        </div>
+        <h1 class="text-lg font-bold">ขายออกโรงงาน</h1>
+    </div>
+    <div class="text-[10px] bg-slate-100 px-2 py-1 rounded-md">
+        ชั่งน้ำหนักรถ
+    </div>
+</header>
+
+<!-- CONTENT -->
+<main class="flex-1 overflow-y-auto p-3 space-y-3 pb-24">
+
+    <!-- 🚚 ข้อมูลรถ -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-200">
+        <h2 class="font-bold mb-3">🚚 ข้อมูลรถ</h2>
+
+        <input type="text" id="license-plate"
+            placeholder="ทะเบียนรถ"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 mb-3">
+
+        <select id="item-select"
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-bold text-blue-700">
+            <option>-- โหลดข้อมูล... --</option>
+        </select>
+    </section>
+
+    <!-- ⚖️ น้ำหนัก -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-200">
+        <h2 class="font-bold mb-3">⚖️ น้ำหนัก (กก.)</h2>
+
+        <div class="grid grid-cols-3 gap-2">
+
+            <input type="number" id="gross-weight" placeholder="หนัก"
+                class="bg-blue-50 text-blue-700 text-center font-bold rounded-xl p-3">
+
+            <input type="number" id="tare-weight" placeholder="เบา"
+                class="bg-red-50 text-red-700 text-center font-bold rounded-xl p-3">
+
+            <div class="bg-green-50 text-green-700 flex items-center justify-center rounded-xl font-bold text-xl">
+                <span id="net-weight">0</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 💵 ราคา -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-200">
+
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="font-bold">💵 ราคา</h2>
+
+            <label class="flex items-center gap-2 text-xs bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                <input type="checkbox" id="pending-price-cb">
+                รอราคา
+            </label>
+        </div>
+
+        <input type="number" id="unit-price"
+            placeholder="บาท/กก."
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 mb-3 text-xl font-bold">
+
+        <div class="text-right text-2xl font-bold">
+            ฿ <span id="total-amount">0.00</span>
+        </div>
+    </section>
+
+    <!-- BUTTON -->
+    <section class="space-y-2">
+
+        <button onclick="window.print()"
+            class="w-full bg-slate-200 py-3 rounded-xl font-bold">
+            🖨️ พิมพ์
+        </button>
+
+        <button id="save-btn" disabled
+            class="w-full bg-blue-600 text-white py-3 rounded-xl disabled:bg-gray-300">
+            💾 บันทึก
+        </button>
+
+    </section>
+
+</main>
+
+<!-- 🔻 NAV -->
+<nav class="sticky bottom-0 bg-white border-t border-slate-200 z-50">
+    
+    <div class="flex overflow-x-auto hide-scrollbar scroll-smooth pb-[env(safe-area-inset-bottom)]">
+
+        <a href="buy.html" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center py-2.5 text-slate-400">
+            <i class="ph ph-download-simple text-2xl"></i>
+            <span class="text-[10px]">รับซื้อ</span>
+        </a>
+
+        <!-- ACTIVE -->
+        <a href="sell.html" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center py-2.5 text-blue-600 bg-blue-50 border-t-2 border-blue-600">
+            <i class="ph-fill ph-upload-simple text-2xl"></i>
+            <span class="text-[10px] font-bold">ขายออก</span>
+        </a>
+
+        <a href="sort.html" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center py-2.5 text-slate-400">
+            <i class="ph ph-recycle text-2xl"></i>
+            <span class="text-[10px]">คัดแยก</span>
+        </a>
+
+        <a href="prices.html" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center py-2.5 text-slate-400">
+            <i class="ph ph-chart-line-up text-2xl"></i>
+            <span class="text-[10px]">ราคา</span>
+        </a>
+
+        <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center py-2.5 text-slate-400">
+            <i class="ph ph-package text-2xl"></i>
+            <span class="text-[10px]">สต๊อก</span>
+        </a>
+
+        <a href="#" class="shrink-0 min-w-[76px] px-2 flex flex-col items-center py-2.5 text-slate-400">
+            <i class="ph ph-money text-2xl"></i>
+            <span class="text-[10px]">ปิดกะ</span>
+        </a>
+
+        <div class="w-2 shrink-0"></div>
+    </div>
+
+</nav>
+
+<script type="module" src="../js/sell.js"></script>
+
+</body>
+</html>

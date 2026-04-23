@@ -1,108 +1,88 @@
--- 1. สร้างตาราง Users (เชื่อมกับระบบ Supabase Auth)
-CREATE TABLE public.users (
-    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    full_name TEXT NOT NULL,
-    role TEXT CHECK (role IN ('admin', 'cashier')) DEFAULT 'cashier',
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-COMMENT ON TABLE public.users IS 'ข้อมูลพนักงาน ผูกกับ auth.users ของ Supabase';
+-- ==========================================
+-- STEP 1: สร้างตาราง
+-- ==========================================
+create extension if not exists "pgcrypto";
 
--- 2. สร้างตาราง Categories (หมวดหมู่สินค้า เช่น เหล็ก, กระดาษ, พลาสติก)
-CREATE TABLE public.categories (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 3. สร้างตาราง Items (รายการสินค้า)
-CREATE TABLE public.items (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
-    name TEXT NOT NULL UNIQUE,
-    default_deduction_percent NUMERIC(5,2) DEFAULT 0.00, -- หักสิ่งเจือปนพื้นฐาน (เช่น 2.00%)
-    created_at TIMESTAMPTZ DEFAULT NOW()
+-- TABLE: items (ประเภทของเก่า)
+create table public.items (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  buy_price numeric not null default 0,
+  sell_price numeric default 0,
+  stock_qty numeric default 0,
+  unit text default 'kg',
+  created_at timestamp with time zone default now()
 );
 
--- 4. สร้างตาราง Prices (บอร์ดราคารับซื้อ-ขายออก)
-CREATE TABLE public.prices (
-    item_id UUID REFERENCES public.items(id) ON DELETE CASCADE PRIMARY KEY,
-    buy_price NUMERIC(10,2) DEFAULT 0.00,
-    sell_price NUMERIC(10,2) DEFAULT 0.00,
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+-- TABLE: customers (ลูกค้า)
+create table public.customers (
+  id uuid primary key default gen_random_uuid(),
+  name text,
+  phone text,
+  created_at timestamp with time zone default now()
 );
 
--- 5. สร้างตาราง Transactions (หัวบิล/รายการหลัก)
-CREATE TABLE public.transactions (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    type TEXT CHECK (type IN ('buy', 'sell', 'sort', 'cash_in', 'cash_out')) NOT NULL,
-    total_amount NUMERIC(12,2) DEFAULT 0.00,
-    status TEXT CHECK (status IN ('completed', 'voided')) DEFAULT 'completed',
-    created_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+-- TABLE: transactions (หัวบิล)
+create table public.transactions (
+  id uuid primary key default gen_random_uuid(),
+  type text check (type in ('BUY','SELL')) not null,
+  customer_id uuid references customers(id),
+  total_amount numeric default 0,
+  created_by uuid references auth.users(id),
+  created_at timestamp with time zone default now()
 );
 
--- 6. สร้างตาราง Transaction Lines (รายละเอียดในบิล)
-CREATE TABLE public.transaction_lines (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    transaction_id UUID REFERENCES public.transactions(id) ON DELETE CASCADE NOT NULL,
-    item_id UUID REFERENCES public.items(id) ON DELETE RESTRICT,
-    gross_weight NUMERIC(10,3) DEFAULT 0.000, -- น้ำหนักชั่งรวม (kg มีทศนิยม 3 ตำแหน่ง)
-    deduction_weight NUMERIC(10,3) DEFAULT 0.000, -- น้ำหนักสิ่งเจือปนที่หักออก
-    
-    -- คำนวณน้ำหนักสุทธิ และ ยอดรวมให้อัตโนมัติ (ป้องกัน Front-end คำนวณพลาด)
-    net_weight NUMERIC(10,3) GENERATED ALWAYS AS (gross_weight - deduction_weight) STORED,
-    unit_price NUMERIC(10,2) DEFAULT 0.00,
-    subtotal NUMERIC(12,2) GENERATED ALWAYS AS ((gross_weight - deduction_weight) * unit_price) STORED
+-- TABLE: transaction_items (รายการในบิล)
+create table public.transaction_items (
+  id uuid primary key default gen_random_uuid(),
+  transaction_id uuid references transactions(id) on delete cascade,
+  item_id uuid references items(id),
+  qty numeric not null,
+  price_per_unit numeric not null,
+  subtotal numeric not null
 );
 
--- 7. สร้างตาราง Inventory Ledger (สมุดบัญชีสต๊อกสินค้า)
-CREATE TABLE public.inventory_ledger (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    item_id UUID REFERENCES public.items(id) ON DELETE RESTRICT NOT NULL,
-    transaction_id UUID REFERENCES public.transactions(id) ON DELETE CASCADE NOT NULL,
-    change_weight NUMERIC(10,3) NOT NULL, -- ค่าบวก = ของเข้า, ค่าลบ = ของออก
-    balance_weight NUMERIC(10,3) NOT NULL, -- ยอดยกไป (Snapshot สต๊อก ณ เวลานั้น)
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- ==========================================
+-- STEP 2: ระบบอัปเดต STOCK อัตโนมัติ (Trigger)
+-- ==========================================
+create or replace function update_stock()
+returns trigger as $$
+declare trx_type text;
+begin
+  select type into trx_type from transactions where id = new.transaction_id;
 
--- 8. สร้างตาราง Cash Flow (ความเคลื่อนไหวเงินสดในลิ้นชัก)
-CREATE TABLE public.cash_flow (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    transaction_id UUID REFERENCES public.transactions(id) ON DELETE CASCADE NOT NULL,
-    amount_in NUMERIC(12,2) DEFAULT 0.00,
-    amount_out NUMERIC(12,2) DEFAULT 0.00,
-    balance NUMERIC(12,2) NOT NULL, -- ยอดเงินคงเหลือในลิ้นชัก
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+  if trx_type = 'BUY' then
+    update items set stock_qty = stock_qty + new.qty where id = new.item_id;
+  elsif trx_type = 'SELL' then
+    update items set stock_qty = stock_qty - new.qty where id = new.item_id;
+  end if;
 
--------------------------------------------------------------------
--- ⚙️ การตั้งค่าระบบรักษาความปลอดภัย (RLS) และ Supabase Realtime
--------------------------------------------------------------------
+  return new;
+end;
+$$ language plpgsql;
 
--- เปิดใช้งาน RLS สำหรับตาราง prices
-ALTER TABLE public.prices ENABLE ROW LEVEL SECURITY;
+create trigger trigger_update_stock
+after insert on transaction_items
+for each row execute function update_stock();
 
--- Policy 1: ให้ทุกคนที่ Login (admin/cashier) สามารถ "อ่าน" ราคาได้
-CREATE POLICY "Anyone authenticated can read prices" 
-ON public.prices FOR SELECT 
-TO authenticated 
-USING (true);
+-- ==========================================
+-- STEP 3: เปิด RLS + สร้าง Policy (ปรับให้แอปใช้งานได้ทันที)
+-- ==========================================
+alter table items enable row level security;
+alter table customers enable row level security;
+alter table transactions enable row level security;
+alter table transaction_items enable row level security;
 
--- Policy 2: ให้เฉพาะ "admin" (เถ้าแก่) เท่านั้นที่สามารถ "แก้ไข" ราคาได้
-CREATE POLICY "Only admins can update prices" 
-ON public.prices FOR UPDATE 
-TO authenticated 
-USING (
-    EXISTS (SELECT 1 FROM public.users WHERE users.id = auth.uid() AND users.role = 'admin')
-);
+-- สร้าง Policy แบบรวบรัด ให้แอป (ทั้ง anon และ authenticated) สามารถ อ่าน/เพิ่ม/แก้ไข/ลบ ได้
+create policy "Allow All on items" on items for all using (true) with check (true);
+create policy "Allow All on customers" on customers for all using (true) with check (true);
+create policy "Allow All on transactions" on transactions for all using (true) with check (true);
+create policy "Allow All on transaction_items" on transaction_items for all using (true) with check (true);
 
--- Policy 3: ให้เฉพาะ "admin" สามารถ "เพิ่ม" รายการราคาใหม่ได้
-CREATE POLICY "Only admins can insert prices" 
-ON public.prices FOR INSERT 
-TO authenticated 
-WITH CHECK (
-    EXISTS (SELECT 1 FROM public.users WHERE users.id = auth.uid() AND users.role = 'admin')
-);
-
--- เปิดการส่งข้อมูล Realtime สำหรับตาราง prices (เถ้าแก่เปลี่ยนราคาปุ๊บ หน้าจอลูกน้องอัปเดตปั๊บ)
-ALTER PUBLICATION supabase_realtime ADD TABLE prices;
+-- ==========================================
+-- STEP 4: ปลดล็อก API (กันปัญหา Permission Denied แบบคราวที่แล้ว)
+-- ==========================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+NOTIFY pgrst, 'reload schema';

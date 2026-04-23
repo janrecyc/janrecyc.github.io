@@ -14,7 +14,7 @@ async function init() {
     // 🔐 ถ้ามี session อยู่แล้ว → เข้า dashboard
     const user = await getCurrentUser();
     if (user) {
-      window.location.href = '/pages/dashboard.html';
+      window.location.href = '/pages/test-auth.html';
       return;
     }
 

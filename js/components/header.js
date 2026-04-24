@@ -1,18 +1,20 @@
+// js/components/header.js
+
 import { logout } from '../core/auth.js';
 
 export function renderHeader(user) {
   return `
-    <header class="bg-[#1a1a1a] px-4 py-3 flex justify-between items-center border-b border-[#2a2a2a]">
+    <header class="bg-white px-4 py-3 flex justify-between items-center shadow-sm">
 
-      <div class="text-white font-bold text-lg">
+      <div class="font-bold">
         JanRecyc System
       </div>
 
-      <div class="flex items-center gap-3 text-sm text-gray-300">
+      <div class="flex items-center gap-3 text-sm">
         <span>${user.profile.full_name}</span>
 
         <button id="logout-btn"
-          class="bg-red-500 px-3 py-1 rounded-lg text-white">
+          class="bg-red-500 text-white px-3 py-1 rounded">
           Logout
         </button>
       </div>

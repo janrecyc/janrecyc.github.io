@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JanRecyc</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <script>
-    window.location.href = "./pages/dashboard.html";
-  </script>
+  <title>janrecyc POS</title>
+
+  <!-- Tailwind CDN (Production note: ควร build จริงภายหลัง) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./style.css" />
 </head>
-<body></body>
-</html>
 
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Root App -->
+  <div id="app"></div>
+
+  <!-- Entry Script -->
+  <script type="module" src="./src/app.js"></script>
+
+</body>
+</html>

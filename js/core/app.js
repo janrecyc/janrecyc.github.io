@@ -1,41 +1,36 @@
 // js/core/app.js
 
-import { requireAuth } from './auth.js';
-import { renderSidebar } from '../components/sidebar.js';
+import { getSession } from './auth.js';
 import { renderHeader, bindHeaderEvents } from '../components/header.js';
-import { showLoading, hideLoading } from './ui.js';
 
-export async function initApp(moduleInit) {
-  try {
-    showLoading();
+export async function initApp(pageInit) {
+  const session = await getSession();
 
-    const user = await requireAuth();
-
-    renderLayout(user);
-
-    if (typeof moduleInit === 'function') {
-      await moduleInit(user);
-    }
-
-    bindHeaderEvents();
-
-  } catch (err) {
-    console.error(err);
-  } finally {
-    hideLoading();
+  if (!session) {
+    window.location.href = '/pages/login.html';
+    return;
   }
+
+  renderLayout(session.user);
+
+  if (typeof pageInit === 'function') {
+    await pageInit(session.user);
+  }
+
+  bindHeaderEvents();
 }
 
+// ❌ ลบ sidebar ออก
 function renderLayout(user) {
   const root = document.getElementById('app');
 
   root.innerHTML = `
-    <div class="flex">
-      ${renderSidebar()}
-      <div class="flex-1">
-        ${renderHeader(user)}
-        <main class="p-4" id="page-content"></main>
-      </div>
+    <div class="min-h-screen bg-black">
+
+      ${renderHeader(user)}
+
+      <main id="page-content" class="pb-20"></main>
+
     </div>
   `;
 }

@@ -1,42 +1,63 @@
 // js/core/ui.js
 
-export function showToast(message, type = 'info') {
-  const toast = document.createElement('div');
+let toastContainer = null;
 
-  const base = 'fixed bottom-4 right-4 px-4 py-2 rounded shadow text-white z-50';
-  const color = {
+// ---------------- TOAST ----------------
+
+export function showToast(message, type = 'info') {
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-50 space-y-2';
+    document.body.appendChild(toastContainer);
+  }
+
+  const el = document.createElement('div');
+
+  const colors = {
     success: 'bg-green-500',
     error: 'bg-red-500',
     info: 'bg-gray-800'
-  }[type];
+  };
 
-  toast.className = `${base} ${color}`;
-  toast.textContent = message;
+  el.className = `
+    ${colors[type] || colors.info}
+    text-white px-4 py-2 rounded-lg shadow-lg
+    animate-fadeIn
+  `;
 
-  document.body.appendChild(toast);
+  el.textContent = message;
+
+  toastContainer.appendChild(el);
 
   setTimeout(() => {
-    toast.remove();
-  }, 3000);
+    el.remove();
+  }, 2500);
 }
 
+// ---------------- LOADING ----------------
+
+let loadingEl = null;
+
 export function showLoading() {
-  let loader = document.getElementById('global-loader');
-  if (loader) return;
+  if (loadingEl) return;
 
-  loader = document.createElement('div');
-  loader.id = 'global-loader';
-  loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-  loader.innerHTML = `<div class="bg-white p-4 rounded shadow">Loading...</div>`;
+  loadingEl = document.createElement('div');
+  loadingEl.className = `
+    fixed inset-0 bg-black/40 flex items-center justify-center z-50
+  `;
 
-  document.body.appendChild(loader);
+  loadingEl.innerHTML = `
+    <div class="bg-white px-4 py-3 rounded-xl shadow">
+      กำลังโหลด...
+    </div>
+  `;
+
+  document.body.appendChild(loadingEl);
 }
 
 export function hideLoading() {
-  const loader = document.getElementById('global-loader');
-  if (loader) loader.remove();
-}
-
-export function confirmDialog(message) {
-  return window.confirm(message);
+  if (loadingEl) {
+    loadingEl.remove();
+    loadingEl = null;
+  }
 }

@@ -1,66 +1,58 @@
-// js/core/app.js
+import { renderHeader } from "../components/header.js";
 
-import { getSession } from './auth.js';
-import { renderHeader, bindHeaderEvents } from '../components/header.js';
+export function initApp(pageInit) {
 
-export async function initApp(pageInit) {
-  const session = await getSession();
+  const fakeUser = {
+    profile: {
+      full_name: "เถ้าแก่ (Admin)"
+    }
+  };
 
-  if (!session) {
-    window.location.href = '/pages/login.html';
-    return;
-  }
-
-  renderLayout(session.user);
+  renderLayout(fakeUser);
 
   if (pageInit) {
-    await pageInit(session.user);
+    pageInit(fakeUser);
   }
-
-  bindHeaderEvents();
 }
 
 function renderLayout(user) {
-  const root = document.getElementById('app');
+  const app = document.getElementById("app");
 
-  root.innerHTML = `
-    <div class="min-h-screen bg-[#f8fafc] flex flex-col">
+  app.innerHTML = `
+    <div class="min-h-screen flex flex-col">
 
       ${renderHeader(user)}
 
-      <main id="page-content" class="flex-1 overflow-y-auto pb-20"></main>
+      <main id="page-content" class="flex-1 p-4 pb-24"></main>
 
-      ${renderBottomNav()}
+      ${bottomNav()}
 
     </div>
   `;
 }
 
-function renderBottomNav() {
+function bottomNav() {
   const path = window.location.pathname;
 
   return `
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 text-xs">
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2">
 
-      ${navItem('dashboard.html','📊','ภาพรวม', path)}
-      ${navItem('buy.html','➕','รับซื้อ', path)}
-      ${navItem('sell.html','🚚','ขาย', path)}
-      ${navItem('prices.html','💰','ราคา', path)}
-      ${navItem('cashflow.html','💵','เงินสด', path)}
+    ${nav("dashboard.html","🏠","หน้าหลัก", path)}
 
-    </nav>
+  </nav>
   `;
 }
 
-function navItem(page, icon, label, path) {
+function nav(page, icon, label, path) {
   const active = path.includes(page);
 
   return `
-    <a href="/pages/${page}" class="flex flex-col items-center ${
-      active ? 'text-blue-600 font-bold' : 'text-gray-400'
+    <a href="./${page}" class="flex flex-col items-center text-xs ${
+      active ? "text-blue-600 font-bold" : "text-gray-400"
     }">
-      <div>${icon}</div>
+      <div class="text-lg">${icon}</div>
       <div>${label}</div>
     </a>
   `;
 }
+

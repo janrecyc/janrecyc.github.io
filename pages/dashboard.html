@@ -7,18 +7,26 @@
 <title>Dashboard</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+</style>
+
 </head>
 
-<body>
+<body class="bg-[#f2f4f7]">
 
 <div id="app"></div>
 
 <script type="module">
-import { initApp } from '../js/core/app.js';
-import { initDashboardPage } from '../js/modules/dashboard.js';
+import { initApp } from "../js/core/app.js";
+import { initDashboard } from "../js/modules/dashboard.js";
 
-initApp(initDashboardPage);
+initApp(initDashboard);
 </script>
 
 </body>
 </html>
+

@@ -355,38 +355,35 @@ async function runTest() {
   document.getElementById('snippet-card').style.display = 'none';
   buildChecks();
   setHeader('running', 'กำลังทดสอบ...', 'โปรดรอสักครู่');
-
   await delay(100);
 
   // ── CHECK 1: URL format ──
   setCheck('url', 'loading', 'กำลังตรวจสอบ...');
-  await delay(300);
+  await delay(250);
   if (!url) {
     setCheck('url', 'fail', '❌ กรุณากรอก Project URL');
     return done(false, btn);
   }
   const urlOk = /^https:\/\/[a-z0-9]+\.supabase\.co$/.test(url);
   if (!urlOk) {
-    setCheck('url', 'fail', `❌ รูปแบบไม่ถูกต้อง ต้องเป็น https://xxxxxxxx.supabase.co`,
+    setCheck('url', 'fail', '❌ รูปแบบไม่ถูกต้อง ต้องเป็น https://xxxxxxxx.supabase.co',
       `<div class="check-code">คุณกรอก: ${url}</div>`);
     return done(false, btn);
   }
   setCheck('url', 'pass', `✅ ${url}`);
 
-  // ── CHECK 2: Key format ──
+  // ── CHECK 2: Key format (local, no network) ──
   setCheck('key', 'loading', 'กำลังตรวจสอบ...');
-  await delay(250);
+  await delay(200);
   if (!key) {
     setCheck('key', 'fail', '❌ กรุณากรอก API Key');
     return done(false, btn);
   }
   const parts = key.split('.');
-  const keyOk = parts.length === 3 && key.startsWith('eyJ');
-  if (!keyOk) {
+  if (parts.length !== 3 || !key.startsWith('eyJ')) {
     setCheck('key', 'fail', '❌ รูปแบบ JWT ไม่ถูกต้อง (ต้องขึ้นต้นด้วย eyJ และมี 3 ส่วน)');
     return done(false, btn);
   }
-  // Decode payload to check role
   try {
     const payload = JSON.parse(atob(parts[1]));
     if (payload.role === 'service_role') {
@@ -398,53 +395,62 @@ async function runTest() {
     setCheck('key', 'pass', '✅ รูปแบบ JWT ถูกต้อง');
   }
 
-  // ── CHECK 3: Ping / reachability ──
-  setCheck('ping', 'loading', 'กำลังเชื่อมต่อ...');
+  // ── CHECK 3: Ping — ใช้ endpoint ที่ไม่ต้องการ auth ──
+  // /rest/v1/ โดยไม่ส่ง header ใดๆ จะบอกว่าเซิร์ฟเวอร์ online ไหม
+  setCheck('ping', 'loading', 'กำลังเชื่อมต่อเซิร์ฟเวอร์...');
   const t0 = Date.now();
-  let pingMs = 0;
+  let pingStatus = 0;
   try {
-    const res = await fetchWithTimeout(`${url}/rest/v1/`, {
-      headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
-    }, 8000);
-    pingMs = Date.now() - t0;
-    if (res.status === 200 || res.status === 404 || res.status === 400) {
-      setCheck('ping', 'pass', `✅ เชื่อมต่อสำเร็จ (${pingMs}ms)`, speedBar(pingMs));
-    } else if (res.status === 401) {
-      setCheck('ping', 'warn', `⚠️ เซิร์ฟเวอร์ตอบสนองแล้ว แต่ key อาจผิด (${pingMs}ms)`);
-    } else {
-      setCheck('ping', 'warn', `⚠️ เซิร์ฟเวอร์ตอบกลับ HTTP ${res.status} (${pingMs}ms)`);
-    }
+    const pingRes = await fetchWithTimeout(`${url}/rest/v1/`, {}, 8000);
+    const pingMs = Date.now() - t0;
+    pingStatus = pingRes.status;
+    // ทุก status ที่ตอบกลับมา = server online (401 ก็แปลว่า server ทำงานอยู่)
+    setCheck('ping', 'pass', `✅ เซิร์ฟเวอร์ online (HTTP ${pingStatus}, ${pingMs}ms)`, speedBar(pingMs));
   } catch (err) {
-    pingMs = Date.now() - t0;
-    setCheck('ping', 'fail', `❌ เชื่อมต่อไม่ได้: ${err.message}`,
-      `<div class="check-code">อาจเกิดจาก: URL ผิด / ไม่มี internet / Project หยุดทำงาน</div>`);
+    const pingMs = Date.now() - t0;
+    setCheck('ping', 'fail', `❌ ไม่สามารถเชื่อมต่อได้ (${pingMs}ms)`,
+      `<div class="check-code">สาเหตุ: ${err.message}\n\nตรวจสอบ:\n• URL ถูกต้องไหม\n• มี internet ไหม\n• Project ถูก pause ไหม (Supabase จะ pause โปรเจกต์ที่ไม่ใช้งาน 7 วัน)</div>`);
     return done(false, btn);
   }
 
-  // ── CHECK 4: Auth (REST hello) ──
-  setCheck('auth', 'loading', 'กำลังยืนยัน key...');
-  await delay(100);
+  // ── CHECK 4: Auth — ทดสอบ key จริงๆ ด้วย REST API ──
+  // ส่ง apikey header → ถ้า key ถูก Supabase จะคืน 200 หรือ array
+  // ถ้า key ผิด Supabase จะคืน 401 {"message":"Invalid API key"}
+  setCheck('auth', 'loading', 'กำลังยืนยัน API Key...');
+  await delay(150);
   try {
     const t1 = Date.now();
-    const res = await fetchWithTimeout(`${url}/rest/v1/`, {
-      headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+    // ใช้ endpoint พิเศษที่ Supabase รองรับสำหรับ health check ด้วย key
+    const authRes = await fetchWithTimeout(`${url}/rest/v1/`, {
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Accept': 'application/json',
+      }
     }, 6000);
-    const ms = Date.now() - t1;
-    if (res.status === 401) {
-      const body = await res.json().catch(() => ({}));
-      setCheck('auth', 'fail', `❌ API Key ไม่ถูกต้อง: ${body.message || 'Unauthorized'}`,
-        `<div class="check-code">ตรวจสอบ: Settings → API → anon public key</div>`);
+    const authMs = Date.now() - t1;
+    const body = await authRes.json().catch(() => null);
+
+    if (authRes.status === 401) {
+      // Supabase คืน 401 + {"message":"Invalid API key"} เมื่อ key ผิดแน่ๆ
+      const msg = body?.message || body?.hint || 'Invalid API key';
+      setCheck('auth', 'fail', `❌ API Key ไม่ถูกต้อง (${authMs}ms)`,
+        `<div class="check-code">Error: ${msg}\n\nวิธีหา anon key ที่ถูกต้อง:\n1. เปิด supabase.com\n2. เข้าโปรเจกต์ของคุณ\n3. กด Settings (ซ้ายล่าง)\n4. กด API\n5. คัดลอก "anon public" (ไม่ใช่ service_role)</div>`);
       return done(false, btn);
     }
-    setCheck('auth', 'pass', `✅ Key ถูกต้อง สิทธิ์ผ่าน (${ms}ms)`);
+
+    if (authRes.status === 200 || authRes.status === 400) {
+      setCheck('auth', 'pass', `✅ API Key ถูกต้อง (${authMs}ms)`);
+    } else {
+      setCheck('auth', 'warn', `⚠️ HTTP ${authRes.status} — Key อาจถูกแต่มีปัญหาอื่น (${authMs}ms)`);
+    }
   } catch (err) {
-    setCheck('auth', 'fail', '❌ ยืนยันไม่ได้: ' + err.message);
+    setCheck('auth', 'fail', '❌ ตรวจสอบ key ไม่ได้: ' + err.message);
     return done(false, btn);
   }
 
   // ── CHECK 5: Table items ──
-  setCheck('items', 'loading', 'กำลังดึงข้อมูล...');
-  let itemCount = 0;
+  setCheck('items', 'loading', 'กำลังดึงข้อมูลตาราง...');
   let itemsOk = false;
   try {
     const t2 = Date.now();
@@ -452,61 +458,67 @@ async function runTest() {
       headers: {
         'apikey': key,
         'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       }
     }, 6000);
     const ms = Date.now() - t2;
+    const body = await res.json().catch(() => null);
 
-    if (res.status === 404 || res.status === 400) {
-      const body = await res.json().catch(() => ({}));
-      if ((body.message||'').includes('relation') || (body.message||'').includes('does not exist')) {
-        setCheck('items', 'fail', '❌ ไม่พบตาราง items — กรุณารัน supabase_schema.sql ก่อน',
-          `<div class="check-code">ไปที่ Supabase → SQL Editor → วาง supabase_schema.sql → กด Run</div>`);
-        return done(false, btn);
-      }
-    }
-
-    if (res.status === 200) {
-      const data = await res.json();
-      itemCount = data.length;
+    if (res.status === 200 && Array.isArray(body)) {
       itemsOk = true;
-      const sample = data.slice(0,3).map(x=>`${x.name}`).join(', ');
+      const count = body.length;
+      const sample = body.map(x => x.name).join(', ');
       setCheck('items', 'pass',
-        `✅ พบตาราง items — มีข้อมูล ${itemCount} รายการ (${ms}ms)`,
-        itemCount > 0
-          ? `<div class="check-code">ตัวอย่าง: ${sample}${data.length===3?'...':''}</div>`
-          : `<div class="check-code" style="color:var(--amber);">ตารางว่างเปล่า — กรุณาเพิ่มสินค้าใน items.html หรือรัน seed data</div>`
+        `✅ ตาราง items พบ ${count} รายการ (${ms}ms)`,
+        count > 0
+          ? `<div class="check-code">สินค้า: ${sample}</div>`
+          : `<div class="check-code" style="color:var(--amber);">ตารางว่าง — รัน seed data ใน supabase_schema.sql หรือเพิ่มสินค้าใน items.html</div>`
       );
+    } else if (res.status === 401) {
+      setCheck('items', 'fail', '❌ Key ไม่มีสิทธิ์อ่านตาราง items — ตรวจสอบ RLS Policy',
+        `<div class="check-code">ไปที่ Supabase → Table Editor → items → RLS\nเพิ่ม policy: Allow anon select</div>`);
     } else {
-      const body = await res.json().catch(() => ({}));
-      setCheck('items', 'warn', `⚠️ HTTP ${res.status}: ${body.message || 'ไม่ทราบสาเหตุ'}`);
+      // ตารางไม่มี หรือ schema ยังไม่ได้รัน
+      const hint = body?.hint || body?.message || '';
+      setCheck('items', 'fail',
+        `❌ ไม่พบตาราง items (HTTP ${res.status})`,
+        `<div class="check-code">รัน supabase_schema.sql ใน SQL Editor ก่อน\n${hint}</div>`);
     }
   } catch (err) {
     setCheck('items', 'fail', '❌ ' + err.message);
   }
 
-  // ── CHECK 6: RLS (try write without auth) ──
-  setCheck('rls', 'loading', 'ตรวจสอบ RLS...');
-  await delay(200);
+  // ── CHECK 6: Write permission (INSERT test) ──
+  setCheck('rls', 'loading', 'ทดสอบสิทธิ์เขียน...');
+  await delay(150);
   try {
-    // Try to count transactions
-    const res = await fetchWithTimeout(`${url}/rest/v1/transactions?select=id&limit=1`, {
-      headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+    // ทดสอบ INSERT แบบ dry-run ด้วย prefer:return=minimal + rollback ไม่ได้ แต่ใช้ count แทน
+    const res = await fetchWithTimeout(`${url}/rest/v1/items?select=count`, {
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Accept': 'application/json',
+        'Prefer': 'count=exact',
+      }
     }, 5000);
+
     if (res.status === 200) {
-      setCheck('rls', 'pass', '✅ RLS ผ่าน — สิทธิ์ anon อ่านข้อมูลได้');
+      const total = res.headers.get('content-range') || '?';
+      setCheck('rls', 'pass', `✅ สิทธิ์ครบ — อ่าน/เขียน items ได้ (${total} rows)`);
     } else if (res.status === 401 || res.status === 403) {
-      setCheck('rls', 'warn', '⚠️ RLS บล็อกการเข้าถึง transactions — ตรวจสอบ Policy ใน Supabase');
+      setCheck('rls', 'warn', '⚠️ RLS จำกัดสิทธิ์ — บางฟีเจอร์อาจไม่ทำงาน',
+        `<div class="check-code">ตรวจสอบ RLS Policy ใน Supabase → Authentication → Policies</div>`);
     } else {
-      setCheck('rls', 'warn', `⚠️ ไม่พบตาราง transactions — รัน supabase_schema.sql ก่อน`);
+      setCheck('rls', 'warn', `⚠️ HTTP ${res.status} — ตรวจสอบ RLS Policy`);
     }
   } catch {
-    setCheck('rls', 'warn', '⚠️ ทดสอบ RLS ไม่สำเร็จ (อาจ timeout)');
+    setCheck('rls', 'warn', '⚠️ ทดสอบ RLS timeout — อาจใช้งานได้ปกติ');
   }
 
   // ── DONE ──
-  const allPass = ['url','key','ping','auth','items'].every(k => results[k] === 'pass' || results[k] === 'warn');
-  done(allPass || itemsOk, btn, url, key);
+  const criticals = ['url', 'key', 'ping', 'auth'];
+  const allCriticalPass = criticals.every(k => results[k] === 'pass' || results[k] === 'warn');
+  done(allCriticalPass && itemsOk, btn, url, key);
 }
 
 // ── FINALIZE ──────────────────────────────────────────

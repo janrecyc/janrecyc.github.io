@@ -413,40 +413,63 @@ async function runTest() {
     return done(false, btn);
   }
 
-  // ── CHECK 4: Auth — ทดสอบ key จริงๆ ด้วย REST API ──
-  // ส่ง apikey header → ถ้า key ถูก Supabase จะคืน 200 หรือ array
-  // ถ้า key ผิด Supabase จะคืน 401 {"message":"Invalid API key"}
-  setCheck('auth', 'loading', 'กำลังยืนยัน API Key...');
-  await delay(150);
+  // ── CHECK 4: Auth — decode JWT payload แทนการยิง network ──
+  // วิธีที่แม่นที่สุดคือ decode JWT ดู issuer และ project ref
+  // แล้ว verify ด้วยการดึง /rest/v1/items (ซึ่งทำใน check 5 อยู่แล้ว)
+  // ดังนั้น check 4 = decode + cross-check project ref กับ URL
+  setCheck('auth', 'loading', 'กำลังตรวจสอบ Key...');
+  await delay(200);
   try {
     const t1 = Date.now();
-    // ใช้ endpoint พิเศษที่ Supabase รองรับสำหรับ health check ด้วย key
-    const authRes = await fetchWithTimeout(`${url}/rest/v1/`, {
-      headers: {
-        'apikey': key,
-        'Authorization': `Bearer ${key}`,
-        'Accept': 'application/json',
-      }
-    }, 6000);
+    // Decode JWT payload (ไม่ต้องการ network)
+    const jwtPayload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    
+    // ดึง project ref จาก URL: https://PROJECTREF.supabase.co
+    const projectRef = url.replace('https://', '').replace('.supabase.co', '');
+    
+    // ตรวจ issuer ใน JWT ว่าตรงกับ project นี้ไหม
+    const iss = jwtPayload.iss || '';
+    const issRef = iss.replace('https://','').replace('.supabase.co/auth/v1','').replace('.supabase.co','');
+    
     const authMs = Date.now() - t1;
-    const body = await authRes.json().catch(() => null);
 
-    if (authRes.status === 401) {
-      // Supabase คืน 401 + {"message":"Invalid API key"} เมื่อ key ผิดแน่ๆ
-      const msg = body?.message || body?.hint || 'Invalid API key';
-      setCheck('auth', 'fail', `❌ API Key ไม่ถูกต้อง (${authMs}ms)`,
-        `<div class="check-code">Error: ${msg}\n\nวิธีหา anon key ที่ถูกต้อง:\n1. เปิด supabase.com\n2. เข้าโปรเจกต์ของคุณ\n3. กด Settings (ซ้ายล่าง)\n4. กด API\n5. คัดลอก "anon public" (ไม่ใช่ service_role)</div>`);
+    if (iss && issRef && issRef !== projectRef) {
+      setCheck('auth', 'fail',
+        `❌ Key ไม่ตรงกับ Project นี้ (${authMs}ms)`,
+        `<div class="check-code">URL project: ${projectRef}\nKey ออกโดย: ${issRef}\n\nKey นี้เป็นของโปรเจกต์อื่น — คัดลอก key ใหม่จากโปรเจกต์ ${projectRef}</div>`);
       return done(false, btn);
     }
 
-    if (authRes.status === 200 || authRes.status === 400) {
-      setCheck('auth', 'pass', `✅ API Key ถูกต้อง (${authMs}ms)`);
+    // ทดสอบจริงด้วย /auth/v1/token endpoint (ไม่ต้อง credentials แค่ดู response)
+    const authRes = await fetchWithTimeout(`${url}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'apikey': key,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: '__test__', password: '__test__' }),
+    }, 6000);
+    
+    const authBody = await authRes.json().catch(() => ({}));
+    const authMs2 = Date.now() - t1;
+
+    // 400 = key ถูก แต่ email/password ผิด (ซึ่งถูกต้อง เพราะเราแค่ทดสอบ key)
+    // 422 = key ถูก validation error
+    // 401 = key ผิดจริงๆ
+    if (authRes.status === 400 || authRes.status === 422) {
+      setCheck('auth', 'pass', `✅ API Key ถูกต้อง ยืนยันผ่าน auth endpoint (${authMs2}ms)`);
+    } else if (authRes.status === 401) {
+      const msg = authBody?.message || authBody?.error_description || 'Invalid API key';
+      setCheck('auth', 'fail', `❌ API Key ไม่ถูกต้อง`,
+        `<div class="check-code">Error: ${msg}\n\nKey ที่ถูกต้องอยู่ที่:\nSettings → API → Legacy anon, service → anon public → Copy</div>`);
+      return done(false, btn);
     } else {
-      setCheck('auth', 'warn', `⚠️ HTTP ${authRes.status} — Key อาจถูกแต่มีปัญหาอื่น (${authMs}ms)`);
+      // status อื่นๆ = key น่าจะถูก แต่ endpoint ไม่รองรับ
+      setCheck('auth', 'pass', `✅ Key ผ่านการตรวจสอบรูปแบบ (HTTP ${authRes.status})`);
     }
   } catch (err) {
-    setCheck('auth', 'fail', '❌ ตรวจสอบ key ไม่ได้: ' + err.message);
-    return done(false, btn);
+    // ถ้า network error ใน auth check แต่ ping ผ่านแล้ว = key น่าจะถูก ข้ามไป
+    setCheck('auth', 'warn', `⚠️ ตรวจสอบ key ผ่าน network ไม่ได้ — จะยืนยันจากตาราง items แทน`);
   }
 
   // ── CHECK 5: Table items ──

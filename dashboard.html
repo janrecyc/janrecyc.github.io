@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ScrapPOS — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<style>
+:root {
+  --ink:       #0A0A0F;
+  --ink2:      #3A3A4A;
+  --ink3:      #8A8A9A;
+  --surface:   #F2F2F7;
+  --white:     #FFFFFF;
+  --primary:   #FF6B00;
+  --primary-d: #CC5200;
+  --primary-l: rgba(255,107,0,0.10);
+  --green:     #00C853;
+  --green-l:   rgba(0,200,83,0.10);
+  --red:       #FF3B30;
+  --red-l:     rgba(255,59,48,0.10);
+  --amber:     #FF9F0A;
+  --blue:      #0A84FF;
+  --blue-l:    rgba(10,132,255,0.10);
+  --r: 22px;
+  --r-sm: 14px;
+  --sh: 0 2px 20px rgba(10,10,30,0.07), 0 0 0 0.5px rgba(10,10,30,0.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body {
+  font-family: 'Prompt', sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.status-bar { height: env(safe-area-inset-top,0px); background: var(--white); flex-shrink:0; }
+
+header {
+  background: var(--white);
+  padding: 14px 20px 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(10,10,30,0.06);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.app-logo { display:flex; align-items:center; gap:8px; }
+.logo-mark { width:32px;height:32px;background:var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px; }
+.app-name { font-size:13px;font-weight:700;color:var(--ink3);letter-spacing:2px;text-transform:uppercase; }
+.header-actions { display:flex;align-items:center;gap:8px; }
+.icon-btn {
+  width:36px;height:36px;border-radius:50%;background:var(--surface);border:none;
+  display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:18px;cursor:pointer;
+}
+.page-title { font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1.1; }
+.page-sub { font-size:12px;color:var(--ink3);font-weight:400;margin-left:2px; }
+
+.date-pills { display:flex;gap:5px;margin-top:10px;overflow-x:auto;scrollbar-width:none; }
+.date-pills::-webkit-scrollbar{display:none;}
+.date-pill {
+  flex-shrink:0;padding:5px 14px;border-radius:100px;
+  font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;
+  border:1px solid rgba(10,10,30,0.08);background:var(--white);color:var(--ink2);cursor:pointer;transition:all .15s;
+}
+.date-pill.on { background:var(--ink);color:white;border-color:var(--ink);box-shadow:0 2px 8px rgba(10,10,30,0.2); }
+
+.config-banner {
+  background:#FFF3CD;border-bottom:2px solid #FF9F0A;
+  padding:8px 20px;font-size:12px;font-weight:500;color:#664D03;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.config-banner i{color:var(--amber);font-size:16px;}
+
+.scroll-body {
+  flex:1;overflow-y:auto;
+  padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 80px);
+  scrollbar-width:none;
+}
+.scroll-body::-webkit-scrollbar{display:none;}
+
+/* HERO */
+.hero-card {
+  background:linear-gradient(135deg,#0A0A0F 0%,#1A1A2E 50%,#16213E 100%);
+  border-radius:var(--r);padding:22px 20px;margin-bottom:12px;
+  position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(10,10,30,0.22);
+}
+.hero-card::before {
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(255,107,0,0.25) 0%,transparent 70%);border-radius:50%;
+}
+.hero-card::after {
+  content:'';position:absolute;bottom:-60px;left:-20px;
+  width:160px;height:160px;
+  background:radial-gradient(circle,rgba(10,132,255,0.15) 0%,transparent 70%);border-radius:50%;
+}
+.hero-label {
+  font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);
+  letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:6px;position:relative;z-index:1;
+}
+.hero-label i{font-size:14px;color:var(--primary);}
+.hero-amount {
+  font-size:42px;font-weight:900;color:white;letter-spacing:-2px;line-height:1.05;
+  margin:8px 0 4px;position:relative;z-index:1;
+}
+.hero-cur{font-size:22px;font-weight:700;margin-right:2px;color:rgba(255,255,255,0.6);}
+.hero-sub{font-size:12px;color:rgba(255,255,255,0.4);position:relative;z-index:1;}
+.hero-sub b{color:var(--green);}
+.hero-chips{display:flex;gap:8px;margin-top:16px;position:relative;z-index:1;}
+.hero-chip{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 12px;backdrop-filter:blur(8px);}
+.hero-chip-label{font-size:10px;font-weight:500;color:rgba(255,255,255,0.4);display:flex;align-items:center;gap:4px;}
+.hero-chip-label i{font-size:12px;}
+.hero-chip-val{font-size:16px;font-weight:800;margin-top:4px;letter-spacing:-0.5px;}
+
+/* SECTION */
+.section-label{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1.5px;text-transform:uppercase;margin:20px 0 10px 4px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(10,10,30,0.06);}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stat-card{background:var(--white);border-radius:var(--r);padding:18px 16px 16px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.stat-card:nth-child(1){animation-delay:.05s;}
+.stat-card:nth-child(2){animation-delay:.10s;}
+.stat-card:nth-child(3){animation-delay:.15s;}
+.stat-card:nth-child(4){animation-delay:.20s;}
+.stat-card:nth-child(5){animation-delay:.25s;}
+.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:90px;height:90px;border-radius:50%;opacity:0.5;}
+.stat-card.buy::before{background:radial-gradient(var(--blue),transparent 70%);}
+.stat-card.sell::before{background:radial-gradient(var(--primary),transparent 70%);}
+.stat-card.net::before{background:radial-gradient(var(--green),transparent 70%);}
+.stat-card.margin::before{background:radial-gradient(#BF5AF2,transparent 70%);}
+.stat-card.cash::before{background:radial-gradient(var(--amber),transparent 70%);}
+.stat-card.stock-card::before{background:radial-gradient(var(--green),transparent 70%);}
+
+.stat-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.stat-icon.buy{background:var(--blue-l);color:var(--blue);}
+.stat-icon.sell{background:var(--primary-l);color:var(--primary);}
+.stat-icon.net{background:var(--green-l);color:var(--green);}
+.stat-icon.margin{background:rgba(191,90,242,0.1);color:#BF5AF2;}
+.stat-icon.cash{background:rgba(255,159,10,0.1);color:var(--amber);}
+.stat-icon.stock-card{background:var(--green-l);color:var(--green);}
+
+.stat-label{font-size:11px;font-weight:500;color:var(--ink3);}
+.stat-value{font-size:22px;font-weight:800;letter-spacing:-0.5px;transition:opacity .3s;}
+.stat-desc{font-size:10px;color:var(--ink3);}
+
+/* CHART */
+.chart-card{background:var(--white);border-radius:var(--r);padding:18px 16px 14px;box-shadow:var(--sh);}
+.chart-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.chart-title{font-size:13px;font-weight:700;}
+.chart-legend{display:flex;gap:12px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+
+.chart-svg-wrap{width:100%;overflow:hidden;}
+svg{width:100%;height:auto;}
+.y-label{font-family:'Prompt',sans-serif;font-size:9px;fill:var(--ink3);}
+.x-label{font-family:'Prompt',sans-serif;font-size:9px;fill:var(--ink3);}
+
+/* MINI BARS */
+.mini-bars-row{display:flex;gap:3px;align-items:flex-end;height:36px;margin-top:8px;}
+.mini-bar{border-radius:2px 2px 0 0;}
+
+/* NET BREAKDOWN */
+.net-card{background:var(--white);border-radius:var(--r);padding:18px 16px;box-shadow:var(--sh);}
+.net-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.net-title{font-size:13px;font-weight:700;}
+.net-val-big{font-size:24px;font-weight:900;letter-spacing:-0.5px;}
+.net-rows{display:flex;flex-direction:column;gap:8px;}
+.net-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.net-row-label{color:var(--ink3);display:flex;align-items:center;gap:6px;}
+.net-row-label i{font-size:14px;}
+.net-row-val{font-weight:700;}
+.net-divider{height:1px;background:rgba(10,10,30,0.06);margin:4px 0;}
+
+/* STOCK TABLE */
+.stock-card{background:var(--white);border-radius:var(--r);padding:18px 16px;box-shadow:var(--sh);}
+.stock-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.stock-head-title{font-size:13px;font-weight:700;}
+.stock-see-all{font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;color:var(--primary);background:var(--primary-l);border:none;padding:5px 12px;border-radius:100px;cursor:pointer;}
+.stock-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(10,10,30,0.05);}
+.stock-row:last-child{border-bottom:none;}
+.stock-icon{font-size:24px;flex-shrink:0;}
+.stock-info{flex:1;min-width:0;}
+.stock-name{font-size:13px;font-weight:600;}
+.stock-qty{font-size:11px;color:var(--ink3);margin-top:1px;}
+.stock-bar-wrap{height:3px;background:rgba(10,10,30,0.06);border-radius:100px;margin-top:5px;}
+.stock-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--blue),var(--primary));}
+.stock-values{text-align:right;flex-shrink:0;}
+.stock-val-cost{font-size:13px;font-weight:700;}
+.stock-val-sell{font-size:11px;margin-top:2px;}
+
+/* BOTTOM NAV */
+nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px);position:sticky;bottom:0;z-index:10;}
+.nav-row{display:flex;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;text-decoration:none;color:var(--ink3);font-size:10px;font-weight:500;position:relative;}
+.nav-tab.on{color:var(--primary);}
+.nav-tab i{font-size:20px;}
+.nav-tab-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--primary);border-radius:0 0 2px 2px;transition:width .2s;}
+.nav-tab.on .nav-tab-indicator{width:24px;}
+
+/* LOADING STATE */
+.skeleton{background:linear-gradient(90deg,#f0f0f5 25%,#e0e0ea 50%,#f0f0f5 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,10,30,0.88);color:white;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px);z-index:999;}
+#toast.toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="status-bar"></div>
+
+<div class="config-banner" id="config-banner">
+  <i class="ph ph-warning-circle"></i>
+  <span>กรุณาตั้งค่า Supabase — ตอนนี้ใช้ข้อมูล Demo</span>
+</div>
+
+<header>
+  <div class="header-top">
+    <div class="app-logo">
+      <div class="logo-mark"><i class="ph ph-recycle"></i></div>
+      <span class="app-name">ScrapPOS</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="loadDashboard()"><i class="ph ph-arrows-clockwise"></i></button>
+    </div>
+  </div>
+  <div class="page-title">Dashboard <span class="page-sub" id="h-time">--:--</span></div>
+
+  <div class="date-pills">
+    <button class="date-pill" onclick="setRange(this,'today')">วันนี้</button>
+    <button class="date-pill on" onclick="setRange(this,'week')">สัปดาห์นี้</button>
+    <button class="date-pill" onclick="setRange(this,'month')">เดือนนี้</button>
+    <button class="date-pill" onclick="setRange(this,'quarter')">ไตรมาส</button>
+    <button class="date-pill" onclick="setRange(this,'year')">ปีนี้</button>
+  </div>
+</header>
+
+<div class="scroll-body">
+
+  <!-- HERO -->
+  <div class="hero-card">
+    <div class="hero-label"><i class="ph-fill ph-currency-circle-dollar"></i>กำไรสุทธิ (รายรับ - ต้นทุน)</div>
+    <div class="hero-amount"><span class="hero-cur">฿</span><span id="h-net-profit">–</span></div>
+    <div class="hero-sub">อัปเดต <b id="h-time2">–</b></div>
+    <div class="hero-chips">
+      <div class="hero-chip">
+        <div class="hero-chip-label"><i class="ph ph-download-simple" style="color:#0A84FF;"></i>รับซื้อ</div>
+        <div class="hero-chip-val" style="color:#0A84FF;" id="h-buy-total">–</div>
+      </div>
+      <div class="hero-chip">
+        <div class="hero-chip-label"><i class="ph ph-upload-simple" style="color:var(--primary);"></i>ขายออก</div>
+        <div class="hero-chip-val" style="color:var(--primary);" id="h-sell-total">–</div>
+      </div>
+      <div class="hero-chip">
+        <div class="hero-chip-label"><i class="ph ph-wallet" style="color:var(--amber);"></i>เงินสด</div>
+        <div class="hero-chip-val" style="color:var(--amber);" id="h-cash-val">–</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI STATS -->
+  <div class="section-label"><i class="ph ph-chart-bar"></i>ตัวชี้วัดหลัก</div>
+  <div class="stat-grid">
+    <div class="stat-card buy">
+      <div class="stat-icon buy"><i class="ph ph-download-simple"></i></div>
+      <div class="stat-label">ยอดรับซื้อ</div>
+      <div class="stat-value" id="s-buy">–</div>
+    </div>
+    <div class="stat-card sell">
+      <div class="stat-icon sell"><i class="ph ph-upload-simple"></i></div>
+      <div class="stat-label">ยอดขายออก</div>
+      <div class="stat-value" id="s-sell">–</div>
+    </div>
+    <div class="stat-card net">
+      <div class="stat-icon net"><i class="ph ph-trend-up"></i></div>
+      <div class="stat-label">กำไรสุทธิ</div>
+      <div class="stat-value" id="s-net">–</div>
+    </div>
+    <div class="stat-card margin">
+      <div class="stat-icon margin"><i class="ph ph-percent"></i></div>
+      <div class="stat-label">Margin</div>
+      <div class="stat-value" id="s-margin">–</div>
+    </div>
+    <div class="stat-card cash" style="grid-column:1/-1;">
+      <div class="stat-icon cash"><i class="ph ph-money"></i></div>
+      <div class="stat-label">ประมาณการเงินสด</div>
+      <div class="stat-value" id="s-cash">–</div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="section-label"><i class="ph ph-chart-line"></i>แนวโน้มรายสัปดาห์</div>
+  <div class="chart-card">
+    <div class="chart-top">
+      <span class="chart-title">รับซื้อ vs ขายออก</span>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#0A84FF;"></div>รับซื้อ</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--primary);"></div>ขายออก</div>
+      </div>
+    </div>
+    <div class="mini-bars-row" id="mini-bars"></div>
+    <div class="chart-svg-wrap" style="margin-top:8px;">
+      <svg viewBox="0 0 320 120" id="chart-svg"></svg>
+    </div>
+  </div>
+
+  <!-- NET BREAKDOWN -->
+  <div class="section-label"><i class="ph ph-calculator"></i>สรุปรายรับ-รายจ่าย</div>
+  <div class="net-card">
+    <div class="net-header">
+      <span class="net-title">กำไรสุทธิ</span>
+      <span class="net-val-big" style="color:var(--green);" id="n-net">–</span>
+    </div>
+    <div class="net-rows">
+      <div class="net-row">
+        <span class="net-row-label"><i class="ph ph-upload-simple" style="color:var(--primary);"></i>รายรับ (ขายออก)</span>
+        <span class="net-row-val" style="color:var(--green);" id="n-income">–</span>
+      </div>
+      <div class="net-divider"></div>
+      <div class="net-row">
+        <span class="net-row-label"><i class="ph ph-download-simple" style="color:var(--blue);"></i>ต้นทุน (รับซื้อ)</span>
+        <span class="net-row-val" style="color:var(--red);" id="n-expense">–</span>
+      </div>
+      <div class="net-divider"></div>
+      <div class="net-row">
+        <span class="net-row-label" style="font-weight:700;">กำไร</span>
+        <span class="net-row-val" style="color:var(--green);font-size:16px;" id="n-diff">–</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK TABLE -->
+  <div class="section-label"><i class="ph ph-package"></i>สต๊อกคงเหลือ</div>
+  <div class="stock-card" id="stock-table">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 0;color:var(--ink3);">
+      <i class="ph ph-spinner-gap" style="font-size:28px;animation:spin .8s linear infinite;"></i>
+      <span style="font-size:13px;">กำลังโหลด...</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav>
+  <div class="nav-row">
+    <a href="buy.html" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-download-simple"></i>
+      <span>รับซื้อ</span>
+    </a>
+    <a href="sell.html" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-upload-simple"></i>
+      <span>ขายออก</span>
+    </a>
+    <a href="#" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-recycle"></i>
+      <span>คัดแยก</span>
+    </a>
+    <a href="#" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-chart-line-up"></i>
+      <span>บอร์ดราคา</span>
+    </a>
+    <a href="dashboard.html" class="nav-tab on">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph-fill ph-package"></i>
+      <span>สต๊อก</span>
+    </a>
+    <a href="#" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-moon-stars"></i>
+      <span>ปิดกะ</span>
+    </a>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+@keyframes spin{to{transform:rotate(360deg);}}
+
+// ══════════════════════════════════════════
+//  SUPABASE CONFIG — แก้ไขตรงนี้
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_ANON = 'YOUR_ANON_KEY';
+const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
+
+// ══════════════════════════════════════════
+//  DEMO DATA
+// ══════════════════════════════════════════
+const DEMO_STOCK = [
+  {icon:'🔩', name:'เหล็กหนัก',          buy_price:4.5,  sell_price:5.80,  stock_qty:4200},
+  {icon:'🔧', name:'เหล็กบาง',           buy_price:2.8,  sell_price:3.50,  stock_qty:1800},
+  {icon:'🪙', name:'ทองแดง',             buy_price:180,  sell_price:215,   stock_qty:320},
+  {icon:'🫗', name:'อลูมิเนียม',         buy_price:40,   sell_price:50,    stock_qty:960},
+  {icon:'⚙️', name:'สแตนเลส',            buy_price:18,   sell_price:22,    stock_qty:550},
+  {icon:'📰', name:'กระดาษหนังสือพิมพ์', buy_price:2.0,  sell_price:2.80,  stock_qty:3000},
+  {icon:'📦', name:'กระดาษลัง',          buy_price:2.5,  sell_price:3.20,  stock_qty:5200},
+  {icon:'🥛', name:'พลาสติกขาว',         buy_price:8,    sell_price:11,    stock_qty:780},
+  {icon:'🔌', name:'สายไฟทองแดง',        buy_price:80,   sell_price:100,   stock_qty:180},
+];
+
+const DEMO_WEEKLY = {
+  labels: ['จ','อ','พ','พฤ','ศ','ส','อา'],
+  buy:    [12400, 8900,  15600, 11200, 18900, 7800,  9400],
+  sell:   [8200,  14500, 9800,  16700, 12300, 21000, 6500],
+};
+
+const RANGE_MULT = {today:0.18, week:1, month:4.3, quarter:13, year:52};
+let activeRange = 'week';
+let STOCK_DATA = [];
+let WEEKLY_DATA = DEMO_WEEKLY;
+
+// ══════════════════════════════════════════
+//  SUPABASE REST
+// ══════════════════════════════════════════
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': `Bearer ${SUPABASE_ANON}`,
+      'Content-Type': 'application/json',
+      ...opts.headers,
+    },
+    method: opts.method || 'GET',
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ══════════════════════════════════════════
+//  LOAD DATA
+// ══════════════════════════════════════════
+async function loadDashboard() {
+  if (!SUPABASE_READY) {
+    document.getElementById('config-banner').style.display = 'flex';
+    STOCK_DATA = DEMO_STOCK;
+    WEEKLY_DATA = DEMO_WEEKLY;
+    render(RANGE_MULT[activeRange]);
+    return;
+  }
+
+  document.getElementById('config-banner').style.display = 'none';
+
+  try {
+    // ตาราง: items (name, icon, buy_price, sell_price, stock_qty)
+    STOCK_DATA = await sbFetch('items?select=name,icon,buy_price,sell_price,stock_qty&order=name');
+
+    // ถ้ามี RPC get_weekly_chart → ใช้ได้เลย  ถ้าไม่มีก็ใช้ Demo
+    try {
+      const weekly = await sbFetch('rpc/get_weekly_chart', {method:'POST', body:{}});
+      if (weekly) WEEKLY_DATA = weekly;
+    } catch(_) {
+      WEEKLY_DATA = DEMO_WEEKLY;
+    }
+
+    render(RANGE_MULT[activeRange]);
+  } catch (err) {
+    toast('❌ โหลดไม่สำเร็จ: ' + err.message);
+    // Fallback demo
+    STOCK_DATA = DEMO_STOCK;
+    render(RANGE_MULT[activeRange]);
+  }
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function fmt(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(2)+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtShort(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toFixed(0);
+}
+
+function animateNum(el, val) {
+  if (!el) return;
+  el.style.opacity = '0'; el.style.transform = 'translateY(4px)';
+  setTimeout(() => {
+    el.textContent = val;
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+  }, 150);
+}
+
+function compute(mult) {
+  const totalBuy  = WEEKLY_DATA.buy.reduce((a,b)=>a+b,0)  * mult;
+  const totalSell = WEEKLY_DATA.sell.reduce((a,b)=>a+b,0) * mult;
+  let stockCost = 0, stockSellVal = 0;
+  STOCK_DATA.forEach(s => {
+    stockCost    += Number(s.buy_price)  * Number(s.stock_qty);
+    stockSellVal += Number(s.sell_price) * Number(s.stock_qty);
+  });
+  const netProfit  = totalSell - totalBuy;
+  const margin     = totalSell > 0 ? (netProfit / totalSell * 100) : 0;
+  const cash       = netProfit * 0.72;
+  const stockProfit= stockSellVal - stockCost;
+  return {totalBuy, totalSell, netProfit, margin, cash, stockCost, stockSellVal, stockProfit};
+}
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function render(mult) {
+  const D = compute(mult);
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('h-time').textContent = timeStr;
+  document.getElementById('h-time2').textContent = timeStr;
+
+  animateNum(document.getElementById('h-net-profit'), fmt(D.netProfit));
+  animateNum(document.getElementById('h-buy-total'),  '฿'+fmt(D.totalBuy));
+  animateNum(document.getElementById('h-sell-total'), '฿'+fmt(D.totalSell));
+  animateNum(document.getElementById('h-cash-val'),   fmt(D.cash));
+
+  animateNum(document.getElementById('s-buy'),    fmt(D.totalBuy));
+  animateNum(document.getElementById('s-sell'),   fmt(D.totalSell));
+  animateNum(document.getElementById('s-net'),    fmt(D.netProfit));
+  animateNum(document.getElementById('s-margin'), D.margin.toFixed(1)+'%');
+  animateNum(document.getElementById('s-cash'),   fmt(D.cash));
+
+  animateNum(document.getElementById('n-net'),     fmt(D.netProfit));
+  animateNum(document.getElementById('n-income'),  '฿'+fmt(D.totalSell));
+  animateNum(document.getElementById('n-expense'), '฿'+fmt(D.totalBuy));
+  animateNum(document.getElementById('n-diff'),    '฿'+fmt(D.netProfit));
+
+  renderMiniBars();
+  renderChart(mult);
+  renderStock();
+}
+
+function renderMiniBars() {
+  const w = WEEKLY_DATA;
+  const max = Math.max(...w.buy, ...w.sell);
+  const bars = document.getElementById('mini-bars');
+  bars.innerHTML = w.buy.map((b,i) => {
+    const bh = Math.max(4, (b/max)*32);
+    const sh = Math.max(4, (w.sell[i]/max)*32);
+    return `<div style="flex:1;display:flex;align-items:flex-end;gap:1px;">
+      <div class="mini-bar" style="flex:1;height:${bh}px;background:rgba(10,132,255,0.35);border-radius:2px 2px 0 0;"></div>
+      <div class="mini-bar" style="flex:1;height:${sh}px;background:rgba(255,107,0,0.55);border-radius:2px 2px 0 0;"></div>
+    </div>`;
+  }).join('');
+}
+
+function renderChart(mult) {
+  const svg = document.getElementById('chart-svg');
+  const W=320, H=120, padL=28, padR=8, padT=8, padB=22;
+  const innerW=W-padL-padR, innerH=H-padT-padB;
+  const buy  = WEEKLY_DATA.buy.map(v=>v*Math.min(mult,1));
+  const sell = WEEKLY_DATA.sell.map(v=>v*Math.min(mult,1));
+  const max  = Math.max(...buy,...sell) || 1;
+  const n    = buy.length;
+  const px   = i => padL + (i/(n-1))*innerW;
+  const py   = v => padT + innerH - (v/max)*innerH;
+
+  const yTicks = [0, 0.5, 1].map(t => ({y: padT+innerH*(1-t), val: fmtShort(max*t)}));
+
+  svg.innerHTML = `
+    ${yTicks.map(t=>`
+      <line x1="${padL}" y1="${t.y}" x2="${W-padR}" y2="${t.y}" stroke="rgba(10,10,30,0.05)" stroke-width="1"/>
+      <text class="y-label" x="${padL-4}" y="${t.y+3}" text-anchor="end">${t.val}</text>
+    `).join('')}
+    ${WEEKLY_DATA.labels.map((l,i)=>`
+      <text class="x-label" x="${px(i)}" y="${H-4}" text-anchor="middle">${l}</text>
+    `).join('')}
+    <defs>
+      <linearGradient id="gb" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0A84FF" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="#0A84FF" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="gs" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#FF6B00" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#FF6B00" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <polygon points="${buy.map((v,i)=>`${px(i)},${py(v)}`).join(' ')} ${px(n-1)},${padT+innerH} ${px(0)},${padT+innerH}" fill="url(#gb)"/>
+    <polygon points="${sell.map((v,i)=>`${px(i)},${py(v)}`).join(' ')} ${px(n-1)},${padT+innerH} ${px(0)},${padT+innerH}" fill="url(#gs)"/>
+    <polyline points="${buy.map((v,i)=>`${px(i)},${py(v)}`).join(' ')}" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${sell.map((v,i)=>`${px(i)},${py(v)}`).join(' ')}" fill="none" stroke="#FF6B00" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${buy.map((v,i)=>`<circle cx="${px(i)}" cy="${py(v)}" r="3.5" fill="#0A84FF"/>`).join('')}
+    ${sell.map((v,i)=>`<circle cx="${px(i)}" cy="${py(v)}" r="3.5" fill="#FF6B00"/>`).join('')}
+  `;
+}
+
+function renderStock() {
+  const maxCost = Math.max(...STOCK_DATA.map(s=>Number(s.buy_price)*Number(s.stock_qty)), 1);
+  const rows = STOCK_DATA.map(s=>{
+    const cost    = Number(s.buy_price)  * Number(s.stock_qty);
+    const sellVal = Number(s.sell_price) * Number(s.stock_qty);
+    const profit  = sellVal - cost;
+    const pct     = Math.round((cost/maxCost)*100);
+    return `
+    <div class="stock-row">
+      <div class="stock-icon">${s.icon}</div>
+      <div class="stock-info">
+        <div class="stock-name">${s.name}</div>
+        <div class="stock-qty">${Number(s.stock_qty).toLocaleString('th-TH')} กก.</div>
+        <div class="stock-bar-wrap"><div class="stock-bar-fill" style="width:${pct}%;"></div></div>
+      </div>
+      <div class="stock-values">
+        <div class="stock-val-cost">฿${fmt(cost)}</div>
+        <div class="stock-val-sell" style="color:var(--green);">+฿${fmt(profit)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('stock-table').innerHTML = `
+    <div class="stock-head">
+      <span class="stock-head-title">สต๊อกคงเหลือ</span>
+      <a href="buy.html"><button class="stock-see-all">+ รับซื้อ</button></a>
+    </div>
+    ${rows || '<div style="padding:20px;text-align:center;color:var(--ink3);font-size:13px;">ไม่มีข้อมูลสต๊อก</div>'}`;
+}
+
+function setRange(el, range) {
+  document.querySelectorAll('.date-pill').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  activeRange = range;
+  render(RANGE_MULT[range]);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast-show';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.className = ''; }, 2200);
+}
+
+// INIT
+loadDashboard();
+</script>
+</body>
+</html>

@@ -426,10 +426,11 @@ let WEEKLY_DATA = DEMO_WEEKLY;
 //  SUPABASE REST
 // ══════════════════════════════════════════
 async function sbFetch(path, opts = {}) {
+  const token = (window.AUTH && window.AUTH.token) ? window.AUTH.token : SUPABASE_ANON;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: {
       'apikey': SUPABASE_ANON,
-      'Authorization': `Bearer ${SUPABASE_ANON}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
       ...opts.headers,
     },

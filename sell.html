@@ -438,10 +438,11 @@ let activeCat = 'all';
 let query = '';
 
 async function sbFetch(path, opts = {}) {
+  const token = (window.AUTH && window.AUTH.token) ? window.AUTH.token : SUPABASE_ANON;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: {
       'apikey': SUPABASE_ANON,
-      'Authorization': `Bearer ${SUPABASE_ANON}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
       'Prefer': opts.prefer || 'return=representation',
       ...opts.headers,

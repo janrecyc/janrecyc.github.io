@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ScrapPOS — เข้าสู่ระบบ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+:root {
+  --ink:     #0A0A0F;
+  --ink2:    #3A3A4A;
+  --ink3:    #8A8A9A;
+  --surface: #F5F5FA;
+  --white:   #FFFFFF;
+  --primary: #0A0A0F;
+  --green:   #00C853;
+  --red:     #FF3B30;
+  --r: 20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body {
+  font-family:'Prompt',sans-serif;
+  background:var(--ink);
+  min-height:100dvh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:20px;
+  padding-top:env(safe-area-inset-top,20px);
+  padding-bottom:env(safe-area-inset-bottom,20px);
+  -webkit-font-smoothing:antialiased;
+  position:relative; overflow:hidden;
+}
+
+/* BG GLOW */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(255,107,0,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(26,107,255,0.10) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+/* LOGO AREA */
+.logo-area {
+  text-align:center;
+  margin-bottom:36px;
+  animation: fadeDown .5s ease both;
+}
+.logo-badge {
+  width:64px; height:64px; background:white; border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:32px; margin:0 auto 14px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+.logo-name {
+  font-size:28px; font-weight:900; color:white;
+  letter-spacing:-1px; line-height:1;
+}
+.logo-sub {
+  font-size:13px; color:rgba(255,255,255,0.4);
+  font-weight:400; margin-top:4px; letter-spacing:1px;
+}
+
+/* CARD */
+.login-card {
+  background:white;
+  border-radius:28px;
+  padding:28px 24px;
+  width:100%; max-width:400px;
+  box-shadow:0 24px 64px rgba(0,0,0,0.4);
+  animation: fadeUp .5s ease .1s both;
+}
+
+.card-title {
+  font-size:20px; font-weight:800; color:var(--ink);
+  margin-bottom:4px;
+}
+.card-sub {
+  font-size:13px; color:var(--ink3);
+  margin-bottom:24px;
+}
+
+/* FORM */
+.field { margin-bottom:14px; }
+.field-label {
+  font-size:11px; font-weight:600; color:var(--ink3);
+  letter-spacing:0.5px; text-transform:uppercase;
+  display:block; margin-bottom:6px;
+}
+.field-wrap { position:relative; }
+.field-input {
+  width:100%; padding:13px 44px 13px 16px;
+  border-radius:14px;
+  background:var(--surface);
+  border:1.5px solid rgba(10,10,30,0.08);
+  font-family:'Prompt',sans-serif; font-size:14px;
+  color:var(--ink); outline:none;
+  transition:border-color .15s, box-shadow .15s;
+  -webkit-appearance:none;
+}
+.field-input:focus {
+  border-color:var(--ink);
+  box-shadow:0 0 0 3px rgba(10,10,30,0.08);
+  background:white;
+}
+.field-input.error { border-color:var(--red); }
+.field-icon {
+  position:absolute; right:14px; top:50%;
+  transform:translateY(-50%);
+  font-size:18px; color:var(--ink3);
+  cursor:pointer; transition:color .15s;
+}
+.field-icon:hover{color:var(--ink);}
+
+/* ERROR MSG */
+.error-msg {
+  display:none; align-items:center; gap:6px;
+  background:rgba(255,59,48,0.08);
+  border:1px solid rgba(255,59,48,0.2);
+  border-radius:12px; padding:10px 14px;
+  font-size:12px; font-weight:500; color:var(--red);
+  margin-bottom:14px;
+}
+.error-msg.show { display:flex; }
+.error-msg i { font-size:16px; flex-shrink:0; }
+
+/* LOGIN BTN */
+.login-btn {
+  width:100%; padding:15px;
+  border-radius:16px;
+  background:var(--ink); color:white;
+  border:none; font-family:'Prompt',sans-serif;
+  font-size:15px; font-weight:700;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:background .15s, transform .1s;
+  margin-top:4px;
+}
+.login-btn:active { transform:scale(0.98); }
+.login-btn:disabled { opacity:0.5; pointer-events:none; }
+
+/* FOOTER NOTE */
+.footer-note {
+  text-align:center; margin-top:20px;
+  font-size:11px; color:rgba(255,255,255,0.3);
+  animation: fadeUp .5s ease .2s both;
+}
+.footer-note b { color:rgba(255,255,255,0.5); }
+
+/* LOADING OVERLAY */
+.loading-overlay {
+  position:fixed; inset:0;
+  background:var(--ink);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:16px; z-index:100;
+  transition:opacity .4s;
+}
+.loading-overlay.hidden { opacity:0; pointer-events:none; }
+.loading-logo {
+  width:56px; height:56px; background:white; border-radius:18px;
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+  animation: pulse 1.5s ease infinite;
+}
+.loading-text { font-size:13px; color:rgba(255,255,255,0.4); font-weight:500; }
+
+@keyframes pulse {
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.06);}
+}
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes fadeDown {
+  from{opacity:0;transform:translateY(-12px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes spin { to{transform:rotate(360deg);} }
+.spin { animation:spin .7s linear infinite; }
+@keyframes shake {
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-8px);}
+  40%{transform:translateX(8px);}
+  60%{transform:translateX(-5px);}
+  80%{transform:translateX(5px);}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING (เช็ค session ก่อน) -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-logo">♻️</div>
+  <div class="loading-text">กำลังตรวจสอบ...</div>
+</div>
+
+<!-- LOGO -->
+<div class="logo-area">
+  <div class="logo-badge">♻️</div>
+  <div class="logo-name">ScrapPOS</div>
+  <div class="logo-sub">ระบบรับซื้อของเก่า</div>
+</div>
+
+<!-- LOGIN CARD -->
+<div class="login-card">
+  <div class="card-title">เข้าสู่ระบบ</div>
+  <div class="card-sub">สำหรับพนักงานร้าน janrecycs</div>
+
+  <!-- ERROR -->
+  <div class="error-msg" id="error-msg">
+    <i class="ph ph-warning-circle"></i>
+    <span id="error-text">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
+  </div>
+
+  <!-- EMAIL -->
+  <div class="field">
+    <label class="field-label">อีเมล</label>
+    <div class="field-wrap">
+      <input class="field-input" type="email" id="inp-email"
+        placeholder="email@example.com"
+        autocomplete="email" inputmode="email">
+      <i class="ph ph-envelope field-icon"></i>
+    </div>
+  </div>
+
+  <!-- PASSWORD -->
+  <div class="field">
+    <label class="field-label">รหัสผ่าน</label>
+    <div class="field-wrap">
+      <input class="field-input" type="password" id="inp-pass"
+        placeholder="••••••••"
+        autocomplete="current-password">
+      <i class="ph ph-eye field-icon" id="eye-icon" onclick="togglePass()"></i>
+    </div>
+  </div>
+
+  <button class="login-btn" id="login-btn" onclick="doLogin()">
+    <i class="ph ph-sign-in"></i>
+    <span>เข้าสู่ระบบ</span>
+  </button>
+</div>
+
+<div class="footer-note">
+  ติดต่อผู้ดูแลระบบหากไม่มีบัญชี<br>
+  <b>ScrapPOS v1.0</b>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIG — แก้ให้ตรงกับโปรเจกต์
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
+
+// ══════════════════════════════════════════
+//  AUTH HELPERS
+// ══════════════════════════════════════════
+async function authFetch(path, body) {
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  return { status: res.status, data: await res.json() };
+}
+
+// เก็บ session ใน localStorage
+function saveSession(session) {
+  localStorage.setItem('sb_session', JSON.stringify({
+    access_token:  session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at:    session.expires_at || (Date.now()/1000 + session.expires_in),
+    user:          session.user,
+  }));
+}
+
+function getSession() {
+  try {
+    return JSON.parse(localStorage.getItem('sb_session'));
+  } catch {
+    return null;
+  }
+}
+
+function clearSession() {
+  localStorage.removeItem('sb_session');
+}
+
+// ตรวจว่า token หมดอายุหรือยัง
+function isExpired(session) {
+  if (!session?.expires_at) return true;
+  return (Date.now() / 1000) > (session.expires_at - 60); // buffer 60s
+}
+
+// Refresh token
+async function refreshSession(session) {
+  const { status, data } = await authFetch('token?grant_type=refresh_token', {
+    refresh_token: session.refresh_token,
+  });
+  if (status === 200 && data.access_token) {
+    saveSession(data);
+    return data;
+  }
+  return null;
+}
+
+// ══════════════════════════════════════════
+//  CHECK SESSION ON LOAD
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  const overlay = document.getElementById('loading-overlay');
+  const session = getSession();
+
+  if (session) {
+    if (!isExpired(session)) {
+      // Token ยังใช้ได้ → ไปหน้าหลักเลย
+      window.location.replace('buy.html');
+      return;
+    }
+    // Token หมดอายุ → ลอง refresh
+    const refreshed = await refreshSession(session).catch(() => null);
+    if (refreshed) {
+      window.location.replace('buy.html');
+      return;
+    }
+    // Refresh ไม่ได้ → ล้าง session
+    clearSession();
+  }
+
+  overlay.classList.add('hidden');
+  setTimeout(() => overlay.remove(), 400);
+  document.getElementById('inp-email').focus();
+});
+
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('inp-email').value.trim();
+  const pass  = document.getElementById('inp-pass').value;
+  const btn   = document.getElementById('login-btn');
+  const errEl = document.getElementById('error-msg');
+  const errTx = document.getElementById('error-text');
+
+  // clear error
+  errEl.classList.remove('show');
+  document.getElementById('inp-email').classList.remove('error');
+  document.getElementById('inp-pass').classList.remove('error');
+
+  // validate
+  if (!email) return shakeField('inp-email', 'กรุณากรอกอีเมล');
+  if (!pass)  return shakeField('inp-pass',  'กรุณากรอกรหัสผ่าน');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i><span>กำลังเข้าสู่ระบบ...</span>';
+
+  try {
+    const { status, data } = await authFetch('token?grant_type=password', {
+      email, password: pass,
+    });
+
+    if (status === 200 && data.access_token) {
+      // สำเร็จ
+      saveSession(data);
+      btn.innerHTML = '<i class="ph ph-check-circle"></i><span>เข้าสู่ระบบสำเร็จ</span>';
+      btn.style.background = '#00C853';
+      setTimeout(() => window.location.replace('buy.html'), 600);
+    } else {
+      // ล้มเหลว
+      const msg = data?.error_description || data?.msg || data?.message || '';
+      let thMsg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+      if (msg.includes('Email not confirmed')) thMsg = 'กรุณายืนยันอีเมลก่อนเข้าใช้งาน';
+      if (msg.includes('Invalid login'))       thMsg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+      if (msg.includes('Too many requests'))   thMsg = 'ลองใหม่อีกครั้งในอีกสักครู่';
+
+      showError(thMsg);
+      document.getElementById('inp-email').classList.add('error');
+      document.getElementById('inp-pass').classList.add('error');
+      resetBtn();
+    }
+  } catch (err) {
+    showError('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ตรวจสอบ internet');
+    resetBtn();
+  }
+}
+
+function showError(msg) {
+  const errEl = document.getElementById('error-msg');
+  const errTx = document.getElementById('error-text');
+  errTx.textContent = msg;
+  errEl.classList.add('show');
+  errEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function resetBtn() {
+  const btn = document.getElementById('login-btn');
+  btn.disabled = false;
+  btn.style.background = '';
+  btn.innerHTML = '<i class="ph ph-sign-in"></i><span>เข้าสู่ระบบ</span>';
+}
+
+function shakeField(id, msg) {
+  const el = document.getElementById(id);
+  el.classList.add('error');
+  el.style.animation = 'shake .35s ease';
+  el.addEventListener('animationend', () => el.style.animation = '', {once:true});
+  el.focus();
+  showError(msg);
+}
+
+function togglePass() {
+  const inp  = document.getElementById('inp-pass');
+  const icon = document.getElementById('eye-icon');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  icon.className = `ph ph-eye${inp.type==='password'?'':'-slash'} field-icon`;
+}
+
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

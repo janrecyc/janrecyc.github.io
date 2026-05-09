@@ -491,7 +491,6 @@ async function loadItems() {
   grid.innerHTML = `<div class="grid-loading"><i class="ph ph-spinner-gap spin" style="font-size:28px;"></i><span style="font-size:13px;">กำลังโหลดสินค้า...</span></div>`;
 
   if (!SUPABASE_READY) {
-    // Demo mode
     await new Promise(r => setTimeout(r, 400));
     ITEMS = DEMO_ITEMS;
     document.getElementById('config-banner').style.display = 'flex';
@@ -499,10 +498,19 @@ async function loadItems() {
     return;
   }
 
+  // รอ auth-guard.js เซ็ต window.AUTH ก่อน (max 3 วินาที)
+  for (let i = 0; i < 30; i++) {
+    if (window.AUTH) break;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  if (!window.AUTH) {
+    // AUTH ไม่พร้อม = ยังไม่ได้ login → guard จะ redirect เอง
+    return;
+  }
+
   document.getElementById('config-banner').style.display = 'none';
 
   try {
-    // ตาราง: items (id, name, icon, buy_price, unit, cat)
     ITEMS = await sbFetch('items?select=id,name,icon,buy_price,unit,cat&order=cat,name');
     renderGrid();
   } catch (err) {

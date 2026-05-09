@@ -3,8 +3,8 @@
 //  <script src="auth-guard.js"></script>
 // ══════════════════════════════════════════════════════
 
-const SUPABASE_URL  = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_ANON = 'YOUR_ANON_KEY';
+const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
 
 // ── Session helpers ────────────────────────────────────
 function getSession() {
@@ -61,7 +61,6 @@ async function refreshSession(s) {
   window.AUTH = {
     session: getSession(),
     user:    getSession()?.user,
-    // access token สำหรับใช้แทน anon key
     token:   getSession()?.access_token,
     logout:  async () => {
       try {
@@ -78,8 +77,9 @@ async function refreshSession(s) {
     },
   };
 
-  // Override SUPABASE_ANON ด้วย access_token จริง
-  // ทำให้ RLS รู้ว่าใครเป็นคนเรียก
   window.SUPABASE_READY = true;
   window.SUPABASE_TOKEN = window.AUTH.token;
+
+  // แจ้งทุกหน้าว่า AUTH พร้อมแล้ว
+  window.dispatchEvent(new Event('auth-ready'));
 })();

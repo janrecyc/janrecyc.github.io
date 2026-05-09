@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
-<script src="auth-guard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root {
   --ink:       #0A0A0F;
@@ -718,12 +718,19 @@ function toast(msg, type = '') {
   toast._t = setTimeout(() => { el.className = ''; }, 2200);
 }
 
-// ── INIT — รอ auth-guard พร้อมก่อน ──
-if (window.AUTH) {
+// ── INIT — ใช้ Supabase SDK เช็ค session ──
+(async () => {
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) {
+    window.location.replace('login.html');
+    return;
+  }
+  window.AUTH = { token: session.access_token, user: session.user,
+    logout: async () => { await _sb.auth.signOut(); window.location.replace('login.html'); }
+  };
   loadItems();
-} else {
-  window.addEventListener('auth-ready', () => loadItems(), { once: true });
-}
+})();
 </script>
 </body>
 </html>

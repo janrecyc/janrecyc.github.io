@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ScrapPOS — คัดแยก</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root {
+  --ink:       #0A0A0F;
+  --ink2:      #3A3A4A;
+  --ink3:      #8A8A9A;
+  --surface:   #F5F5FA;
+  --white:     #FFFFFF;
+  --primary:   #00B86B;
+  --primary-d: #008F52;
+  --primary-l: rgba(0,184,107,0.10);
+  --green:     #00C853;
+  --red:       #FF3B30;
+  --amber:     #FF9F0A;
+  --blue:      #1A6BFF;
+  --card-sh:   0 2px 20px rgba(10,10,30,0.07), 0 0 0 0.5px rgba(10,10,30,0.06);
+  --r: 20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body {
+  font-family:'Prompt',sans-serif;
+  background:var(--surface);
+  color:var(--ink);
+  height:100dvh;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+
+.status-bar{height:env(safe-area-inset-top,0px);background:var(--white);flex-shrink:0;}
+
+/* ── HEADER ── */
+header {
+  background:var(--white);
+  padding:14px 20px 12px;
+  flex-shrink:0;
+  border-bottom:1px solid rgba(10,10,30,0.06);
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+.app-logo{display:flex;align-items:center;gap:8px;}
+.logo-mark{width:32px;height:32px;background:var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;}
+.app-name{font-size:13px;font-weight:700;color:var(--ink3);letter-spacing:2px;text-transform:uppercase;}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--surface);border:none;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:18px;cursor:pointer;}
+.icon-btn:active{background:#e8e8f0;}
+.page-title{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1.1;}
+.page-sub{font-size:12px;color:var(--ink3);font-weight:400;margin-left:2px;}
+
+/* ── STEP INDICATOR ── */
+.step-bar{display:flex;align-items:center;gap:0;padding:10px 20px 0;flex-shrink:0;}
+.step{display:flex;align-items:center;gap:6px;flex:1;}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid rgba(10,10,30,0.1);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink3);flex-shrink:0;transition:all .25s;}
+.step-dot.active{background:var(--primary);border-color:var(--primary);color:white;box-shadow:0 4px 12px rgba(0,184,107,0.3);}
+.step-dot.done{background:var(--ink);border-color:var(--ink);color:white;}
+.step-label{font-size:11px;font-weight:600;color:var(--ink3);transition:color .25s;white-space:nowrap;}
+.step-label.active{color:var(--primary);}
+.step-label.done{color:var(--ink);}
+.step-line{height:2px;flex:1;background:rgba(10,10,30,0.08);border-radius:100px;margin:0 6px;transition:background .25s;}
+.step-line.done{background:var(--ink);}
+
+/* ── APP BODY ── */
+.app-body{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+
+/* ── STEP PANELS ── */
+.panel{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}
+.panel.active{display:flex;}
+
+/* ── SEARCH ── */
+.search-area{padding:10px 20px 0;flex-shrink:0;}
+.search-field{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid rgba(10,10,30,0.08);border-radius:14px;padding:10px 14px;box-shadow:0 1px 6px rgba(10,10,30,0.05);transition:border-color .15s,box-shadow .15s;}
+.search-field:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,184,107,0.12);}
+.search-field i{color:var(--ink3);font-size:17px;}
+.search-field input{flex:1;border:none;outline:none;font-family:'Prompt',sans-serif;font-size:14px;color:var(--ink);background:transparent;}
+.search-field input::placeholder{color:var(--ink3);}
+
+/* ── CAT BAR ── */
+.cat-bar{display:flex;gap:6px;padding:8px 20px 6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+.cat-bar::-webkit-scrollbar{display:none;}
+.cat-btn{flex-shrink:0;padding:6px 14px;border-radius:100px;font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;border:none;cursor:pointer;transition:all .16s;white-space:nowrap;}
+.cat-btn.on{background:var(--ink);color:white;box-shadow:0 2px 8px rgba(10,10,30,0.2);}
+.cat-btn:not(.on){background:var(--white);color:var(--ink2);border:1px solid rgba(10,10,30,0.08);}
+
+/* ── ITEM GRID ── */
+.item-grid-wrap{flex:1;overflow-y:auto;padding:4px 16px 10px;scrollbar-width:none;}
+.item-grid-wrap::-webkit-scrollbar{display:none;}
+.item-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(min-width:500px){.item-grid{grid-template-columns:repeat(3,1fr);}}
+
+.item-card{background:var(--white);border-radius:var(--r);padding:16px 14px 14px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--card-sh);transition:transform .13s,box-shadow .13s;border:1.5px solid transparent;display:flex;flex-direction:column;gap:8px;user-select:none;}
+.item-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.7) 0%,transparent 50%);pointer-events:none;}
+.item-card:active{transform:scale(0.95);}
+.item-card.selected{border-color:var(--primary);box-shadow:0 8px 32px rgba(0,184,107,0.18),0 0 0 1.5px var(--primary);}
+.card-check{position:absolute;top:10px;right:10px;width:22px;height:22px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;opacity:0;transform:scale(0.6);transition:all .18s;}
+.item-card.selected .card-check{opacity:1;transform:scale(1);}
+.card-icon{font-size:32px;line-height:1;}
+.card-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;}
+.card-stock{font-size:10px;color:var(--ink3);}
+
+.grid-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:50px 0;color:var(--ink3);}
+.grid-empty i{font-size:32px;opacity:.4;}
+.grid-empty p{font-size:13px;}
+
+.spin{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── SELECTED ITEM BAR ── */
+.selected-bar{flex-shrink:0;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);padding:10px 20px;display:flex;align-items:center;gap:12px;}
+.selected-bar-icon{font-size:28px;}
+.selected-bar-info{flex:1;min-width:0;}
+.selected-bar-name{font-size:13px;font-weight:700;}
+.selected-bar-sub{font-size:11px;color:var(--ink3);margin-top:2px;}
+.next-btn{padding:10px 20px;border-radius:14px;background:var(--primary);color:white;border:none;font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.next-btn:disabled{opacity:.4;pointer-events:none;}
+.next-btn:active{background:var(--primary-d);}
+
+/* ── STEP 2: RESULT SELECTOR ── */
+.result-wrap{flex:1;overflow-y:auto;padding:12px 16px 10px;scrollbar-width:none;}
+.result-wrap::-webkit-scrollbar{display:none;}
+
+.result-section-label{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;padding:6px 4px 8px;display:flex;align-items:center;gap:8px;}
+.result-section-label::after{content:'';flex:1;height:1px;background:rgba(10,10,30,0.06);}
+
+.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+@media(min-width:500px){.result-grid{grid-template-columns:repeat(3,1fr);}}
+
+.result-card{background:var(--white);border-radius:16px;padding:14px 12px 12px;cursor:pointer;border:1.5px solid transparent;box-shadow:var(--card-sh);display:flex;flex-direction:column;gap:6px;transition:transform .13s,box-shadow .13s;position:relative;overflow:hidden;}
+.result-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.7) 0%,transparent 50%);pointer-events:none;}
+.result-card:active{transform:scale(0.95);}
+.result-card.selected{border-color:var(--primary);box-shadow:0 8px 32px rgba(0,184,107,0.18),0 0 0 1.5px var(--primary);}
+.result-card .card-check{position:absolute;top:8px;right:8px;width:20px;height:20px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;opacity:0;transform:scale(0.6);transition:all .18s;}
+.result-card.selected .card-check{opacity:1;transform:scale(1);}
+.result-icon{font-size:28px;line-height:1;}
+.result-name{font-size:12px;font-weight:700;color:var(--ink);}
+.result-price{font-size:12px;font-weight:700;color:var(--primary);}
+.result-price-unit{font-size:10px;font-weight:400;color:var(--ink3);}
+
+/* ── STEP 3: KG INPUT ── */
+.kg-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:0;}
+
+.sort-summary-card{background:var(--white);border-radius:22px;padding:20px;width:100%;max-width:360px;box-shadow:var(--card-sh);margin-bottom:20px;}
+.sort-arrow{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.sort-from,.sort-to{flex:1;text-align:center;}
+.sort-item-icon{font-size:32px;margin-bottom:4px;}
+.sort-item-label{font-size:10px;color:var(--ink3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;}
+.sort-item-name{font-size:13px;font-weight:700;margin-top:2px;}
+.sort-arrow-icon{font-size:22px;color:var(--primary);flex-shrink:0;}
+
+.kg-label{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;text-align:center;}
+.kg-input-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.kg-step-btn{width:48px;height:48px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(10,10,30,0.08);font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:all .12s;}
+.kg-step-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
+.kg-input{width:120px;text-align:center;font-family:'Prompt',sans-serif;font-size:28px;font-weight:800;color:var(--ink);border:2px solid rgba(10,10,30,0.08);border-radius:16px;padding:10px;background:var(--white);outline:none;transition:border-color .15s;}
+.kg-input:focus{border-color:var(--primary);}
+.kg-unit{font-size:13px;color:var(--ink3);text-align:center;}
+
+.yield-preview{background:var(--primary-l);border:1px solid rgba(0,184,107,0.2);border-radius:14px;padding:12px 16px;width:100%;max-width:360px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.yield-label{font-size:12px;color:var(--primary);font-weight:600;}
+.yield-val{font-size:16px;font-weight:800;color:var(--primary);}
+
+/* ── FOOTER ACTIONS ── */
+.panel-footer{flex-shrink:0;padding:10px 20px calc(env(safe-area-inset-bottom,0px)+10px);border-top:1px solid rgba(10,10,30,0.06);background:var(--white);}
+.footer-row{display:flex;gap:10px;}
+.btn-back{flex:1;padding:14px;border-radius:16px;background:var(--surface);border:1px solid rgba(10,10,30,0.08);font-family:'Prompt',sans-serif;font-size:14px;font-weight:600;color:var(--ink2);cursor:pointer;}
+.btn-back:active{background:#e0e0ea;}
+.btn-confirm{flex:2;padding:14px;border-radius:16px;background:var(--primary);border:none;color:white;font-family:'Prompt',sans-serif;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:background .15s;}
+.btn-confirm:disabled{opacity:.4;pointer-events:none;}
+.btn-confirm:active{background:var(--primary-d);}
+
+/* ── NAV ── */
+nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px);}
+.nav-row{display:flex;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;text-decoration:none;color:var(--ink3);font-size:10px;font-weight:500;position:relative;}
+.nav-tab.on{color:var(--primary);}
+.nav-tab i{font-size:20px;}
+.nav-tab-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--primary);border-radius:0 0 2px 2px;transition:width .2s;}
+.nav-tab.on .nav-tab-indicator{width:24px;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,10,30,0.88);color:white;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px);z-index:999;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.success{background:rgba(0,184,107,0.92);}
+#toast.error{background:rgba(255,59,48,0.9);}
+</style>
+</head>
+<body>
+
+<div class="status-bar"></div>
+
+<header>
+  <div class="header-top">
+    <div class="app-logo">
+      <div class="logo-mark"><i class="ph ph-recycle"></i></div>
+      <span class="app-name">ScrapPOS</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="icon-btn" onclick="resetAll()" title="เริ่มใหม่"><i class="ph ph-arrows-counter-clockwise"></i></button>
+      <button class="icon-btn" onclick="window.AUTH && window.AUTH.logout()" title="ออกจากระบบ"><i class="ph ph-sign-out"></i></button>
+    </div>
+  </div>
+  <div class="page-title">คัดแยก <span class="page-sub">Sort</span></div>
+</header>
+
+<!-- STEP BAR -->
+<div class="step-bar">
+  <div class="step">
+    <div class="step-dot active" id="dot-1">1</div>
+    <span class="step-label active" id="lbl-1">เลือกวัตถุดิบ</span>
+  </div>
+  <div class="step-line" id="line-1"></div>
+  <div class="step">
+    <div class="step-dot" id="dot-2">2</div>
+    <span class="step-label" id="lbl-2">ผลลัพธ์</span>
+  </div>
+  <div class="step-line" id="line-2"></div>
+  <div class="step">
+    <div class="step-dot" id="dot-3">3</div>
+    <span class="step-label" id="lbl-3">น้ำหนัก</span>
+  </div>
+</div>
+
+<div class="app-body">
+
+  <!-- ══ STEP 1: เลือกวัตถุดิบ ══ -->
+  <div class="panel active" id="panel-1">
+    <div class="search-area">
+      <div class="search-field">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="search-1" placeholder="ค้นหาวัตถุดิบ...">
+      </div>
+    </div>
+    <div class="cat-bar">
+      <button class="cat-btn on" data-cat="all">ทั้งหมด</button>
+      <button class="cat-btn" data-cat="metal">🔩 โลหะ</button>
+      <button class="cat-btn" data-cat="paper">📰 กระดาษ</button>
+      <button class="cat-btn" data-cat="plastic">♻️ พลาสติก</button>
+      <button class="cat-btn" data-cat="glass">🪟 แก้ว</button>
+      <button class="cat-btn" data-cat="electric">⚡ ไฟฟ้า</button>
+    </div>
+    <div class="item-grid-wrap">
+      <div class="item-grid" id="grid-1">
+        <div class="grid-empty">
+          <i class="ph ph-spinner-gap spin" style="font-size:28px;"></i>
+          <p>กำลังโหลด...</p>
+        </div>
+      </div>
+    </div>
+    <div class="selected-bar">
+      <div class="selected-bar-icon" id="sel-icon-1">📦</div>
+      <div class="selected-bar-info">
+        <div class="selected-bar-name" id="sel-name-1">ยังไม่ได้เลือกวัตถุดิบ</div>
+        <div class="selected-bar-sub" id="sel-sub-1">กดเลือกสินค้าด้านบน</div>
+      </div>
+      <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
+        ถัดไป <i class="ph ph-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2: เลือกผลลัพธ์ ══ -->
+  <div class="panel" id="panel-2">
+    <div class="result-wrap" id="result-wrap">
+      <div class="result-section-label">คัดแยกแล้วได้อะไร</div>
+      <div class="result-grid" id="grid-2">
+        <div class="grid-empty" style="grid-column:1/-1;">
+          <i class="ph ph-spinner-gap spin" style="font-size:28px;"></i>
+          <p>กำลังโหลด...</p>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="footer-row">
+        <button class="btn-back" onclick="goStep(1)"><i class="ph ph-arrow-left"></i> ย้อนกลับ</button>
+        <button class="btn-confirm" id="btn-next-2" disabled onclick="goStep(3)">
+          <i class="ph ph-arrow-right"></i> ถัดไป
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: ใส่น้ำหนัก ══ -->
+  <div class="panel" id="panel-3">
+    <div class="kg-panel">
+
+      <!-- สรุปการคัดแยก -->
+      <div class="sort-summary-card">
+        <div class="sort-arrow">
+          <div class="sort-from">
+            <div class="sort-item-icon" id="sum-from-icon">📦</div>
+            <div class="sort-item-label">วัตถุดิบ</div>
+            <div class="sort-item-name" id="sum-from-name">–</div>
+          </div>
+          <div class="sort-arrow-icon"><i class="ph ph-arrow-right-bold"></i></div>
+          <div class="sort-to">
+            <div class="sort-item-icon" id="sum-to-icon">📦</div>
+            <div class="sort-item-label">ผลลัพธ์</div>
+            <div class="sort-item-name" id="sum-to-name">–</div>
+          </div>
+        </div>
+        <div style="height:1px;background:rgba(10,10,30,0.06);margin-bottom:14px;"></div>
+        <div class="kg-label">น้ำหนักผลลัพธ์ที่ได้ (กก.)</div>
+        <div class="kg-input-row">
+          <button class="kg-step-btn" onclick="adjustKg(-1)">−</button>
+          <input class="kg-input" type="number" id="kg-input" value="0" min="0" step="1" oninput="updateYield()">
+          <button class="kg-step-btn" onclick="adjustKg(1)">+</button>
+        </div>
+        <div class="kg-unit">กิโลกรัม</div>
+      </div>
+
+      <div class="yield-preview" id="yield-preview">
+        <span class="yield-label">มูลค่าโดยประมาณ</span>
+        <span class="yield-val" id="yield-val">฿0.00</span>
+      </div>
+
+    </div>
+    <div class="panel-footer">
+      <div class="footer-row">
+        <button class="btn-back" onclick="goStep(2)"><i class="ph ph-arrow-left"></i> ย้อนกลับ</button>
+        <button class="btn-confirm" id="btn-save" onclick="saveSort()">
+          <i class="ph ph-check-circle"></i> บันทึก
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-body -->
+
+<!-- NAV -->
+<nav>
+  <div class="nav-row">
+    <a href="buy.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-download-simple"></i><span>รับซื้อ</span>
+    </a>
+    <a href="sell.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-upload-simple"></i><span>ขายออก</span>
+    </a>
+    <a href="sort.html" class="nav-tab on">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph-fill ph-recycle"></i><span>คัดแยก</span>
+    </a>
+    <a href="items.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-pencil-simple"></i><span>สินค้า</span>
+    </a>
+    <a href="dashboard.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-package"></i><span>สต๊อก</span>
+    </a>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
+
+// ══════════════════════════════════════════
+//  DEMO DATA
+// ══════════════════════════════════════════
+const DEMO_ITEMS = [
+  {id:1,  name:'เหล็กหนัก',          icon:'🔩', buy_price:4.50, sell_price:5.80, stock_qty:4200, cat:'metal'},
+  {id:2,  name:'เหล็กบาง',           icon:'🔧', buy_price:2.80, sell_price:3.50, stock_qty:1800, cat:'metal'},
+  {id:3,  name:'ทองแดง',             icon:'🪙', buy_price:195,  sell_price:215,  stock_qty:320,  cat:'metal'},
+  {id:4,  name:'อลูมิเนียม',         icon:'🫗', buy_price:42,   sell_price:50,   stock_qty:960,  cat:'metal'},
+  {id:5,  name:'สแตนเลส',            icon:'⚙️', buy_price:18,   sell_price:22,   stock_qty:550,  cat:'metal'},
+  {id:6,  name:'กระดาษหนังสือพิมพ์', icon:'📰', buy_price:2.20, sell_price:2.80, stock_qty:3000, cat:'paper'},
+  {id:7,  name:'กระดาษลัง',          icon:'📦', buy_price:2.50, sell_price:3.20, stock_qty:5200, cat:'paper'},
+  {id:8,  name:'กระดาษขาว',          icon:'📄', buy_price:3.00, sell_price:3.80, stock_qty:1100, cat:'paper'},
+  {id:9,  name:'พลาสติกขาว',         icon:'🥛', buy_price:8.50, sell_price:11,   stock_qty:780,  cat:'plastic'},
+  {id:10, name:'ขวด PET',            icon:'🍶', buy_price:6.00, sell_price:8.00, stock_qty:620,  cat:'plastic'},
+  {id:11, name:'แก้วใส',             icon:'🪟', buy_price:1.20, sell_price:1.60, stock_qty:2100, cat:'glass'},
+  {id:12, name:'สายไฟทองแดง',        icon:'🔌', buy_price:85,   sell_price:100,  stock_qty:180,  cat:'electric'},
+  {id:13, name:'มอเตอร์เก่า',        icon:'⚡', buy_price:25,   sell_price:32,   stock_qty:95,   cat:'electric'},
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let ALL_ITEMS = [];
+let selectedFrom = null;  // วัตถุดิบ
+let selectedTo   = null;  // ผลลัพธ์
+let activeCat = 'all';
+let q1 = '';
+let currentStep = 1;
+
+// ══════════════════════════════════════════
+//  SUPABASE FETCH
+// ══════════════════════════════════════════
+async function sbFetch(path, opts = {}) {
+  const token = (window.AUTH && window.AUTH.token) ? window.AUTH.token : SUPABASE_ANON;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation',
+      ...opts.headers,
+    },
+    method: opts.method || 'GET',
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.message || `HTTP ${res.status}`);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ══════════════════════════════════════════
+//  LOAD ITEMS
+// ══════════════════════════════════════════
+async function loadItems() {
+  const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
+  if (!SUPABASE_READY) {
+    ALL_ITEMS = DEMO_ITEMS;
+  } else {
+    try {
+      ALL_ITEMS = await sbFetch('items?select=id,name,icon,buy_price,sell_price,stock_qty,cat&order=cat,name');
+    } catch (err) {
+      ALL_ITEMS = DEMO_ITEMS;
+      toast('โหลดไม่สำเร็จ ใช้ข้อมูล Demo', 'error');
+    }
+  }
+  renderGrid1();
+}
+
+// ══════════════════════════════════════════
+//  STEP 1 — RENDER วัตถุดิบ
+// ══════════════════════════════════════════
+function renderGrid1() {
+  const grid = document.getElementById('grid-1');
+  let list = ALL_ITEMS;
+  if (activeCat !== 'all') list = list.filter(x => x.cat === activeCat);
+  if (q1) list = list.filter(x => x.name.includes(q1));
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="grid-empty"><i class="ph ph-magnifying-glass"></i><p>ไม่พบสินค้า</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(item => {
+    const sel   = selectedFrom && selectedFrom.id === item.id;
+    const stock = Number(item.stock_qty || 0);
+    const empty = stock <= 0;
+    const stockColor = empty ? 'color:var(--red)' : stock < 100 ? 'color:var(--amber)' : 'color:var(--green)';
+    return `
+    <div class="item-card ${sel?'selected':''}"
+      onclick="${empty?`toast('สต๊อกหมด','error')`:`selectFrom(${item.id})`}"
+      style="${empty?'opacity:.45;pointer-events:none;':''}">
+      <div class="card-check"><i class="ph ph-check-bold"></i></div>
+      <div class="card-icon">${item.icon}</div>
+      <div class="card-name">${item.name}</div>
+      <div class="card-stock" style="${stockColor}">
+        ${empty ? '❌ หมดสต๊อก' : stock.toLocaleString('th-TH') + ' กก.'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectFrom(id) {
+  selectedFrom = ALL_ITEMS.find(x => x.id === id);
+  renderGrid1();
+  // อัปเดต bar
+  document.getElementById('sel-icon-1').textContent = selectedFrom.icon;
+  document.getElementById('sel-name-1').textContent = selectedFrom.name;
+  document.getElementById('sel-sub-1').textContent  = `สต๊อก ${Number(selectedFrom.stock_qty||0).toLocaleString('th-TH')} กก.`;
+  document.getElementById('btn-next-1').disabled = false;
+}
+
+// ══════════════════════════════════════════
+//  STEP 2 — RENDER ผลลัพธ์
+// ══════════════════════════════════════════
+function renderGrid2() {
+  const grid = document.getElementById('grid-2');
+  // กรองเอาสินค้าที่ไม่ใช่ตัวเดิม
+  const list = ALL_ITEMS.filter(x => x.id !== selectedFrom?.id);
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="grid-empty" style="grid-column:1/-1;"><i class="ph ph-package"></i><p>ไม่มีสินค้าอื่น</p></div>`;
+    return;
+  }
+
+  // จัดกลุ่มตาม cat
+  const cats = [...new Set(list.map(x => x.cat))];
+  const catLabel = {metal:'โลหะ',paper:'กระดาษ',plastic:'พลาสติก',glass:'แก้ว',electric:'ไฟฟ้า'};
+  const catEmoji = {metal:'🔩',paper:'📰',plastic:'♻️',glass:'🪟',electric:'⚡'};
+
+  grid.innerHTML = cats.map(cat => {
+    const items = list.filter(x => x.cat === cat);
+    return `
+      <div style="grid-column:1/-1;">
+        <div class="result-section-label">${catEmoji[cat]||''} ${catLabel[cat]||cat}</div>
+      </div>
+      ${items.map(item => {
+        const sel = selectedTo && selectedTo.id === item.id;
+        return `
+        <div class="result-card ${sel?'selected':''}" onclick="selectTo(${item.id})">
+          <div class="card-check"><i class="ph ph-check-bold"></i></div>
+          <div class="result-icon">${item.icon}</div>
+          <div class="result-name">${item.name}</div>
+          <div class="result-price">฿${Number(item.sell_price).toFixed(2)}<span class="result-price-unit">/กก.</span></div>
+        </div>`;
+      }).join('')}`;
+  }).join('');
+}
+
+function selectTo(id) {
+  selectedTo = ALL_ITEMS.find(x => x.id === id);
+  renderGrid2();
+  document.getElementById('btn-next-2').disabled = false;
+}
+
+// ══════════════════════════════════════════
+//  STEP 3 — SUMMARY + KG
+// ══════════════════════════════════════════
+function renderStep3() {
+  document.getElementById('sum-from-icon').textContent = selectedFrom.icon;
+  document.getElementById('sum-from-name').textContent = selectedFrom.name;
+  document.getElementById('sum-to-icon').textContent   = selectedTo.icon;
+  document.getElementById('sum-to-name').textContent   = selectedTo.name;
+  document.getElementById('kg-input').value = 0;
+  updateYield();
+}
+
+function adjustKg(delta) {
+  const inp = document.getElementById('kg-input');
+  inp.value = Math.max(0, (parseFloat(inp.value) || 0) + delta);
+  updateYield();
+}
+
+function updateYield() {
+  const kg  = parseFloat(document.getElementById('kg-input').value) || 0;
+  const price = selectedTo ? Number(selectedTo.sell_price) : 0;
+  const val = kg * price;
+  document.getElementById('yield-val').textContent = '฿' + val.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// ══════════════════════════════════════════
+//  STEP NAVIGATION
+// ══════════════════════════════════════════
+function goStep(n) {
+  document.getElementById(`panel-${currentStep}`).classList.remove('active');
+  currentStep = n;
+  document.getElementById(`panel-${n}`).classList.add('active');
+  updateStepBar(n);
+  if (n === 2) renderGrid2();
+  if (n === 3) renderStep3();
+}
+
+function updateStepBar(n) {
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    const lbl = document.getElementById(`lbl-${i}`);
+    dot.className = 'step-dot ' + (i < n ? 'done' : i === n ? 'active' : '');
+    dot.textContent = i < n ? '' : i;
+    if (i < n) dot.innerHTML = '<i class="ph ph-check-bold" style="font-size:12px;"></i>';
+    lbl.className = 'step-label ' + (i < n ? 'done' : i === n ? 'active' : '');
+  }
+  for (let i = 1; i <= 2; i++) {
+    document.getElementById(`line-${i}`).className = 'step-line ' + (n > i ? 'done' : '');
+  }
+}
+
+// ══════════════════════════════════════════
+//  SAVE
+// ══════════════════════════════════════════
+async function saveSort() {
+  const kg = parseFloat(document.getElementById('kg-input').value) || 0;
+  if (kg <= 0) { toast('กรุณากรอกน้ำหนัก', 'error'); return; }
+
+  // ตรวจสต๊อกวัตถุดิบพอไหม
+  const fromStock = Number(selectedFrom.stock_qty || 0);
+  if (kg > fromStock) {
+    toast(`❌ สต๊อก${selectedFrom.name}มีแค่ ${fromStock.toLocaleString('th-TH')} กก.`, 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i> กำลังบันทึก...';
+
+  const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
+
+  if (!SUPABASE_READY) {
+    // Demo — อัปเดต local state
+    await new Promise(r => setTimeout(r, 700));
+    const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
+    const ti = ALL_ITEMS.find(x => x.id === selectedTo.id);
+    if (fi) fi.stock_qty = Math.max(0, Number(fi.stock_qty) - kg);
+    if (ti) ti.stock_qty = Number(ti.stock_qty || 0) + kg;
+    toast(`✅ ${selectedFrom.name} −${kg} กก. → ${selectedTo.name} +${kg} กก. (Demo)`, 'success');
+    setTimeout(resetAll, 1400);
+    return;
+  }
+
+  try {
+    // 1. บันทึกประวัติ sort_logs
+    await sbFetch('sort_logs', {
+      method: 'POST',
+      prefer: 'return=minimal',
+      body: {
+        from_item_id:   selectedFrom.id,
+        from_item_name: selectedFrom.name,
+        to_item_id:     selectedTo.id,
+        to_item_name:   selectedTo.name,
+        sort_kg:        kg,
+        result_value:   kg * Number(selectedTo.sell_price),
+        created_at:     new Date().toISOString(),
+      },
+    });
+
+    // 2. หัก stock วัตถุดิบ (from)
+    await sbFetch(`items?id=eq.${selectedFrom.id}`, {
+      method: 'PATCH',
+      prefer: 'return=minimal',
+      body: { stock_qty: Math.max(0, fromStock - kg), updated_at: new Date().toISOString() },
+    });
+
+    // 3. เพิ่ม stock ผลลัพธ์ (to) เหมือนรับซื้อใหม่
+    const toStock = Number(selectedTo.stock_qty || 0);
+    await sbFetch(`items?id=eq.${selectedTo.id}`, {
+      method: 'PATCH',
+      prefer: 'return=minimal',
+      body: { stock_qty: toStock + kg, updated_at: new Date().toISOString() },
+    });
+
+    // อัปเดต local state
+    const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
+    const ti = ALL_ITEMS.find(x => x.id === selectedTo.id);
+    if (fi) fi.stock_qty = Math.max(0, fromStock - kg);
+    if (ti) ti.stock_qty = toStock + kg;
+
+    toast(`✅ ${selectedFrom.name} −${kg} กก. → ${selectedTo.name} +${kg} กก.`, 'success');
+    setTimeout(resetAll, 1400);
+  } catch (err) {
+    toast('❌ ' + err.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-check-circle"></i> บันทึก';
+  }
+}
+
+// ══════════════════════════════════════════
+//  RESET
+// ══════════════════════════════════════════
+function resetAll() {
+  selectedFrom = null;
+  selectedTo   = null;
+  document.getElementById('sel-icon-1').textContent = '📦';
+  document.getElementById('sel-name-1').textContent = 'ยังไม่ได้เลือกวัตถุดิบ';
+  document.getElementById('sel-sub-1').textContent  = 'กดเลือกสินค้าด้านบน';
+  document.getElementById('btn-next-1').disabled = true;
+  document.getElementById('btn-next-2').disabled = true;
+  document.getElementById('btn-save').disabled = false;
+  document.getElementById('btn-save').innerHTML = '<i class="ph ph-check-circle"></i> บันทึก';
+  goStep(1);
+  renderGrid1();
+}
+
+// ══════════════════════════════════════════
+//  FILTERS
+// ══════════════════════════════════════════
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    activeCat = btn.dataset.cat;
+    renderGrid1();
+  });
+});
+
+document.getElementById('search-1').addEventListener('input', e => {
+  q1 = e.target.value.trim();
+  renderGrid1();
+});
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type ? `show ${type}` : 'show';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.className = ''; }, 2400);
+}
+
+// ══════════════════════════════════════════
+//  INIT — SDK Auth
+// ══════════════════════════════════════════
+(async () => {
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) {
+    window.location.replace('login.html');
+    return;
+  }
+  window.AUTH = {
+    token: session.access_token,
+    user:  session.user,
+    logout: async () => { await _sb.auth.signOut(); window.location.replace('login.html'); }
+  };
+  loadItems();
+})();
+</script>
+</body>
+</html>

@@ -232,6 +232,7 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="loadDashboard()"><i class="ph ph-arrows-clockwise"></i></button>
+      <button class="icon-btn" onclick="window.AUTH && window.AUTH.logout()" title="ออกจากระบบ"><i class="ph ph-sign-out"></i></button>
     </div>
   </div>
   <div class="page-title">Dashboard <span class="page-sub" id="h-time">--:--</span></div>
@@ -353,35 +354,25 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 <!-- BOTTOM NAV -->
 <nav>
   <div class="nav-row">
-    <a href="buy.html" class="nav-tab">
+    <a href="buy.html" class="nav-tab ">
       <div class="nav-tab-indicator"></div>
-      <i class="ph ph-download-simple"></i>
-      <span>รับซื้อ</span>
+      <i class="ph ph-download-simple"></i><span>รับซื้อ</span>
     </a>
-    <a href="sell.html" class="nav-tab">
+    <a href="sell.html" class="nav-tab ">
       <div class="nav-tab-indicator"></div>
-      <i class="ph ph-upload-simple"></i>
-      <span>ขายออก</span>
+      <i class="ph ph-upload-simple"></i><span>ขายออก</span>
     </a>
-    <a href="#" class="nav-tab">
+    <a href="sort.html" class="nav-tab ">
       <div class="nav-tab-indicator"></div>
-      <i class="ph ph-recycle"></i>
-      <span>คัดแยก</span>
+      <i class="ph ph-recycle"></i><span>คัดแยก</span>
     </a>
-    <a href="items.html" class="nav-tab">
+    <a href="items.html" class="nav-tab ">
       <div class="nav-tab-indicator"></div>
-      <i class="ph ph-pencil-simple"></i>
-      <span>สินค้า</span>
+      <i class="ph ph-pencil-simple"></i><span>สินค้า</span>
     </a>
     <a href="dashboard.html" class="nav-tab on">
       <div class="nav-tab-indicator"></div>
-      <i class="ph-fill ph-package"></i>
-      <span>สต๊อก</span>
-    </a>
-    <a href="#" class="nav-tab">
-      <div class="nav-tab-indicator"></div>
-      <i class="ph ph-moon-stars"></i>
-      <span>ปิดกะ</span>
+      <i class="ph-fill ph-package"></i><span>สต๊อก</span>
     </a>
   </div>
 </nav>

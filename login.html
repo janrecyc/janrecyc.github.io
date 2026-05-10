@@ -48,9 +48,32 @@ body::before {
   width:100%; max-width:400px;
   box-shadow:0 24px 64px rgba(0,0,0,.4);
   animation:fadeUp .5s ease .1s both;
+  position: relative;
 }
 .card-title { font-size:20px; font-weight:800; color:var(--ink); margin-bottom:4px; }
 .card-sub { font-size:13px; color:var(--ink3); margin-bottom:24px; }
+
+/* Identifier-first specific styles */
+.step-container { display: none; animation: fadeIn .3s ease; }
+.step-container.active { display: block; }
+.user-badge {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); padding: 12px 16px;
+  border-radius: 14px; margin-bottom: 16px;
+  border: 1.5px solid rgba(10,10,30,.04);
+}
+.user-badge-email {
+  font-size: 14px; font-weight: 500; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.user-badge-edit {
+  font-size: 12px; font-weight: 600; color: var(--ink3);
+  background: none; border: none; cursor: pointer;
+  padding: 4px; display: flex; align-items: center; gap: 4px;
+  transition: color .2s; font-family: 'Prompt', sans-serif;
+}
+.user-badge-edit:hover { color: var(--ink); }
+
 .field { margin-bottom:14px; }
 .field-label {
   font-size:11px; font-weight:600; color:var(--ink3);
@@ -84,7 +107,7 @@ body::before {
   background:var(--ink); color:white; border:none;
   font-family:'Prompt',sans-serif; font-size:15px; font-weight:700;
   cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
-  transition:background .15s,transform .1s; margin-top:4px;
+  transition:background .15s,transform .1s; margin-top:8px;
 }
 .login-btn:active { transform:scale(.98); }
 .login-btn:disabled { opacity:.5; pointer-events:none; }
@@ -105,6 +128,7 @@ body::before {
 @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.06);} }
 @keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
 @keyframes fadeDown { from{opacity:0;transform:translateY(-12px);} to{opacity:1;transform:translateY(0);} }
+@keyframes fadeIn { from{opacity:0;transform:translateX(10px);} to{opacity:1;transform:translateX(0);} }
 @keyframes spin { to{transform:rotate(360deg);} }
 .spin { animation:spin .7s linear infinite; }
 @keyframes shake {
@@ -125,34 +149,50 @@ body::before {
 
 <div class="logo-area">
   <div class="logo-badge">♻️</div>
-  <div class="logo-name">ScrapPOS</div>
+  <div class="logo-name">JanRecyc</div>
   <div class="logo-sub">ระบบรับซื้อของเก่า</div>
 </div>
 
 <div class="login-card">
-  <div class="card-title">เข้าสู่ระบบ</div>
-  <div class="card-sub">สำหรับพนักงานร้าน janrecycs</div>
+  <div class="card-title" id="card-title">ยินดีต้อนรับ</div>
+  <div class="card-sub" id="card-sub">กรอกอีเมลเพื่อเข้าสู่ระบบ</div>
+  
   <div class="error-msg" id="error-msg">
     <i class="ph ph-warning-circle"></i>
-    <span id="error-text">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
+    <span id="error-text">ข้อความแจ้งเตือน</span>
   </div>
-  <div class="field">
-    <label class="field-label">อีเมล</label>
-    <div class="field-wrap">
-      <input class="field-input" type="email" id="inp-email" placeholder="email@example.com" autocomplete="email" inputmode="email">
-      <i class="ph ph-envelope field-icon"></i>
+
+  <!-- Step 1: Identifier (Email) -->
+  <div class="step-container active" id="step-1">
+    <div class="field">
+      <label class="field-label">อีเมล</label>
+      <div class="field-wrap">
+        <input class="field-input" type="email" id="inp-email" placeholder="email@example.com" autocomplete="email" inputmode="email">
+        <i class="ph ph-envelope field-icon"></i>
+      </div>
     </div>
   </div>
-  <div class="field">
-    <label class="field-label">รหัสผ่าน</label>
-    <div class="field-wrap">
-      <input class="field-input" type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
-      <i class="ph ph-eye field-icon" id="eye-icon" onclick="togglePass()"></i>
+
+  <!-- Step 2: Password -->
+  <div class="step-container" id="step-2">
+    <div class="user-badge">
+      <div class="user-badge-email" id="display-email"></div>
+      <button class="user-badge-edit" onclick="goBack()">
+        เปลี่ยน
+      </button>
+    </div>
+    <div class="field">
+      <label class="field-label">รหัสผ่าน</label>
+      <div class="field-wrap">
+        <input class="field-input" type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+        <i class="ph ph-eye field-icon" id="eye-icon" onclick="togglePass()"></i>
+      </div>
     </div>
   </div>
-  <button class="login-btn" id="login-btn" onclick="doLogin()">
-    <i class="ph ph-sign-in"></i>
-    <span>เข้าสู่ระบบ</span>
+
+  <button class="login-btn" id="main-btn" onclick="handleAction()">
+    <span id="btn-text">ถัดไป</span>
+    <i class="ph ph-arrow-right" id="btn-icon"></i>
   </button>
 </div>
 
@@ -165,7 +205,9 @@ const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// เช็ค session — ถ้ายังอยู่ระบบให้ข้ามไปหน้าหลักเลย
+let currentStep = 1;
+
+// เช็ค session
 const overlay = document.getElementById('loading-overlay');
 const { data: { session } } = await supabase.auth.getSession();
 if (session) {
@@ -176,30 +218,91 @@ if (session) {
   document.getElementById('inp-email').focus();
 }
 
-// ── LOGIN ──
+// ── ACTION HANDLER ──
+window.handleAction = function() {
+  if (currentStep === 1) {
+    processEmail();
+  } else {
+    doLogin();
+  }
+};
+
+// ── STEP 1: Process Email ──
+function processEmail() {
+  const email = document.getElementById('inp-email').value.trim();
+  clearErrors();
+  
+  if (!email) return shakeField('inp-email', 'กรุณากรอกอีเมล');
+  
+  // เช็ครูปแบบอีเมลเบื้องต้น
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return shakeField('inp-email', 'รูปแบบอีเมลไม่ถูกต้อง');
+  }
+
+  // เปลี่ยนเป็น Step 2
+  currentStep = 2;
+  document.getElementById('display-email').textContent = email;
+  document.getElementById('step-1').classList.remove('active');
+  document.getElementById('step-2').classList.add('active');
+  
+  // อัปเดต Text / Button
+  document.getElementById('card-title').textContent = 'ป้อนรหัสผ่าน';
+  document.getElementById('card-sub').textContent = 'สำหรับพนักงานร้าน janrecycs';
+  
+  const btnIcon = document.getElementById('btn-icon');
+  btnIcon.className = 'ph ph-sign-in';
+  // ย้ายไอคอนไปอยู่ด้านหน้าข้อความเหมือนดีไซน์เดิมตอนล็อกอิน
+  document.getElementById('main-btn').insertBefore(btnIcon, document.getElementById('btn-text'));
+  document.getElementById('btn-text').textContent = 'เข้าสู่ระบบ';
+
+  document.getElementById('inp-pass').focus();
+}
+
+// ── GO BACK TO STEP 1 ──
+window.goBack = function() {
+  currentStep = 1;
+  clearErrors();
+  document.getElementById('inp-pass').value = ''; // เคลียร์รหัสผ่าน
+  
+  document.getElementById('step-2').classList.remove('active');
+  document.getElementById('step-1').classList.add('active');
+  
+  document.getElementById('card-title').textContent = 'ยินดีต้อนรับ';
+  document.getElementById('card-sub').textContent = 'กรอกอีเมลเพื่อเข้าสู่ระบบ';
+
+  const btnIcon = document.getElementById('btn-icon');
+  btnIcon.className = 'ph ph-arrow-right';
+  // ย้ายไอคอนกลับไปต่อท้าย
+  document.getElementById('main-btn').appendChild(btnIcon);
+  document.getElementById('btn-text').textContent = 'ถัดไป';
+
+  document.getElementById('inp-email').focus();
+};
+
+// ── STEP 2: LOGIN ──
 window.doLogin = async function() {
   const email = document.getElementById('inp-email').value.trim();
   const pass  = document.getElementById('inp-pass').value;
-  const btn   = document.getElementById('login-btn');
+  const btn   = document.getElementById('main-btn');
 
   clearErrors();
-  if (!email) return shakeField('inp-email', 'กรุณากรอกอีเมล');
-  if (!pass)  return shakeField('inp-pass',  'กรุณากรอกรหัสผ่าน');
+  if (!pass) return shakeField('inp-pass', 'กรุณากรอกรหัสผ่าน');
 
   btn.disabled = true;
-  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i><span>กำลังเข้าสู่ระบบ...</span>';
+  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i><span id="btn-text">กำลังเข้าสู่ระบบ...</span>';
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
 
   if (error) {
-    let msg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    let msg = 'รหัสผ่านไม่ถูกต้อง'; // เปลี่ยนข้อความให้เจาะจงขึ้นเนื่องจากอีเมลน่าจะถูกแล้ว
     if (error.message.includes('Email not confirmed')) msg = 'กรุณายืนยันอีเมลก่อนเข้าใช้งาน';
     if (error.message.includes('Too many requests'))   msg = 'ลองใหม่อีกครั้งในอีกสักครู่';
+    
     showError(msg);
-    document.getElementById('inp-email').classList.add('error');
     document.getElementById('inp-pass').classList.add('error');
     btn.disabled = false;
-    btn.innerHTML = '<i class="ph ph-sign-in"></i><span>เข้าสู่ระบบ</span>';
+    btn.innerHTML = '<i class="ph ph-sign-in" id="btn-icon"></i><span id="btn-text">เข้าสู่ระบบ</span>';
     return;
   }
 
@@ -208,6 +311,7 @@ window.doLogin = async function() {
   setTimeout(() => window.location.replace('buy.html'), 600);
 };
 
+// ── UI HELPERS ──
 function showError(msg) {
   const el = document.getElementById('error-msg');
   document.getElementById('error-text').textContent = msg;
@@ -232,7 +336,10 @@ window.togglePass = function() {
   inp.type = inp.type === 'password' ? 'text' : 'password';
   icon.className = `ph ph-eye${inp.type==='password'?'':'-slash'} field-icon`;
 };
-document.addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
+
+document.addEventListener('keydown', e => { 
+  if (e.key === 'Enter') window.handleAction(); 
+});
 </script>
 </body>
 </html>

@@ -602,17 +602,7 @@ function goStep(n) {
 }
 
 function updateStepBar(n) {
-  for (let i = 1; i <= 3; i++) {
-    const dot = document.getElementById(`dot-${i}`);
-    const lbl = document.getElementById(`lbl-${i}`);
-    dot.className = 'step-dot ' + (i < n ? 'done' : i === n ? 'active' : '');
-    dot.textContent = i < n ? '' : i;
-    if (i < n) dot.innerHTML = '<i class="ph ph-check-bold" style="font-size:12px;"></i>';
-    lbl.className = 'step-label ' + (i < n ? 'done' : i === n ? 'active' : '');
-  }
-  for (let i = 1; i <= 2; i++) {
-    document.getElementById(`line-${i}`).className = 'step-line ' + (n > i ? 'done' : '');
-  }
+  // step bar ถูกลบออกแล้ว — ไม่ต้องทำอะไร
 }
 
 // ══════════════════════════════════════════

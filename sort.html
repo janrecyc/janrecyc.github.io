@@ -59,6 +59,25 @@ header {
 
 
 
+/* ── FROM CHIP ── */
+.from-chip{display:flex;align-items:center;gap:8px;background:var(--primary-l);border:1px solid rgba(0,184,107,0.2);border-radius:14px;padding:10px 14px;margin:10px 0 0;flex-shrink:0;}
+.from-chip span:first-child{font-size:20px;}
+.from-chip-kg{margin-left:auto;font-size:12px;font-weight:700;color:var(--primary);background:rgba(0,184,107,0.15);padding:3px 10px;border-radius:100px;}
+#from-chip-name{font-size:13px;font-weight:700;color:var(--ink);}
+
+/* ── RESULT ROW (multi) ── */
+.result-row-item{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--card-sh);}
+.rri-icon{font-size:24px;flex-shrink:0;}
+.rri-info{flex:1;min-width:0;}
+.rri-name{font-size:13px;font-weight:700;}
+.rri-price{font-size:11px;color:var(--ink3);margin-top:1px;}
+.rri-stepper{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.rri-btn{width:28px;height:28px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(10,10,30,0.08);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);}
+.rri-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
+.rri-inp{width:58px;text-align:center;font-family:'Prompt',sans-serif;font-size:14px;font-weight:700;border:1.5px solid rgba(10,10,30,0.08);border-radius:10px;padding:5px 3px;background:var(--surface);outline:none;color:var(--ink);}
+.rri-inp:focus{border-color:var(--primary);background:var(--white);}
+.rri-remove{width:28px;height:28px;border-radius:50%;background:var(--red-l, rgba(255,59,48,0.1));border:none;color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
 /* ── KG BAR ── */
 .kg-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;flex-wrap:wrap;}
 .kg-bar-left{flex:1;min-width:0;}
@@ -270,66 +289,45 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
     </div>
   </div>
 
-  <!-- ══ STEP 2: เลือกผลลัพธ์ ══ -->
+  <!-- ══ STEP 2: เลือกผลลัพธ์ + ใส่น้ำหนักแต่ละชนิด ══ -->
   <div class="panel" id="panel-2">
-    <div class="result-wrap" id="result-wrap">
-      <div class="result-section-label">คัดแยกแล้วได้อะไร</div>
+    <div class="result-wrap">
+
+      <!-- วัตถุดิบที่เลือก -->
+      <div class="from-chip" id="from-chip">
+        <span id="from-chip-icon">📦</span>
+        <span id="from-chip-name">–</span>
+        <span class="from-chip-kg" id="from-chip-kg">0 กก.</span>
+      </div>
+
+      <!-- header -->
+      <div class="result-section-label" style="margin-top:8px;">คัดแยกได้สินค้าอะไรบ้าง <span style="color:var(--ink3);font-weight:400;">(เลือกได้หลายชนิด)</span></div>
+
+      <!-- grid สินค้า -->
       <div class="result-grid" id="grid-2">
         <div class="grid-empty" style="grid-column:1/-1;">
           <i class="ph ph-spinner-gap spin" style="font-size:28px;"></i>
           <p>กำลังโหลด...</p>
         </div>
       </div>
-    </div>
-    <div class="panel-footer">
-      <div class="footer-row">
-        <button class="btn-back" onclick="goStep(1)"><i class="ph ph-arrow-left"></i> ย้อนกลับ</button>
-        <button class="btn-confirm" id="btn-next-2" disabled onclick="goStep(3)">
-          <i class="ph ph-arrow-right"></i> ถัดไป
-        </button>
-      </div>
-    </div>
-  </div>
 
-  <!-- ══ STEP 3: ใส่น้ำหนัก ══ -->
-  <div class="panel" id="panel-3">
-    <div class="kg-panel">
-
-      <!-- สรุปการคัดแยก -->
-      <div class="sort-summary-card">
-        <div class="sort-arrow">
-          <div class="sort-from">
-            <div class="sort-item-icon" id="sum-from-icon">📦</div>
-            <div class="sort-item-label">วัตถุดิบ</div>
-            <div class="sort-item-name" id="sum-from-name">–</div>
-          </div>
-          <div class="sort-arrow-icon"><i class="ph ph-arrow-right-bold"></i></div>
-          <div class="sort-to">
-            <div class="sort-item-icon" id="sum-to-icon">📦</div>
-            <div class="sort-item-label">ผลลัพธ์</div>
-            <div class="sort-item-name" id="sum-to-name">–</div>
-          </div>
-        </div>
-        <div style="height:1px;background:rgba(10,10,30,0.06);margin-bottom:14px;"></div>
-        <div class="kg-label">น้ำหนักผลลัพธ์ที่ได้ (กก.)</div>
-        <div class="kg-input-row">
-          <button class="kg-step-btn" onclick="adjustKg(-1)">−</button>
-          <input class="kg-input" type="number" id="kg-input" value="0" min="0" step="1" oninput="updateYield()">
-          <button class="kg-step-btn" onclick="adjustKg(1)">+</button>
-        </div>
-        <div class="kg-unit">กิโลกรัม</div>
+      <!-- รายการที่เลือก + ใส่ kg -->
+      <div id="result-rows-wrap" style="display:none;">
+        <div class="result-section-label">น้ำหนักแต่ละชนิด</div>
+        <div id="result-rows"></div>
       </div>
 
-      <div class="yield-preview" id="yield-preview">
-        <span class="yield-label">มูลค่าโดยประมาณ</span>
+      <!-- มูลค่ารวม -->
+      <div class="yield-preview" id="yield-preview" style="display:none;margin:8px 0 4px;">
+        <span class="yield-label">มูลค่ารวมโดยประมาณ</span>
         <span class="yield-val" id="yield-val">฿0.00</span>
       </div>
 
     </div>
     <div class="panel-footer">
       <div class="footer-row">
-        <button class="btn-back" onclick="goStep(2)"><i class="ph ph-arrow-left"></i> ย้อนกลับ</button>
-        <button class="btn-confirm" id="btn-save" onclick="saveSort()">
+        <button class="btn-back" onclick="goStep(1)"><i class="ph ph-arrow-left"></i> ย้อนกลับ</button>
+        <button class="btn-confirm" id="btn-save" disabled onclick="saveSort()">
           <i class="ph ph-check-circle"></i> บันทึก
         </button>
       </div>
@@ -397,7 +395,7 @@ const DEMO_ITEMS = [
 // ══════════════════════════════════════════
 let ALL_ITEMS = [];
 let selectedFrom = null;  // วัตถุดิบ
-let selectedTo   = null;  // ผลลัพธ์
+let selectedTos  = {};     // {id: {item, kg}} ผลลัพธ์หลายชนิด
 let activeCat = 'all';
 let q1 = '';
 let currentStep = 1;
@@ -519,8 +517,12 @@ function onKgInput() {
 //  STEP 2 — RENDER ผลลัพธ์
 // ══════════════════════════════════════════
 function renderGrid2() {
+  // อัปเดต from-chip
+  document.getElementById('from-chip-icon').textContent = selectedFrom.icon;
+  document.getElementById('from-chip-name').textContent = selectedFrom.name;
+  document.getElementById('from-chip-kg').textContent   = getFromKg() + ' กก.';
+
   const grid = document.getElementById('grid-2');
-  // กรองเอาสินค้าที่ไม่ใช่ตัวเดิม
   const list = ALL_ITEMS.filter(x => x.id !== selectedFrom?.id);
 
   if (!list.length) {
@@ -528,7 +530,6 @@ function renderGrid2() {
     return;
   }
 
-  // จัดกลุ่มตาม cat
   const cats = [...new Set(list.map(x => x.cat))];
   const catLabel = {metal:'โลหะ',paper:'กระดาษ',plastic:'พลาสติก',glass:'แก้ว',electric:'ไฟฟ้า'};
   const catEmoji = {metal:'🔩',paper:'📰',plastic:'♻️',glass:'🪟',electric:'⚡'};
@@ -540,9 +541,9 @@ function renderGrid2() {
         <div class="result-section-label">${catEmoji[cat]||''} ${catLabel[cat]||cat}</div>
       </div>
       ${items.map(item => {
-        const sel = selectedTo && selectedTo.id === item.id;
+        const sel = !!selectedTos[item.id];
         return `
-        <div class="result-card ${sel?'selected':''}" onclick="selectTo(${item.id})">
+        <div class="result-card ${sel?'selected':''}" onclick="toggleTo(${item.id})">
           <div class="card-check"><i class="ph ph-check-bold"></i></div>
           <div class="result-icon">${item.icon}</div>
           <div class="result-name">${item.name}</div>
@@ -550,40 +551,96 @@ function renderGrid2() {
         </div>`;
       }).join('')}`;
   }).join('');
+
+  renderResultRows();
 }
 
-function selectTo(id) {
-  selectedTo = ALL_ITEMS.find(x => x.id === id);
+function toggleTo(id) {
+  const item = ALL_ITEMS.find(x => x.id === id);
+  if (!item) return;
+  if (selectedTos[id]) {
+    delete selectedTos[id];
+  } else {
+    selectedTos[id] = { item, kg: 0 };
+  }
   renderGrid2();
-  document.getElementById('btn-next-2').disabled = false;
+}
+
+function renderResultRows() {
+  const keys = Object.keys(selectedTos);
+  const wrap = document.getElementById('result-rows-wrap');
+  const rows = document.getElementById('result-rows');
+  const yieldEl = document.getElementById('yield-preview');
+
+  if (!keys.length) {
+    wrap.style.display = 'none';
+    yieldEl.style.display = 'none';
+    document.getElementById('btn-save').disabled = true;
+    return;
+  }
+
+  wrap.style.display = 'block';
+  yieldEl.style.display = 'flex';
+
+  rows.innerHTML = keys.map(id => {
+    const t = selectedTos[id];
+    return `
+    <div class="result-row-item">
+      <div class="rri-icon">${t.item.icon}</div>
+      <div class="rri-info">
+        <div class="rri-name">${t.item.name}</div>
+        <div class="rri-price">฿${Number(t.item.sell_price).toFixed(2)}/กก.</div>
+      </div>
+      <div class="rri-stepper">
+        <button class="rri-btn" onclick="adjTo(${id},-0.1)">−</button>
+        <input class="rri-inp" type="number" id="to-kg-${id}" value="${t.kg}"
+          min="0" step="0.1" oninput="onToKg(${id})">
+        <button class="rri-btn" onclick="adjTo(${id},0.1)">+</button>
+      </div>
+      <button class="rri-remove" onclick="toggleTo(${id})"><i class="ph ph-x-bold"></i></button>
+    </div>`;
+  }).join('');
+
+  updateTotalYield();
+}
+
+function adjTo(id, delta) {
+  if (!selectedTos[id]) return;
+  const inp = document.getElementById(`to-kg-${id}`);
+  let val = Math.round(((parseFloat(inp.value)||0) + delta) * 10) / 10;
+  val = Math.max(0, val);
+  inp.value = val;
+  selectedTos[id].kg = val;
+  updateTotalYield();
+}
+
+function onToKg(id) {
+  const inp = document.getElementById(`to-kg-${id}`);
+  const val = Math.max(0, parseFloat(inp.value)||0);
+  inp.value = val;
+  if (selectedTos[id]) selectedTos[id].kg = val;
+  updateTotalYield();
+}
+
+function updateTotalYield() {
+  let total = 0;
+  Object.values(selectedTos).forEach(t => {
+    total += (t.kg || 0) * Number(t.item.sell_price);
+  });
+  document.getElementById('yield-val').textContent =
+    '฿' + total.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  // enable บันทึก ถ้ามีอย่างน้อย 1 ชนิดที่ใส่ kg > 0
+  const hasKg = Object.values(selectedTos).some(t => t.kg > 0);
+  document.getElementById('btn-save').disabled = !hasKg;
 }
 
 // ══════════════════════════════════════════
 //  STEP 3 — SUMMARY + KG
 // ══════════════════════════════════════════
-function renderStep3() {
-  document.getElementById('sum-from-icon').textContent = selectedFrom.icon;
-  document.getElementById('sum-from-name').textContent = selectedFrom.name;
-  document.getElementById('sum-to-icon').textContent   = selectedTo.icon;
-  document.getElementById('sum-to-name').textContent   = selectedTo.name;
-  // sync kg จาก step 1
-  const kg = getFromKg();
-  document.getElementById('kg-input').value = kg;
-  updateYield();
-}
+function renderStep3() { /* ไม่ใช้แล้ว */ }
 
-function adjustKg(delta) {
-  const inp = document.getElementById('kg-input');
-  inp.value = Math.max(0, (parseFloat(inp.value) || 0) + delta);
-  updateYield();
-}
-
-function updateYield() {
-  const kg  = parseFloat(document.getElementById('kg-input').value) || 0;
-  const price = selectedTo ? Number(selectedTo.sell_price) : 0;
-  const val = kg * price;
-  document.getElementById('yield-val').textContent = '฿' + val.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
+// adjustKg / updateYield ย้ายไปใช้ updateTotalYield แล้ว
 
 // ══════════════════════════════════════════
 //  STEP NAVIGATION
@@ -598,7 +655,6 @@ function goStep(n) {
   document.getElementById(`panel-${n}`).classList.add('active');
   updateStepBar(n);
   if (n === 2) renderGrid2();
-  if (n === 3) renderStep3();
 }
 
 function updateStepBar(n) {
@@ -609,73 +665,80 @@ function updateStepBar(n) {
 //  SAVE
 // ══════════════════════════════════════════
 async function saveSort() {
-  const kg = getFromKg();
-  if (kg <= 0) { toast('กรุณากรอกน้ำหนัก', 'error'); return; }
-
-  // ตรวจสต๊อกวัตถุดิบพอไหม
+  const fromKg    = getFromKg();
   const fromStock = Number(selectedFrom.stock_qty || 0);
-  if (kg > fromStock) {
+  const results   = Object.values(selectedTos).filter(t => t.kg > 0);
+
+  if (fromKg <= 0) { toast('กรุณากรอกน้ำหนักวัตถุดิบ', 'error'); return; }
+  if (fromKg > fromStock) {
     toast(`❌ สต๊อก${selectedFrom.name}มีแค่ ${fromStock.toLocaleString('th-TH')} กก.`, 'error');
     return;
   }
+  if (!results.length) { toast('กรุณาใส่น้ำหนักผลลัพธ์อย่างน้อย 1 ชนิด', 'error'); return; }
 
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
   btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i> กำลังบันทึก...';
 
+  const totalValue = results.reduce((s, t) => s + t.kg * Number(t.item.sell_price), 0);
   const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
 
   if (!SUPABASE_READY) {
-    // Demo — อัปเดต local state
     await new Promise(r => setTimeout(r, 700));
     const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
-    const ti = ALL_ITEMS.find(x => x.id === selectedTo.id);
-    if (fi) fi.stock_qty = Math.max(0, Number(fi.stock_qty) - kg);
-    if (ti) ti.stock_qty = Number(ti.stock_qty || 0) + kg;
-    toast(`✅ ${selectedFrom.name} −${kg} กก. → ${selectedTo.name} +${kg} กก. (Demo)`, 'success');
-    setTimeout(resetAll, 1400);
+    if (fi) fi.stock_qty = Math.max(0, Number(fi.stock_qty) - fromKg);
+    results.forEach(t => {
+      const ti = ALL_ITEMS.find(x => x.id === t.item.id);
+      if (ti) ti.stock_qty = Number(ti.stock_qty || 0) + t.kg;
+    });
+    const summary = results.map(t => `${t.item.name} +${t.kg}กก.`).join(', ');
+    toast(`✅ ${selectedFrom.name} −${fromKg}กก. → ${summary} (Demo)`, 'success');
+    setTimeout(resetAll, 1800);
     return;
   }
 
   try {
-    // 1. บันทึกประวัติ sort_logs
-    await sbFetch('sort_logs', {
-      method: 'POST',
-      prefer: 'return=minimal',
-      body: {
-        from_item_id:   selectedFrom.id,
-        from_item_name: selectedFrom.name,
-        to_item_id:     selectedTo.id,
-        to_item_name:   selectedTo.name,
-        sort_kg:        kg,
-        result_value:   kg * Number(selectedTo.sell_price),
-        created_at:     new Date().toISOString(),
-      },
-    });
+    // 1. บันทึก sort_logs (1 row ต่อผลลัพธ์)
+    for (const t of results) {
+      await sbFetch('sort_logs', {
+        method: 'POST', prefer: 'return=minimal',
+        body: {
+          from_item_id:   selectedFrom.id,
+          from_item_name: selectedFrom.name,
+          to_item_id:     t.item.id,
+          to_item_name:   t.item.name,
+          sort_kg:        fromKg,
+          result_kg:      t.kg,
+          result_value:   t.kg * Number(t.item.sell_price),
+          created_at:     new Date().toISOString(),
+        },
+      });
+    }
 
-    // 2. หัก stock วัตถุดิบ (from)
+    // 2. หัก stock วัตถุดิบ
     await sbFetch(`items?id=eq.${selectedFrom.id}`, {
-      method: 'PATCH',
-      prefer: 'return=minimal',
-      body: { stock_qty: Math.max(0, fromStock - kg), updated_at: new Date().toISOString() },
+      method: 'PATCH', prefer: 'return=minimal',
+      body: { stock_qty: Math.max(0, fromStock - fromKg), updated_at: new Date().toISOString() },
     });
 
-    // 3. เพิ่ม stock ผลลัพธ์ (to) เหมือนรับซื้อใหม่
-    const toStock = Number(selectedTo.stock_qty || 0);
-    await sbFetch(`items?id=eq.${selectedTo.id}`, {
-      method: 'PATCH',
-      prefer: 'return=minimal',
-      body: { stock_qty: toStock + kg, updated_at: new Date().toISOString() },
-    });
+    // 3. เพิ่ม stock ผลลัพธ์แต่ละชนิด
+    for (const t of results) {
+      const ti  = ALL_ITEMS.find(x => x.id === t.item.id);
+      const cur = Number(ti?.stock_qty || 0);
+      await sbFetch(`items?id=eq.${t.item.id}`, {
+        method: 'PATCH', prefer: 'return=minimal',
+        body: { stock_qty: cur + t.kg, updated_at: new Date().toISOString() },
+      });
+      if (ti) ti.stock_qty = cur + t.kg;
+    }
 
     // อัปเดต local state
     const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
-    const ti = ALL_ITEMS.find(x => x.id === selectedTo.id);
-    if (fi) fi.stock_qty = Math.max(0, fromStock - kg);
-    if (ti) ti.stock_qty = toStock + kg;
+    if (fi) fi.stock_qty = Math.max(0, fromStock - fromKg);
 
-    toast(`✅ ${selectedFrom.name} −${kg} กก. → ${selectedTo.name} +${kg} กก.`, 'success');
-    setTimeout(resetAll, 1400);
+    const summary = results.map(t => `${t.item.name} +${t.kg}กก.`).join(', ');
+    toast(`✅ ${selectedFrom.name} −${fromKg}กก. → ${summary}`, 'success');
+    setTimeout(resetAll, 1800);
   } catch (err) {
     toast('❌ ' + err.message, 'error');
     btn.disabled = false;
@@ -688,7 +751,7 @@ async function saveSort() {
 // ══════════════════════════════════════════
 function resetAll() {
   selectedFrom = null;
-  selectedTo   = null;
+  selectedTos  = {};
   // ซ่อน kg-bar กลับไปแสดง selected-bar
   document.getElementById('selected-bar').style.display = 'flex';
   document.getElementById('kg-bar').style.display = 'none';

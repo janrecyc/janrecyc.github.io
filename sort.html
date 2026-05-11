@@ -57,17 +57,19 @@ header {
 .page-title{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1.1;}
 .page-sub{font-size:12px;color:var(--ink3);font-weight:400;margin-left:2px;}
 
-/* ── STEP INDICATOR ── */
-.step-bar{display:flex;align-items:center;gap:0;padding:10px 20px 0;flex-shrink:0;}
-.step{display:flex;align-items:center;gap:6px;flex:1;}
-.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid rgba(10,10,30,0.1);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink3);flex-shrink:0;transition:all .25s;}
-.step-dot.active{background:var(--primary);border-color:var(--primary);color:white;box-shadow:0 4px 12px rgba(0,184,107,0.3);}
-.step-dot.done{background:var(--ink);border-color:var(--ink);color:white;}
-.step-label{font-size:11px;font-weight:600;color:var(--ink3);transition:color .25s;white-space:nowrap;}
-.step-label.active{color:var(--primary);}
-.step-label.done{color:var(--ink);}
-.step-line{height:2px;flex:1;background:rgba(10,10,30,0.08);border-radius:100px;margin:0 6px;transition:background .25s;}
-.step-line.done{background:var(--ink);}
+
+
+/* ── KG BAR ── */
+.kg-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;flex-wrap:wrap;}
+.kg-bar-left{flex:1;min-width:0;}
+.kg-bar-label{font-size:12px;font-weight:600;color:var(--ink);}
+.kg-bar-stock{font-size:11px;color:var(--ink3);margin-top:1px;}
+.kg-bar-stepper{display:flex;align-items:center;gap:6px;}
+.ks-btn{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(10,10,30,0.08);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);flex-shrink:0;}
+.ks-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
+.ks-input{width:72px;text-align:center;font-family:'Prompt',sans-serif;font-size:16px;font-weight:800;color:var(--ink);border:1.5px solid rgba(10,10,30,0.08);border-radius:12px;padding:6px 4px;background:var(--surface);outline:none;}
+.ks-input:focus{border-color:var(--primary);background:var(--white);}
+.kg-bar-unit{font-size:12px;color:var(--ink3);font-weight:500;}
 
 /* ── APP BODY ── */
 .app-body{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
@@ -211,23 +213,7 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
   <div class="page-title">คัดแยก <span class="page-sub">Sort</span></div>
 </header>
 
-<!-- STEP BAR -->
-<div class="step-bar">
-  <div class="step">
-    <div class="step-dot active" id="dot-1">1</div>
-    <span class="step-label active" id="lbl-1">เลือกวัตถุดิบ</span>
-  </div>
-  <div class="step-line" id="line-1"></div>
-  <div class="step">
-    <div class="step-dot" id="dot-2">2</div>
-    <span class="step-label" id="lbl-2">ผลลัพธ์</span>
-  </div>
-  <div class="step-line" id="line-2"></div>
-  <div class="step">
-    <div class="step-dot" id="dot-3">3</div>
-    <span class="step-label" id="lbl-3">น้ำหนัก</span>
-  </div>
-</div>
+
 
 <div class="app-body">
 
@@ -255,13 +241,30 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
         </div>
       </div>
     </div>
-    <div class="selected-bar">
+    <div class="selected-bar" id="selected-bar">
       <div class="selected-bar-icon" id="sel-icon-1">📦</div>
       <div class="selected-bar-info">
         <div class="selected-bar-name" id="sel-name-1">ยังไม่ได้เลือกวัตถุดิบ</div>
         <div class="selected-bar-sub" id="sel-sub-1">กดเลือกสินค้าด้านบน</div>
       </div>
       <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
+        ถัดไป <i class="ph ph-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- น้ำหนักวัตถุดิบ (แสดงเมื่อเลือกสินค้าแล้ว) -->
+    <div class="kg-bar" id="kg-bar" style="display:none;">
+      <div class="kg-bar-left">
+        <div class="kg-bar-label">น้ำหนักที่จะคัดแยก</div>
+        <div class="kg-bar-stock" id="kg-bar-stock">สต๊อก 0 กก.</div>
+      </div>
+      <div class="kg-bar-stepper">
+        <button class="ks-btn" onclick="stepKg(-1)">−</button>
+        <input class="ks-input" type="number" id="from-kg" value="0" min="0" step="0.1" oninput="onKgInput()">
+        <button class="ks-btn" onclick="stepKg(1)">+</button>
+      </div>
+      <span class="kg-bar-unit">กก.</span>
+      <button class="next-btn" id="btn-next-kg" disabled onclick="goStep(2)">
         ถัดไป <i class="ph ph-arrow-right"></i>
       </button>
     </div>
@@ -477,11 +480,39 @@ function renderGrid1() {
 function selectFrom(id) {
   selectedFrom = ALL_ITEMS.find(x => x.id === id);
   renderGrid1();
-  // อัปเดต bar
-  document.getElementById('sel-icon-1').textContent = selectedFrom.icon;
-  document.getElementById('sel-name-1').textContent = selectedFrom.name;
-  document.getElementById('sel-sub-1').textContent  = `สต๊อก ${Number(selectedFrom.stock_qty||0).toLocaleString('th-TH')} กก.`;
-  document.getElementById('btn-next-1').disabled = false;
+
+  const stock = Number(selectedFrom.stock_qty || 0);
+
+  // ซ่อน selected-bar เดิม แสดง kg-bar
+  document.getElementById('selected-bar').style.display = 'none';
+  const kgBar = document.getElementById('kg-bar');
+  kgBar.style.display = 'flex';
+
+  document.getElementById('kg-bar-stock').textContent = `สต๊อก ${stock.toLocaleString('th-TH')} กก.`;
+  document.getElementById('kg-bar-stock').style.color = stock < 100 ? 'var(--amber)' : 'var(--green)';
+
+  // reset kg
+  const inp = document.getElementById('from-kg');
+  inp.value = 0;
+  inp.max   = stock;
+  document.getElementById('btn-next-kg').disabled = true;
+}
+
+function stepKg(delta) {
+  const inp   = document.getElementById('from-kg');
+  const stock = Number(selectedFrom?.stock_qty || 0);
+  let val = Math.round((parseFloat(inp.value) || 0) * 10) / 10;
+  val = Math.min(stock, Math.max(0, val + delta * 0.1));
+  inp.value = Math.round(val * 10) / 10;
+  onKgInput();
+}
+
+function onKgInput() {
+  const inp   = document.getElementById('from-kg');
+  const stock = Number(selectedFrom?.stock_qty || 0);
+  let val = parseFloat(inp.value) || 0;
+  if (val > stock) { val = stock; inp.value = stock; }
+  document.getElementById('btn-next-kg').disabled = val <= 0;
 }
 
 // ══════════════════════════════════════════
@@ -535,7 +566,9 @@ function renderStep3() {
   document.getElementById('sum-from-name').textContent = selectedFrom.name;
   document.getElementById('sum-to-icon').textContent   = selectedTo.icon;
   document.getElementById('sum-to-name').textContent   = selectedTo.name;
-  document.getElementById('kg-input').value = 0;
+  // sync kg จาก step 1
+  const kg = getFromKg();
+  document.getElementById('kg-input').value = kg;
   updateYield();
 }
 
@@ -555,6 +588,10 @@ function updateYield() {
 // ══════════════════════════════════════════
 //  STEP NAVIGATION
 // ══════════════════════════════════════════
+function getFromKg() {
+  return parseFloat(document.getElementById('from-kg').value) || 0;
+}
+
 function goStep(n) {
   document.getElementById(`panel-${currentStep}`).classList.remove('active');
   currentStep = n;
@@ -582,7 +619,7 @@ function updateStepBar(n) {
 //  SAVE
 // ══════════════════════════════════════════
 async function saveSort() {
-  const kg = parseFloat(document.getElementById('kg-input').value) || 0;
+  const kg = getFromKg();
   if (kg <= 0) { toast('กรุณากรอกน้ำหนัก', 'error'); return; }
 
   // ตรวจสต๊อกวัตถุดิบพอไหม
@@ -662,10 +699,10 @@ async function saveSort() {
 function resetAll() {
   selectedFrom = null;
   selectedTo   = null;
-  document.getElementById('sel-icon-1').textContent = '📦';
-  document.getElementById('sel-name-1').textContent = 'ยังไม่ได้เลือกวัตถุดิบ';
-  document.getElementById('sel-sub-1').textContent  = 'กดเลือกสินค้าด้านบน';
-  document.getElementById('btn-next-1').disabled = true;
+  // ซ่อน kg-bar กลับไปแสดง selected-bar
+  document.getElementById('selected-bar').style.display = 'flex';
+  document.getElementById('kg-bar').style.display = 'none';
+  document.getElementById('from-kg').value = 0;
   document.getElementById('btn-next-2').disabled = true;
   document.getElementById('btn-save').disabled = false;
   document.getElementById('btn-save').innerHTML = '<i class="ph ph-check-circle"></i> บันทึก';

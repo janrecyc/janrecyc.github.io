@@ -30,6 +30,7 @@ body {
   font-family:'Prompt',sans-serif;
   background:var(--surface);
   color:var(--ink);
+  height:100vh; /* เพิ่ม Fallback สำหรับเบราว์เซอร์เก่า */
   height:100dvh;
   display:flex; flex-direction:column;
   overflow:hidden;
@@ -760,7 +761,7 @@ function resetAll() {
   document.getElementById('selected-bar').style.display = 'flex';
   document.getElementById('kg-bar').style.display = 'none';
   document.getElementById('from-kg').value = 0;
-  document.getElementById('btn-next-2').disabled = true;
+  // document.getElementById('btn-next-2').disabled = true; // ลบ/คอมเมนต์ บรรทัดที่เป็นบั๊กออก
   document.getElementById('btn-save').disabled = false;
   document.getElementById('btn-save').innerHTML = '<i class="ph ph-check-circle"></i> บันทึก';
   goStep(1);

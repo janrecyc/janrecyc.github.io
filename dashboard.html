@@ -207,9 +207,51 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 .nav-tab-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--primary);border-radius:0 0 2px 2px;transition:width .2s;}
 .nav-tab.on .nav-tab-indicator{width:24px;}
 
-/* LOADING STATE */
-.skeleton{background:linear-gradient(90deg,#f0f0f5 25%,#e0e0ea 50%,#f0f0f5 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
-@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+/* CASH MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,10,30,0.5);z-index:100;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px);}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal-sheet{background:var(--white);border-radius:24px 24px 0 0;padding:0 0 calc(env(safe-area-inset-bottom,0px)+16px);width:100%;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.modal-overlay.show .modal-sheet{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:rgba(10,10,30,0.12);border-radius:2px;margin:12px auto 0;}
+.modal-head{padding:16px 20px 12px;border-bottom:1px solid rgba(10,10,30,0.06);}
+.modal-title{font-size:17px;font-weight:800;color:var(--ink);}
+.modal-sub{font-size:12px;color:var(--ink3);margin-top:2px;}
+.modal-body{padding:20px;}
+.modal-type-row{display:flex;gap:8px;margin-bottom:16px;}
+.type-btn{flex:1;padding:10px;border-radius:14px;border:1.5px solid rgba(10,10,30,0.08);background:var(--surface);font-family:'Prompt',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;}
+.type-btn.deposit.on{background:rgba(0,200,83,0.1);border-color:var(--green);color:var(--green);}
+.type-btn.withdraw.on{background:rgba(255,59,48,0.1);border-color:var(--red);color:var(--red);}
+.modal-amount-wrap{position:relative;margin-bottom:12px;}
+.modal-currency{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:var(--ink3);}
+.modal-amount-inp{width:100%;padding:14px 14px 14px 32px;font-family:'Prompt',sans-serif;font-size:24px;font-weight:800;border:1.5px solid rgba(10,10,30,0.1);border-radius:16px;outline:none;color:var(--ink);background:var(--surface);transition:border-color .15s;}
+.modal-amount-inp:focus{border-color:var(--primary);background:var(--white);}
+.modal-note-inp{width:100%;padding:12px 14px;font-family:'Prompt',sans-serif;font-size:14px;border:1.5px solid rgba(10,10,30,0.08);border-radius:14px;outline:none;color:var(--ink);background:var(--surface);margin-bottom:16px;transition:border-color .15s;}
+.modal-note-inp:focus{border-color:var(--primary);background:var(--white);}
+.modal-confirm-btn{width:100%;padding:15px;border-radius:16px;border:none;font-family:'Prompt',sans-serif;font-size:15px;font-weight:700;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
+.modal-confirm-btn.deposit{background:var(--green);}
+.modal-confirm-btn.withdraw{background:var(--red);}
+.modal-confirm-btn:disabled{opacity:.4;pointer-events:none;}
+
+/* CASH CARD BUTTONS */
+.cash-btns{display:flex;gap:8px;margin-top:10px;}
+.cash-action-btn{flex:1;padding:8px 12px;border-radius:12px;border:none;font-family:'Prompt',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;}
+.cash-action-btn.deposit{background:rgba(0,200,83,0.12);color:var(--green);}
+.cash-action-btn.withdraw{background:rgba(255,59,48,0.1);color:var(--red);}
+.cash-action-btn:active{transform:scale(0.95);}
+
+/* CASH LOG */
+.cash-log-card{background:var(--white);border-radius:var(--r);padding:18px 16px;box-shadow:var(--sh);}
+.cash-log-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(10,10,30,0.05);}
+.cash-log-row:last-child{border-bottom:none;}
+.cash-log-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.cash-log-info{flex:1;min-width:0;}
+.cash-log-type{font-size:12px;font-weight:700;}
+.cash-log-note{font-size:11px;color:var(--ink3);margin-top:1px;}
+.cash-log-date{font-size:10px;color:var(--ink3);}
+.cash-log-amt{font-size:14px;font-weight:800;flex-shrink:0;}
+
+.spin{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,10,30,0.88);color:white;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px);z-index:999;}
 #toast.toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -293,9 +335,22 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
       <div class="stat-value" id="s-margin">–</div>
     </div>
     <div class="stat-card cash" style="grid-column:1/-1;">
-      <div class="stat-icon cash"><i class="ph ph-money"></i></div>
-      <div class="stat-label">ประมาณการเงินสด</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="stat-icon cash"><i class="ph ph-money"></i></div>
+          <span class="stat-label">เงินสดคงเหลือ</span>
+        </div>
+        <span style="font-size:10px;color:var(--ink3);">ขาย+เติม−รับซื้อ−ถอน</span>
+      </div>
       <div class="stat-value" id="s-cash">–</div>
+      <div class="cash-btns">
+        <button class="cash-action-btn deposit" onclick="openCashModal('deposit')">
+          <i class="ph ph-plus-circle"></i> เติมเงิน
+        </button>
+        <button class="cash-action-btn withdraw" onclick="openCashModal('withdraw')">
+          <i class="ph ph-minus-circle"></i> ถอนเงิน
+        </button>
+      </div>
     </div>
   </div>
 
@@ -340,6 +395,14 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
     </div>
   </div>
 
+  <!-- CASH LOG -->
+  <div class="section-label"><i class="ph ph-clock-counter-clockwise"></i>ประวัติเงินสด</div>
+  <div class="cash-log-card" id="cash-log-wrap">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 0;color:var(--ink3);">
+      <i class="ph ph-spinner-gap spin" style="font-size:24px;"></i>
+    </div>
+  </div>
+
   <!-- STOCK TABLE -->
   <div class="section-label"><i class="ph ph-package"></i>สต๊อกคงเหลือ</div>
   <div class="stock-card" id="stock-table">
@@ -378,6 +441,35 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 </nav>
 
 <div id="toast"></div>
+
+<!-- CASH MODAL -->
+<div class="modal-overlay" id="cash-modal" onclick="closeCashModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">เติมเงินเข้าระบบ</div>
+      <div class="modal-sub" id="modal-sub">บันทึกเงินสดที่มีในมือ</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-type-row">
+        <button class="type-btn deposit on" id="type-deposit" onclick="setCashType('deposit')">
+          <i class="ph ph-plus-circle"></i> เติมเงิน
+        </button>
+        <button class="type-btn withdraw" id="type-withdraw" onclick="setCashType('withdraw')">
+          <i class="ph ph-minus-circle"></i> ถอนเงิน
+        </button>
+      </div>
+      <div class="modal-amount-wrap">
+        <span class="modal-currency">฿</span>
+        <input class="modal-amount-inp" type="number" id="cash-amount" placeholder="0.00" min="0.01" step="0.01" oninput="onCashAmtInput()">
+      </div>
+      <input class="modal-note-inp" type="text" id="cash-note" placeholder="หมายเหตุ (ไม่บังคับ)">
+      <button class="modal-confirm-btn deposit" id="cash-confirm-btn" disabled onclick="saveCash()">
+        <i class="ph ph-check-circle"></i> <span id="confirm-label">บันทึกเงินเข้า</span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -456,7 +548,7 @@ async function loadDashboard() {
 
     // 2. ดึง transactions ทั้งหมด — type, total_amount, created_at
     ALL_TXNS = await sbFetch(
-      'transactions?select=type,total_amount,total_kg,created_at&order=created_at.asc'
+      'transactions?select=type,total_amount,total_kg,factory_name,created_at&order=created_at.asc'
     ) || [];
 
     // 3. สร้าง weekly chart จาก transactions จริง 7 วันล่าสุด
@@ -553,13 +645,28 @@ function animateNum(el, val) {
 }
 
 function compute(mult) {
-  let totalBuy, totalSell;
+  let totalBuy, totalSell, totalDeposit = 0, totalWithdraw = 0;
 
-  // ถ้ามี transactions จริง → ใช้ sumTxns กรองตาม range
   if (ALL_TXNS.length > 0) {
-    ({ totalBuy, totalSell } = sumTxns(ALL_TXNS, activeRange));
+    const { start } = { start: getRangeStart(activeRange) };
+    let tBuy = 0, tSell = 0, tDep = 0, tWit = 0;
+    ALL_TXNS.forEach(t => {
+      const d   = new Date(t.created_at);
+      const amt = Number(t.total_amount || 0);
+      // เงินสดคำนวณตลอดเวลา ไม่กรอง range
+      if (t.type === 'deposit')  tDep += amt;
+      if (t.type === 'withdraw') tWit += amt;
+      // รับซื้อ/ขาย กรองตาม range
+      if (d >= getRangeStart(activeRange)) {
+        if (t.type === 'buy')  tBuy  += amt;
+        if (t.type === 'sell') tSell += amt;
+      }
+    });
+    totalBuy      = tBuy;
+    totalSell     = tSell;
+    totalDeposit  = tDep;
+    totalWithdraw = tWit;
   } else {
-    // fallback demo
     totalBuy  = WEEKLY_DATA.buy.reduce((a,b)=>a+b,0)  * mult;
     totalSell = WEEKLY_DATA.sell.reduce((a,b)=>a+b,0) * mult;
   }
@@ -569,11 +676,136 @@ function compute(mult) {
     stockCost    += Number(s.buy_price)  * Number(s.stock_qty);
     stockSellVal += Number(s.sell_price) * Number(s.stock_qty);
   });
+
   const netProfit   = totalSell - totalBuy;
   const margin      = totalSell > 0 ? (netProfit / totalSell * 100) : 0;
-  const cash        = netProfit * 0.72;
+  // เงินสด = ขายออก + เติมเงิน - รับซื้อ - ถอนเงิน (ตลอดทุก transaction)
+  const allBuy  = ALL_TXNS.filter(t=>t.type==='buy').reduce((s,t)=>s+Number(t.total_amount||0),0);
+  const allSell = ALL_TXNS.filter(t=>t.type==='sell').reduce((s,t)=>s+Number(t.total_amount||0),0);
+  const cash        = allSell + totalDeposit - allBuy - totalWithdraw;
   const stockProfit = stockSellVal - stockCost;
   return {totalBuy, totalSell, netProfit, margin, cash, stockCost, stockSellVal, stockProfit};
+}
+
+// ══════════════════════════════════════════
+//  CASH MODAL
+// ══════════════════════════════════════════
+let cashType = 'deposit';
+
+function openCashModal(type) {
+  cashType = type;
+  setCashType(type);
+  document.getElementById('cash-amount').value = '';
+  document.getElementById('cash-note').value   = '';
+  document.getElementById('cash-confirm-btn').disabled = true;
+  document.getElementById('cash-modal').classList.add('show');
+  setTimeout(() => document.getElementById('cash-amount').focus(), 300);
+}
+
+function closeCashModal(e) {
+  if (e && e.target !== document.getElementById('cash-modal')) return;
+  document.getElementById('cash-modal').classList.remove('show');
+}
+
+function setCashType(type) {
+  cashType = type;
+  const isDeposit = type === 'deposit';
+  document.getElementById('type-deposit').classList.toggle('on', isDeposit);
+  document.getElementById('type-withdraw').classList.toggle('on', !isDeposit);
+  document.getElementById('modal-title').textContent  = isDeposit ? 'เติมเงินเข้าระบบ' : 'ถอนเงินออกจากระบบ';
+  document.getElementById('modal-sub').textContent    = isDeposit ? 'บันทึกเงินสดที่รับเข้ามา' : 'บันทึกเงินสดที่จ่ายออกไป';
+  document.getElementById('confirm-label').textContent = isDeposit ? 'บันทึกเงินเข้า' : 'บันทึกเงินออก';
+  const btn = document.getElementById('cash-confirm-btn');
+  btn.className = `modal-confirm-btn ${type}`;
+}
+
+function onCashAmtInput() {
+  const val = parseFloat(document.getElementById('cash-amount').value) || 0;
+  document.getElementById('cash-confirm-btn').disabled = val <= 0;
+}
+
+async function saveCash() {
+  const amt  = parseFloat(document.getElementById('cash-amount').value) || 0;
+  const note = document.getElementById('cash-note').value.trim();
+  if (amt <= 0) return;
+
+  const btn = document.getElementById('cash-confirm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i> กำลังบันทึก...';
+
+  const body = {
+    type:         cashType,
+    total_amount: amt,
+    total_kg:     null,
+    factory_id:   null,
+    factory_name: note || (cashType === 'deposit' ? 'เติมเงิน' : 'ถอนเงิน'),
+    lines:        null,
+    created_at:   new Date().toISOString(),
+  };
+
+  if (!SUPABASE_READY) {
+    await new Promise(r => setTimeout(r, 500));
+    ALL_TXNS.push({...body, id: Date.now()});
+    toast(cashType === 'deposit' ? `✅ เติมเงิน ฿${fmt(amt)}` : `✅ ถอนเงิน ฿${fmt(amt)}`);
+    document.getElementById('cash-modal').classList.remove('show');
+    render(RANGE_MULT[activeRange]);
+    renderCashLog();
+    return;
+  }
+
+  try {
+    await sbFetch('transactions', { method:'POST', prefer:'return=minimal', body });
+    // โหลด transactions ใหม่
+    ALL_TXNS = await sbFetch(
+      'transactions?select=type,total_amount,total_kg,factory_name,created_at&order=created_at.asc'
+    ) || [];
+    toast(cashType === 'deposit' ? `✅ เติมเงิน ฿${fmt(amt)}` : `✅ ถอนเงิน ฿${fmt(amt)}`);
+    document.getElementById('cash-modal').classList.remove('show');
+    render(RANGE_MULT[activeRange]);
+    renderCashLog();
+  } catch (err) {
+    toast('❌ ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = `<i class="ph ph-check-circle"></i> <span id="confirm-label">${cashType==='deposit'?'บันทึกเงินเข้า':'บันทึกเงินออก'}</span>`;
+  }
+}
+
+function renderCashLog() {
+  const wrap = document.getElementById('cash-log-wrap');
+  // กรองเฉพาะ deposit/withdraw เรียงล่าสุดก่อน
+  const logs = [...ALL_TXNS]
+    .filter(t => t.type === 'deposit' || t.type === 'withdraw')
+    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 20);
+
+  if (!logs.length) {
+    wrap.innerHTML = `<div style="text-align:center;padding:24px;color:var(--ink3);font-size:13px;">ยังไม่มีรายการเติม/ถอนเงิน</div>`;
+    return;
+  }
+
+  const typeLabel = { deposit:'เติมเงิน', withdraw:'ถอนเงิน' };
+  const typeColor = { deposit:'var(--green)', withdraw:'var(--red)' };
+  const typeBg    = { deposit:'rgba(0,200,83,0.1)', withdraw:'rgba(255,59,48,0.08)' };
+  const typeIcon  = { deposit:'ph-plus-circle', withdraw:'ph-minus-circle' };
+  const typeSign  = { deposit:'+', withdraw:'−' };
+
+  wrap.innerHTML = logs.map(t => {
+    const d   = new Date(t.created_at);
+    const dStr = d.toLocaleDateString('th-TH',{day:'numeric',month:'short'}) + ' ' +
+                 d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    return `
+    <div class="cash-log-row">
+      <div class="cash-log-icon" style="background:${typeBg[t.type]};color:${typeColor[t.type]};">
+        <i class="ph ${typeIcon[t.type]}"></i>
+      </div>
+      <div class="cash-log-info">
+        <div class="cash-log-type" style="color:${typeColor[t.type]};">${typeLabel[t.type]}</div>
+        <div class="cash-log-note">${t.factory_name || '–'}</div>
+        <div class="cash-log-date">${dStr}</div>
+      </div>
+      <div class="cash-log-amt" style="color:${typeColor[t.type]};">${typeSign[t.type]}฿${fmt(Number(t.total_amount||0))}</div>
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════
@@ -604,8 +836,9 @@ function render(mult) {
   animateNum(document.getElementById('n-diff'),    '฿'+fmt(D.netProfit));
 
   renderMiniBars();
-  renderChart(mult);
+  renderChart();
   renderStock();
+  renderCashLog();
 }
 
 function renderMiniBars() {

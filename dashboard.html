@@ -412,6 +412,7 @@ const RANGE_MULT = {today:0.18, week:1, month:4.3, quarter:13, year:52};
 let activeRange = 'week';
 let STOCK_DATA = [];
 let WEEKLY_DATA = DEMO_WEEKLY;
+let ALL_TXNS = [];
 
 // ══════════════════════════════════════════
 //  SUPABASE REST
@@ -438,8 +439,8 @@ async function sbFetch(path, opts = {}) {
 async function loadDashboard() {
   if (!SUPABASE_READY) {
     document.getElementById('config-banner').style.display = 'flex';
-    STOCK_DATA = DEMO_STOCK;
-    WEEKLY_DATA = DEMO_WEEKLY;
+    STOCK_DATA   = DEMO_STOCK;
+    WEEKLY_DATA  = DEMO_WEEKLY;
     render(RANGE_MULT[activeRange]);
     return;
   }
@@ -447,24 +448,82 @@ async function loadDashboard() {
   document.getElementById('config-banner').style.display = 'none';
 
   try {
-    // ตาราง: items (name, icon, buy_price, sell_price, stock_qty)
-    STOCK_DATA = await sbFetch('items?select=name,icon,buy_price,sell_price,stock_qty&order=name');
+    // 1. ดึง items (สต๊อก)
+    STOCK_DATA = await sbFetch(
+      'items?select=name,icon,buy_price,sell_price,stock_qty&order=name'
+    );
 
-    // ถ้ามี RPC get_weekly_chart → ใช้ได้เลย  ถ้าไม่มีก็ใช้ Demo
-    try {
-      const weekly = await sbFetch('rpc/get_weekly_chart', {method:'POST', body:{}});
-      if (weekly) WEEKLY_DATA = weekly;
-    } catch(_) {
-      WEEKLY_DATA = DEMO_WEEKLY;
-    }
+    // 2. ดึง transactions ทั้งหมด (type=buy / sell)
+    const txns = await sbFetch(
+      'transactions?select=type,total_amount,total_kg,created_at&order=created_at'
+    ) || [];
+
+    // 3. คำนวณ weekly chart จาก transactions จริง
+    WEEKLY_DATA = buildWeeklyData(txns);
+
+    // 4. เก็บ txns ไว้ใช้ใน compute() แทนการคูณ mult
+    ALL_TXNS = txns;
 
     render(RANGE_MULT[activeRange]);
   } catch (err) {
     toast('❌ โหลดไม่สำเร็จ: ' + err.message);
-    // Fallback demo
-    STOCK_DATA = DEMO_STOCK;
+    STOCK_DATA  = DEMO_STOCK;
+    WEEKLY_DATA = DEMO_WEEKLY;
+    ALL_TXNS    = [];
     render(RANGE_MULT[activeRange]);
   }
+}
+
+// สร้าง weekly data จาก transactions 7 วันล่าสุด
+function buildWeeklyData(txns) {
+  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const buy  = [0,0,0,0,0,0,0];
+  const sell = [0,0,0,0,0,0,0];
+  const now  = new Date();
+
+  txns.forEach(t => {
+    const d    = new Date(t.created_at);
+    const diff = Math.floor((now - d) / 86400000);
+    if (diff < 7) {
+      const dow = d.getDay(); // 0=อา
+      if (t.type === 'buy')  buy[dow]  += Number(t.total_amount || 0);
+      if (t.type === 'sell') sell[dow] += Number(t.total_amount || 0);
+    }
+  });
+
+  // จัด label ให้เริ่มจากวันจันทร์
+  return { labels: ['จ','อ','พ','พฤ','ศ','ส','อา'], buy, sell };
+}
+
+// คำนวณยอดจาก ALL_TXNS กรองตาม range
+function sumByRange(txns, range) {
+  const now   = new Date();
+  const start = new Date(now);
+
+  if (range === 'today') {
+    start.setHours(0,0,0,0);
+  } else if (range === 'week') {
+    const dow = now.getDay();
+    start.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+    start.setHours(0,0,0,0);
+  } else if (range === 'month') {
+    start.setDate(1); start.setHours(0,0,0,0);
+  } else if (range === 'quarter') {
+    const qm = Math.floor(now.getMonth() / 3) * 3;
+    start.setMonth(qm,1); start.setHours(0,0,0,0);
+  } else if (range === 'year') {
+    start.setMonth(0,1); start.setHours(0,0,0,0);
+  }
+
+  let totalBuy = 0, totalSell = 0;
+  txns.forEach(t => {
+    const d = new Date(t.created_at);
+    if (d >= start) {
+      if (t.type === 'buy')  totalBuy  += Number(t.total_amount || 0);
+      if (t.type === 'sell') totalSell += Number(t.total_amount || 0);
+    }
+  });
+  return { totalBuy, totalSell };
 }
 
 // ══════════════════════════════════════════
@@ -492,8 +551,16 @@ function animateNum(el, val) {
 }
 
 function compute(mult) {
-  const totalBuy  = WEEKLY_DATA.buy.reduce((a,b)=>a+b,0)  * mult;
-  const totalSell = WEEKLY_DATA.sell.reduce((a,b)=>a+b,0) * mult;
+  let totalBuy, totalSell;
+
+  // ถ้ามี transactions จริง ใช้ sumByRange แทนการคูณ mult
+  if (SUPABASE_READY && ALL_TXNS.length > 0) {
+    ({ totalBuy, totalSell } = sumByRange(ALL_TXNS, activeRange));
+  } else {
+    totalBuy  = WEEKLY_DATA.buy.reduce((a,b)=>a+b,0)  * mult;
+    totalSell = WEEKLY_DATA.sell.reduce((a,b)=>a+b,0) * mult;
+  }
+
   let stockCost = 0, stockSellVal = 0;
   STOCK_DATA.forEach(s => {
     stockCost    += Number(s.buy_price)  * Number(s.stock_qty);

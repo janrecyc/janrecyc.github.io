@@ -410,9 +410,9 @@ const DEMO_WEEKLY = {
 
 const RANGE_MULT = {today:0.18, week:1, month:4.3, quarter:13, year:52};
 let activeRange = 'week';
-let STOCK_DATA = [];
+let STOCK_DATA  = [];
 let WEEKLY_DATA = DEMO_WEEKLY;
-let ALL_TXNS = [];
+let ALL_TXNS    = [];   // เก็บ transactions จริงทั้งหมด
 
 // ══════════════════════════════════════════
 //  SUPABASE REST
@@ -439,8 +439,9 @@ async function sbFetch(path, opts = {}) {
 async function loadDashboard() {
   if (!SUPABASE_READY) {
     document.getElementById('config-banner').style.display = 'flex';
-    STOCK_DATA   = DEMO_STOCK;
-    WEEKLY_DATA  = DEMO_WEEKLY;
+    STOCK_DATA  = DEMO_STOCK;
+    WEEKLY_DATA = DEMO_WEEKLY;
+    ALL_TXNS    = [];
     render(RANGE_MULT[activeRange]);
     return;
   }
@@ -448,21 +449,18 @@ async function loadDashboard() {
   document.getElementById('config-banner').style.display = 'none';
 
   try {
-    // 1. ดึง items (สต๊อก)
+    // 1. ดึง items สำหรับแสดงสต๊อก
     STOCK_DATA = await sbFetch(
       'items?select=name,icon,buy_price,sell_price,stock_qty&order=name'
-    );
-
-    // 2. ดึง transactions ทั้งหมด (type=buy / sell)
-    const txns = await sbFetch(
-      'transactions?select=type,total_amount,total_kg,created_at&order=created_at'
     ) || [];
 
-    // 3. คำนวณ weekly chart จาก transactions จริง
-    WEEKLY_DATA = buildWeeklyData(txns);
+    // 2. ดึง transactions ทั้งหมด — type, total_amount, created_at
+    ALL_TXNS = await sbFetch(
+      'transactions?select=type,total_amount,total_kg,created_at&order=created_at.asc'
+    ) || [];
 
-    // 4. เก็บ txns ไว้ใช้ใน compute() แทนการคูณ mult
-    ALL_TXNS = txns;
+    // 3. สร้าง weekly chart จาก transactions จริง 7 วันล่าสุด
+    WEEKLY_DATA = buildWeeklyData(ALL_TXNS);
 
     render(RANGE_MULT[activeRange]);
   } catch (err) {
@@ -474,56 +472,60 @@ async function loadDashboard() {
   }
 }
 
-// สร้าง weekly data จาก transactions 7 วันล่าสุด
-function buildWeeklyData(txns) {
-  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
-  const buy  = [0,0,0,0,0,0,0];
-  const sell = [0,0,0,0,0,0,0];
-  const now  = new Date();
-
-  txns.forEach(t => {
-    const d    = new Date(t.created_at);
-    const diff = Math.floor((now - d) / 86400000);
-    if (diff < 7) {
-      const dow = d.getDay(); // 0=อา
-      if (t.type === 'buy')  buy[dow]  += Number(t.total_amount || 0);
-      if (t.type === 'sell') sell[dow] += Number(t.total_amount || 0);
-    }
-  });
-
-  // จัด label ให้เริ่มจากวันจันทร์
-  return { labels: ['จ','อ','พ','พฤ','ศ','ส','อา'], buy, sell };
+// ══════════════════════════════════════════
+//  RANGE FILTER
+// ══════════════════════════════════════════
+function getRangeStart(range) {
+  const now = new Date();
+  const d   = new Date(now);
+  if (range === 'today') {
+    d.setHours(0,0,0,0);
+  } else if (range === 'week') {
+    const dow = d.getDay(); // 0=อา
+    d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
+    d.setHours(0,0,0,0);
+  } else if (range === 'month') {
+    d.setDate(1); d.setHours(0,0,0,0);
+  } else if (range === 'quarter') {
+    d.setMonth(Math.floor(d.getMonth()/3)*3, 1); d.setHours(0,0,0,0);
+  } else if (range === 'year') {
+    d.setMonth(0,1); d.setHours(0,0,0,0);
+  }
+  return d;
 }
 
-// คำนวณยอดจาก ALL_TXNS กรองตาม range
-function sumByRange(txns, range) {
-  const now   = new Date();
-  const start = new Date(now);
-
-  if (range === 'today') {
-    start.setHours(0,0,0,0);
-  } else if (range === 'week') {
-    const dow = now.getDay();
-    start.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
-    start.setHours(0,0,0,0);
-  } else if (range === 'month') {
-    start.setDate(1); start.setHours(0,0,0,0);
-  } else if (range === 'quarter') {
-    const qm = Math.floor(now.getMonth() / 3) * 3;
-    start.setMonth(qm,1); start.setHours(0,0,0,0);
-  } else if (range === 'year') {
-    start.setMonth(0,1); start.setHours(0,0,0,0);
-  }
-
+function sumTxns(txns, range) {
+  const start = getRangeStart(range);
   let totalBuy = 0, totalSell = 0;
   txns.forEach(t => {
-    const d = new Date(t.created_at);
-    if (d >= start) {
-      if (t.type === 'buy')  totalBuy  += Number(t.total_amount || 0);
-      if (t.type === 'sell') totalSell += Number(t.total_amount || 0);
+    if (new Date(t.created_at) >= start) {
+      const amt = Number(t.total_amount || 0);
+      if (t.type === 'buy')  totalBuy  += amt;
+      if (t.type === 'sell') totalSell += amt;
     }
   });
   return { totalBuy, totalSell };
+}
+
+// สร้าง weekly data จาก transactions 7 วันล่าสุด (จ-อา)
+function buildWeeklyData(txns) {
+  const buy  = [0,0,0,0,0,0,0]; // index 0=จ ... 6=อา
+  const sell = [0,0,0,0,0,0,0];
+  const now  = new Date();
+  const weekStart = getRangeStart('week');
+
+  txns.forEach(t => {
+    const d = new Date(t.created_at);
+    if (d >= weekStart && d <= now) {
+      // dow: 0=อา,1=จ...6=ส → แปลงเป็น index จ=0
+      const dow = d.getDay();
+      const idx = dow === 0 ? 6 : dow - 1;
+      const amt = Number(t.total_amount || 0);
+      if (t.type === 'buy')  buy[idx]  += amt;
+      if (t.type === 'sell') sell[idx] += amt;
+    }
+  });
+  return { labels:['จ','อ','พ','พฤ','ศ','ส','อา'], buy, sell };
 }
 
 // ══════════════════════════════════════════
@@ -553,10 +555,11 @@ function animateNum(el, val) {
 function compute(mult) {
   let totalBuy, totalSell;
 
-  // ถ้ามี transactions จริง ใช้ sumByRange แทนการคูณ mult
-  if (SUPABASE_READY && ALL_TXNS.length > 0) {
-    ({ totalBuy, totalSell } = sumByRange(ALL_TXNS, activeRange));
+  // ถ้ามี transactions จริง → ใช้ sumTxns กรองตาม range
+  if (ALL_TXNS.length > 0) {
+    ({ totalBuy, totalSell } = sumTxns(ALL_TXNS, activeRange));
   } else {
+    // fallback demo
     totalBuy  = WEEKLY_DATA.buy.reduce((a,b)=>a+b,0)  * mult;
     totalSell = WEEKLY_DATA.sell.reduce((a,b)=>a+b,0) * mult;
   }
@@ -566,10 +569,10 @@ function compute(mult) {
     stockCost    += Number(s.buy_price)  * Number(s.stock_qty);
     stockSellVal += Number(s.sell_price) * Number(s.stock_qty);
   });
-  const netProfit  = totalSell - totalBuy;
-  const margin     = totalSell > 0 ? (netProfit / totalSell * 100) : 0;
-  const cash       = netProfit * 0.72;
-  const stockProfit= stockSellVal - stockCost;
+  const netProfit   = totalSell - totalBuy;
+  const margin      = totalSell > 0 ? (netProfit / totalSell * 100) : 0;
+  const cash        = netProfit * 0.72;
+  const stockProfit = stockSellVal - stockCost;
   return {totalBuy, totalSell, netProfit, margin, cash, stockCost, stockSellVal, stockProfit};
 }
 

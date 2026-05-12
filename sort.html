@@ -48,7 +48,7 @@ header {
   flex-shrink:0;
   border-bottom:1px solid rgba(10,10,30,0.06);
 }
-.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
 .app-logo{display:flex;align-items:center;gap:8px;}
 .logo-mark{width:32px;height:32px;background:var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;}
 .app-name{font-size:13px;font-weight:700;color:var(--ink3);letter-spacing:2px;text-transform:uppercase;}
@@ -59,64 +59,30 @@ header {
 
 
 
-/* ── FROM CHIP ── */
-.from-chip{display:flex;align-items:center;gap:8px;background:var(--primary-l);border:1px solid rgba(0,184,107,0.2);border-radius:14px;padding:10px 14px;margin:10px 0 0;flex-shrink:0;}
-.from-chip span:first-child{font-size:20px;}
-.from-chip-kg{margin-left:auto;font-size:12px;font-weight:700;color:var(--primary);background:rgba(0,184,107,0.15);padding:3px 10px;border-radius:100px;}
-#from-chip-name{font-size:13px;font-weight:700;color:var(--ink);}
-#result-rows-wrap{flex-shrink:0;}
-.result-grid{flex-shrink:0;}
-
-/* ── RESULT ROW (multi) ── */
-.result-row-item{display:flex;align-items:center;gap:10px;background:var(--white);border-radius:16px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--card-sh);}
-.rri-icon{font-size:24px;flex-shrink:0;}
-.rri-info{flex:1;min-width:0;}
-.rri-name{font-size:13px;font-weight:700;}
-.rri-price{font-size:11px;color:var(--ink3);margin-top:1px;}
-.rri-stepper{display:flex;align-items:center;gap:5px;flex-shrink:0;}
-.rri-btn{width:28px;height:28px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(10,10,30,0.08);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);}
-.rri-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
-.rri-inp{width:58px;text-align:center;font-family:'Prompt',sans-serif;font-size:14px;font-weight:700;border:1.5px solid rgba(10,10,30,0.08);border-radius:10px;padding:5px 3px;background:var(--surface);outline:none;color:var(--ink);}
-.rri-inp:focus{border-color:var(--primary);background:var(--white);}
-.rri-remove{width:28px;height:28px;border-radius:50%;background:var(--red-l, rgba(255,59,48,0.1));border:none;color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-
-/* ── KG BAR ── */
-.kg-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;flex-wrap:wrap;}
-.kg-bar-left{flex:1;min-width:0;}
-.kg-bar-label{font-size:12px;font-weight:600;color:var(--ink);}
-.kg-bar-stock{font-size:11px;color:var(--ink3);margin-top:1px;}
-.kg-bar-stepper{display:flex;align-items:center;gap:6px;}
-.ks-btn{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(10,10,30,0.08);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);flex-shrink:0;}
-.ks-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
-.ks-input{width:72px;text-align:center;font-family:'Prompt',sans-serif;font-size:16px;font-weight:800;color:var(--ink);border:1.5px solid rgba(10,10,30,0.08);border-radius:12px;padding:6px 4px;background:var(--surface);outline:none;}
-.ks-input:focus{border-color:var(--primary);background:var(--white);}
-.kg-bar-unit{font-size:12px;color:var(--ink3);font-weight:500;}
-
 /* ── APP BODY ── */
 .app-body{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
 
-/* ── STEP PANELS ── */
-.panel{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}
-#panel-2{display:none;}
+/* ── PANELS ── */
+.panel{display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden;}
 .panel.active{display:flex;}
 
-/* ── SEARCH ── */
-.search-area{padding:10px 20px 0;flex-shrink:0;}
+/* ════════════════════════════
+   STEP 1 — เลือกวัตถุดิบ
+   ════════════════════════════ */
+.search-area{padding:10px 16px 0;flex-shrink:0;}
 .search-field{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid rgba(10,10,30,0.08);border-radius:14px;padding:10px 14px;box-shadow:0 1px 6px rgba(10,10,30,0.05);transition:border-color .15s,box-shadow .15s;}
 .search-field:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,184,107,0.12);}
 .search-field i{color:var(--ink3);font-size:17px;}
 .search-field input{flex:1;border:none;outline:none;font-family:'Prompt',sans-serif;font-size:14px;color:var(--ink);background:transparent;}
 .search-field input::placeholder{color:var(--ink3);}
 
-/* ── CAT BAR ── */
-.cat-bar{display:flex;gap:6px;padding:8px 20px 6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+.cat-bar{display:flex;gap:6px;padding:8px 16px 6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
 .cat-bar::-webkit-scrollbar{display:none;}
 .cat-btn{flex-shrink:0;padding:6px 14px;border-radius:100px;font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;border:none;cursor:pointer;transition:all .16s;white-space:nowrap;}
 .cat-btn.on{background:var(--ink);color:white;box-shadow:0 2px 8px rgba(10,10,30,0.2);}
 .cat-btn:not(.on){background:var(--white);color:var(--ink2);border:1px solid rgba(10,10,30,0.08);}
 
-/* ── ITEM GRID ── */
-.item-grid-wrap{flex:1;overflow-y:auto;padding:4px 16px 10px;scrollbar-width:none;}
+.item-grid-wrap{flex:1;overflow-y:auto;padding:4px 12px 8px;scrollbar-width:none;}
 .item-grid-wrap::-webkit-scrollbar{display:none;}
 .item-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 @media(min-width:500px){.item-grid{grid-template-columns:repeat(3,1fr);}}
@@ -129,36 +95,51 @@ header {
 .item-card.selected .card-check{opacity:1;transform:scale(1);}
 .card-icon{font-size:32px;line-height:1;}
 .card-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;}
-.card-stock{font-size:10px;color:var(--ink3);}
+.card-stock{font-size:10px;}
 
 .grid-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:50px 0;color:var(--ink3);}
 .grid-empty i{font-size:32px;opacity:.4;}
 .grid-empty p{font-size:13px;}
 
-.spin{animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
+/* ── BOTTOM BAR ── */
+.bottom-bar{flex-shrink:0;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);padding:10px 16px calc(env(safe-area-inset-bottom,0px)+6px);display:flex;align-items:center;gap:12px;}
+.bottom-bar-info{flex:1;min-width:0;}
+.bottom-bar-title{font-size:13px;font-weight:700;color:var(--ink);}
+.bottom-bar-sub{font-size:11px;color:var(--ink3);margin-top:2px;}
 
-/* ── SELECTED ITEM BAR ── */
-.selected-bar{flex-shrink:0;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);padding:10px 20px;display:flex;align-items:center;gap:12px;}
-.selected-bar-icon{font-size:28px;}
-.selected-bar-info{flex:1;min-width:0;}
-.selected-bar-name{font-size:13px;font-weight:700;}
-.selected-bar-sub{font-size:11px;color:var(--ink3);margin-top:2px;}
-.next-btn{padding:10px 20px;border-radius:14px;background:var(--primary);color:white;border:none;font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;}
-.next-btn:disabled{opacity:.4;pointer-events:none;}
+/* ── KG BAR ── */
+.kg-bar-wrap{flex-shrink:0;background:rgba(0,184,107,0.06);border-top:1px solid rgba(0,184,107,0.15);padding:10px 16px 6px;display:none;}
+.kg-bar-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.kg-bar-label{font-size:12px;font-weight:700;color:var(--ink);}
+.kg-bar-stock{font-size:11px;font-weight:500;}
+.kg-stepper{display:flex;align-items:center;gap:8px;}
+.ks-btn{width:36px;height:36px;border-radius:50%;background:var(--white);border:1.5px solid rgba(10,10,30,0.1);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);flex-shrink:0;transition:all .12s;}
+.ks-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
+.ks-input{width:80px;text-align:center;font-family:'Prompt',sans-serif;font-size:18px;font-weight:800;color:var(--ink);border:1.5px solid rgba(10,10,30,0.1);border-radius:12px;padding:7px 4px;background:var(--white);outline:none;}
+.ks-input:focus{border-color:var(--primary);background:var(--white);}
+.kg-unit{font-size:13px;color:var(--ink3);font-weight:500;}
+
+.next-btn{padding:12px 20px;border-radius:14px;background:var(--primary);color:white;border:none;font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;transition:background .15s;}
+.next-btn:disabled{opacity:.35;pointer-events:none;}
 .next-btn:active{background:var(--primary-d);}
 
-/* ── STEP 2: RESULT SELECTOR ── */
-.result-wrap{flex:1;overflow-y:auto;padding:10px 16px 10px;scrollbar-width:none;display:flex;flex-direction:column;gap:0;min-height:0;}
-.result-wrap::-webkit-scrollbar{display:none;}
+/* ════════════════════════════
+   STEP 2 — เลือกผลลัพธ์
+   ════════════════════════════ */
+.from-chip{display:flex;align-items:center;gap:8px;background:var(--primary-l);border:1px solid rgba(0,184,107,0.2);border-radius:14px;padding:10px 14px;margin:10px 16px 0;flex-shrink:0;}
+.from-chip-icon{font-size:20px;}
+.from-chip-name{font-size:13px;font-weight:700;color:var(--ink);flex:1;}
+.from-chip-kg{font-size:12px;font-weight:700;color:var(--primary);background:rgba(0,184,107,0.15);padding:3px 10px;border-radius:100px;white-space:nowrap;}
 
-.result-section-label{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;padding:6px 4px 8px;display:flex;align-items:center;gap:8px;}
-.result-section-label::after{content:'';flex:1;height:1px;background:rgba(10,10,30,0.06);}
+.section-label{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;padding:8px 16px 6px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(10,10,30,0.06);}
 
-.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;flex-shrink:0;}
+.result-grid-wrap{flex:1;overflow-y:auto;padding:0 12px 8px;scrollbar-width:none;}
+.result-grid-wrap::-webkit-scrollbar{display:none;}
+.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 @media(min-width:500px){.result-grid{grid-template-columns:repeat(3,1fr);}}
 
-.result-card{background:var(--white);border-radius:16px;padding:14px 12px 12px;cursor:pointer;border:1.5px solid transparent;box-shadow:var(--card-sh);display:flex;flex-direction:column;gap:6px;transition:transform .13s,box-shadow .13s;position:relative;overflow:hidden;}
+.result-card{background:var(--white);border-radius:16px;padding:14px 12px 12px;cursor:pointer;border:1.5px solid transparent;box-shadow:var(--card-sh);display:flex;flex-direction:column;gap:6px;transition:transform .13s,box-shadow .13s;position:relative;overflow:hidden;user-select:none;}
 .result-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.7) 0%,transparent 50%);pointer-events:none;}
 .result-card:active{transform:scale(0.95);}
 .result-card.selected{border-color:var(--primary);box-shadow:0 8px 32px rgba(0,184,107,0.18),0 0 0 1.5px var(--primary);}
@@ -169,36 +150,38 @@ header {
 .result-price{font-size:12px;font-weight:700;color:var(--primary);}
 .result-price-unit{font-size:10px;font-weight:400;color:var(--ink3);}
 
-/* ── STEP 3: KG INPUT ── */
-.kg-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:0;}
+.sel-count-badge{display:inline-flex;align-items:center;gap:4px;background:var(--primary);color:white;border-radius:100px;padding:2px 10px;font-size:11px;font-weight:700;}
 
-.sort-summary-card{background:var(--white);border-radius:22px;padding:20px;width:100%;max-width:360px;box-shadow:var(--card-sh);margin-bottom:20px;}
-.sort-arrow{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-.sort-from,.sort-to{flex:1;text-align:center;}
-.sort-item-icon{font-size:32px;margin-bottom:4px;}
-.sort-item-label{font-size:10px;color:var(--ink3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;}
-.sort-item-name{font-size:13px;font-weight:700;margin-top:2px;}
-.sort-arrow-icon{font-size:22px;color:var(--primary);flex-shrink:0;}
+/* ════════════════════════════
+   STEP 3 — ใส่น้ำหนัก
+   ════════════════════════════ */
+.weight-wrap{flex:1;overflow-y:auto;padding:0 12px 8px;scrollbar-width:none;}
+.weight-wrap::-webkit-scrollbar{display:none;}
 
-.kg-label{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;text-align:center;}
-.kg-input-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
-.kg-step-btn{width:48px;height:48px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(10,10,30,0.08);font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:all .12s;}
-.kg-step-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
-.kg-input{width:120px;text-align:center;font-family:'Prompt',sans-serif;font-size:28px;font-weight:800;color:var(--ink);border:2px solid rgba(10,10,30,0.08);border-radius:16px;padding:10px;background:var(--white);outline:none;transition:border-color .15s;}
-.kg-input:focus{border-color:var(--primary);}
-.kg-unit{font-size:13px;color:var(--ink3);text-align:center;}
+.weight-item{background:var(--white);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--card-sh);display:flex;align-items:center;gap:12px;}
+.wi-icon{font-size:28px;flex-shrink:0;}
+.wi-info{flex:1;min-width:0;}
+.wi-name{font-size:13px;font-weight:700;color:var(--ink);}
+.wi-price{font-size:11px;color:var(--ink3);margin-top:2px;}
+.wi-stepper{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.wi-btn{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(10,10,30,0.08);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:all .12s;}
+.wi-btn:active{background:var(--primary);border-color:var(--primary);color:white;}
+.wi-inp{width:64px;text-align:center;font-family:'Prompt',sans-serif;font-size:14px;font-weight:700;border:1.5px solid rgba(10,10,30,0.08);border-radius:10px;padding:6px 3px;background:var(--surface);outline:none;color:var(--ink);}
+.wi-inp:focus{border-color:var(--primary);background:var(--white);}
+.wi-remove{width:30px;height:30px;border-radius:50%;background:rgba(255,59,48,0.08);border:none;color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.wi-remove:active{background:rgba(255,59,48,0.2);}
 
-.yield-preview{background:var(--primary-l);border:1px solid rgba(0,184,107,0.2);border-radius:14px;padding:12px 16px;width:100%;max-width:360px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.yield-label{font-size:12px;color:var(--primary);font-weight:600;}
-.yield-val{font-size:16px;font-weight:800;color:var(--primary);}
+.total-card{background:var(--primary-l);border:1px solid rgba(0,184,107,0.2);border-radius:16px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.total-label{font-size:12px;font-weight:600;color:var(--primary);}
+.total-val{font-size:18px;font-weight:800;color:var(--primary);}
 
-/* ── FOOTER ACTIONS ── */
-.panel-footer{flex-shrink:0;padding:10px 20px calc(env(safe-area-inset-bottom,0px)+10px);border-top:1px solid rgba(10,10,30,0.06);background:var(--white);}
+/* ── PANEL FOOTER ── */
+.panel-footer{flex-shrink:0;padding:10px 16px calc(env(safe-area-inset-bottom,0px)+8px);border-top:1px solid rgba(10,10,30,0.06);background:var(--white);}
 .footer-row{display:flex;gap:10px;}
-.btn-back{flex:1;padding:14px;border-radius:16px;background:var(--surface);border:1px solid rgba(10,10,30,0.08);font-family:'Prompt',sans-serif;font-size:14px;font-weight:600;color:var(--ink2);cursor:pointer;}
+.btn-back{flex:1;padding:14px;border-radius:16px;background:var(--surface);border:1px solid rgba(10,10,30,0.08);font-family:'Prompt',sans-serif;font-size:14px;font-weight:600;color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .btn-back:active{background:#e0e0ea;}
 .btn-confirm{flex:2;padding:14px;border-radius:16px;background:var(--primary);border:none;color:white;font-family:'Prompt',sans-serif;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:background .15s;}
-.btn-confirm:disabled{opacity:.4;pointer-events:none;}
+.btn-confirm:disabled{opacity:.35;pointer-events:none;}
 .btn-confirm:active{background:var(--primary-d);}
 
 /* ── NAV ── */
@@ -215,6 +198,9 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 #toast.success{background:rgba(0,184,107,0.92);}
 #toast.error{background:rgba(255,59,48,0.9);}
+
+.spin{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
@@ -239,7 +225,7 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 
 <div class="app-body">
 
-  <!-- ══ STEP 1: เลือกวัตถุดิบ ══ -->
+  <!-- ══ STEP 1: เลือกวัตถุดิบ + น้ำหนัก ══ -->
   <div class="panel active" id="panel-1">
     <div class="search-area">
       <div class="search-field">
@@ -258,78 +244,107 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
     <div class="item-grid-wrap">
       <div class="item-grid" id="grid-1">
         <div class="grid-empty">
-          <i class="ph ph-spinner-gap spin" style="font-size:28px;"></i>
+          <i class="ph ph-spinner-gap spin"></i>
           <p>กำลังโหลด...</p>
         </div>
       </div>
     </div>
-    <div class="selected-bar" id="selected-bar">
-      <div class="selected-bar-icon" id="sel-icon-1">📦</div>
-      <div class="selected-bar-info">
-        <div class="selected-bar-name" id="sel-name-1">ยังไม่ได้เลือกวัตถุดิบ</div>
-        <div class="selected-bar-sub" id="sel-sub-1">กดเลือกสินค้าด้านบน</div>
+
+    <!-- ส่วนล่าง: ยังไม่เลือก -->
+    <div class="bottom-bar" id="bar-idle">
+      <div class="bottom-bar-info">
+        <div class="bottom-bar-title">ยังไม่ได้เลือกวัตถุดิบ</div>
+        <div class="bottom-bar-sub">กดเลือกสินค้าด้านบน</div>
       </div>
-      <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
-        ถัดไป <i class="ph ph-arrow-right"></i>
-      </button>
+      <button class="next-btn" disabled>ถัดไป <i class="ph ph-arrow-right"></i></button>
     </div>
 
-    <!-- น้ำหนักวัตถุดิบ (แสดงเมื่อเลือกสินค้าแล้ว) -->
-    <div class="kg-bar" id="kg-bar" style="display:none;">
-      <div class="kg-bar-left">
-        <div class="kg-bar-label">น้ำหนักที่จะคัดแยก</div>
-        <div class="kg-bar-stock" id="kg-bar-stock">สต๊อก 0 กก.</div>
+    <!-- ส่วนล่าง: เลือกแล้ว → กรอก kg -->
+    <div id="bar-kg" style="display:none;">
+      <div class="kg-bar-wrap" id="kg-bar-wrap" style="display:block;">
+        <div class="kg-bar-label-row">
+          <span class="kg-bar-label" id="kg-bar-item-name">–</span>
+          <span class="kg-bar-stock" id="kg-bar-stock"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:var(--ink3);font-weight:500;">น้ำหนักที่จะคัดแยก</span>
+          <div class="kg-stepper" style="flex:1;justify-content:flex-end;">
+            <button class="ks-btn" onclick="stepKg(-1)">−</button>
+            <input class="ks-input" type="number" id="from-kg" value="0" min="0.1" step="0.1" oninput="onKgInput()">
+            <span class="kg-unit">กก.</span>
+            <button class="ks-btn" onclick="stepKg(1)">+</button>
+          </div>
+        </div>
       </div>
-      <div class="kg-bar-stepper">
-        <button class="ks-btn" onclick="stepKg(-1)">−</button>
-        <input class="ks-input" type="number" id="from-kg" value="0" min="0" step="0.1" oninput="onKgInput()">
-        <button class="ks-btn" onclick="stepKg(1)">+</button>
+      <div class="bottom-bar">
+        <div class="bottom-bar-info">
+          <div class="bottom-bar-title" id="sel-item-name-bar">–</div>
+          <div class="bottom-bar-sub" id="sel-item-sub-bar">กรอกน้ำหนักที่ต้องการคัดแยก</div>
+        </div>
+        <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
+          ถัดไป <i class="ph ph-arrow-right"></i>
+        </button>
       </div>
-      <span class="kg-bar-unit">กก.</span>
-      <button class="next-btn" id="btn-next-kg" disabled onclick="goStep(2)">
-        ถัดไป <i class="ph ph-arrow-right"></i>
-      </button>
     </div>
   </div>
 
-  <!-- ══ STEP 2: เลือกผลลัพธ์ + ใส่น้ำหนักแต่ละชนิด ══ -->
+  <!-- ══ STEP 2: เลือกผลลัพธ์ ══ -->
   <div class="panel" id="panel-2">
-    <div class="result-wrap">
+    <!-- chip วัตถุดิบ -->
+    <div class="from-chip">
+      <span class="from-chip-icon" id="s2-from-icon">📦</span>
+      <span class="from-chip-name" id="s2-from-name">–</span>
+      <span class="from-chip-kg" id="s2-from-kg">0 กก.</span>
+    </div>
 
-      <!-- วัตถุดิบที่เลือก -->
-      <div class="from-chip" id="from-chip">
-        <span id="from-chip-icon">📦</span>
-        <span id="from-chip-name">–</span>
-        <span class="from-chip-kg" id="from-chip-kg">0 กก.</span>
-      </div>
+    <div class="section-label">
+      คัดแยกได้สินค้าอะไรบ้าง
+      <span id="sel-count-wrap" style="display:none;">
+        <span class="sel-count-badge" id="sel-count-text"></span>
+      </span>
+    </div>
 
-      <!-- header -->
-      <div class="result-section-label" style="margin-top:8px;">คัดแยกได้สินค้าอะไรบ้าง <span style="color:var(--ink3);font-weight:400;">(เลือกได้หลายชนิด)</span></div>
-
-      <!-- grid สินค้า -->
+    <div class="result-grid-wrap">
       <div class="result-grid" id="grid-2">
         <div class="grid-empty" style="grid-column:1/-1;">
-          <i class="ph ph-spinner-gap spin" style="font-size:28px;"></i>
+          <i class="ph ph-spinner-gap spin"></i>
           <p>กำลังโหลด...</p>
         </div>
       </div>
-
-      <!-- รายการที่เลือก + ใส่ kg -->
-      <div id="result-rows-wrap" style="display:none;">
-        <div class="result-section-label">น้ำหนักแต่ละชนิด</div>
-        <div id="result-rows"></div>
-      </div>
-
-      <!-- มูลค่ารวม -->
-      <div class="yield-preview" id="yield-preview" style="display:none;margin:8px 0 4px;">
-        <span class="yield-label">มูลค่ารวมโดยประมาณ</span>
-        <span class="yield-val" id="yield-val">฿0.00</span>
-      </div>
-
     </div>
+
     <div class="panel-footer">
       <div class="footer-row">
         <button class="btn-back" onclick="goStep(1)"><i class="ph ph-arrow-left"></i> ย้อนกลับ</button>
+        <button class="btn-confirm" id="btn-next-2" disabled onclick="goStep(3)">
+          ใส่น้ำหนัก <i class="ph ph-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: ใส่น้ำหนักผลลัพธ์ ══ -->
+  <div class="panel" id="panel-3">
+    <!-- chip วัตถุดิบ -->
+    <div class="from-chip">
+      <span class="from-chip-icon" id="s3-from-icon">📦</span>
+      <span class="from-chip-name" id="s3-from-name">–</span>
+      <span class="from-chip-kg" id="s3-from-kg">0 กก.</span>
+    </div>
+
+    <div class="section-label">ใส่น้ำหนักแต่ละชนิด</div>
+
+    <div class="weight-wrap" id="weight-wrap">
+      <!-- rows จะ render ที่นี่ -->
+      <div class="total-card" id="total-card">
+        <span class="total-label">มูลค่ารวมโดยประมาณ</span>
+        <span class="total-val" id="total-val">฿0.00</span>
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <div class="footer-row">
+        <button class="btn-back" onclick="goStep(2)"><i class="ph ph-arrow-left"></i> ย้อนกลับ</button>
         <button class="btn-confirm" id="btn-save" disabled onclick="saveSort()">
           <i class="ph ph-check-circle"></i> บันทึก
         </button>
@@ -342,11 +357,11 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 <!-- NAV -->
 <nav>
   <div class="nav-row">
-    <a href="buy.html" class="nav-tab ">
+    <a href="buy.html" class="nav-tab">
       <div class="nav-tab-indicator"></div>
       <i class="ph ph-download-simple"></i><span>รับซื้อ</span>
     </a>
-    <a href="sell.html" class="nav-tab ">
+    <a href="sell.html" class="nav-tab">
       <div class="nav-tab-indicator"></div>
       <i class="ph ph-upload-simple"></i><span>ขายออก</span>
     </a>
@@ -354,11 +369,11 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
       <div class="nav-tab-indicator"></div>
       <i class="ph-fill ph-recycle"></i><span>คัดแยก</span>
     </a>
-    <a href="items.html" class="nav-tab ">
+    <a href="items.html" class="nav-tab">
       <div class="nav-tab-indicator"></div>
       <i class="ph ph-pencil-simple"></i><span>สินค้า</span>
     </a>
-    <a href="dashboard.html" class="nav-tab ">
+    <a href="dashboard.html" class="nav-tab">
       <div class="nav-tab-indicator"></div>
       <i class="ph ph-package"></i><span>สต๊อก</span>
     </a>
@@ -396,12 +411,12 @@ const DEMO_ITEMS = [
 // ══════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════
-let ALL_ITEMS = [];
-let selectedFrom = null;  // วัตถุดิบ
-let selectedTos  = {};     // {id: {item, kg}} ผลลัพธ์หลายชนิด
-let activeCat = 'all';
-let q1 = '';
-let currentStep = 1;
+let ALL_ITEMS    = [];
+let selectedFrom = null;
+let selectedTos  = {};   // { id: { item, kg } }
+let activeCat    = 'all';
+let q1           = '';
+let currentStep  = 1;
 
 // ══════════════════════════════════════════
 //  SUPABASE FETCH
@@ -446,7 +461,7 @@ async function loadItems() {
 }
 
 // ══════════════════════════════════════════
-//  STEP 1 — RENDER วัตถุดิบ
+//  STEP 1 — เลือกวัตถุดิบ
 // ══════════════════════════════════════════
 function renderGrid1() {
   const grid = document.getElementById('grid-1');
@@ -465,9 +480,9 @@ function renderGrid1() {
     const empty = stock <= 0;
     const stockColor = empty ? 'color:var(--red)' : stock < 100 ? 'color:var(--amber)' : 'color:var(--green)';
     return `
-    <div class="item-card ${sel?'selected':''}"
-      onclick="${empty?`toast('สต๊อกหมด','error')`:`selectFrom(${item.id})`}"
-      style="${empty?'opacity:.45;pointer-events:none;':''}">
+    <div class="item-card ${sel ? 'selected' : ''} ${empty ? 'disabled-card' : ''}"
+      onclick="${empty ? `toast('สต๊อกหมด','error')` : `selectFrom(${item.id})`}"
+      style="${empty ? 'opacity:.45;' : ''}">
       <div class="card-check"><i class="ph ph-check-bold"></i></div>
       <div class="card-icon">${item.icon}</div>
       <div class="card-name">${item.name}</div>
@@ -484,27 +499,29 @@ function selectFrom(id) {
 
   const stock = Number(selectedFrom.stock_qty || 0);
 
-  // ซ่อน selected-bar เดิม แสดง kg-bar
-  document.getElementById('selected-bar').style.display = 'none';
-  const kgBar = document.getElementById('kg-bar');
-  kgBar.style.display = 'flex';
+  // แสดง kg-bar
+  document.getElementById('bar-idle').style.display = 'none';
+  document.getElementById('bar-kg').style.display   = 'block';
+  document.getElementById('kg-bar-item-name').textContent = selectedFrom.name;
+  document.getElementById('sel-item-name-bar').textContent = `${selectedFrom.icon} ${selectedFrom.name}`;
+  document.getElementById('sel-item-sub-bar').textContent  = 'กรอกน้ำหนักที่ต้องการคัดแยก';
 
-  document.getElementById('kg-bar-stock').textContent = `สต๊อก ${stock.toLocaleString('th-TH')} กก.`;
-  document.getElementById('kg-bar-stock').style.color = stock < 100 ? 'var(--amber)' : 'var(--green)';
+  const stockEl = document.getElementById('kg-bar-stock');
+  stockEl.textContent = `สต๊อก ${stock.toLocaleString('th-TH')} กก.`;
+  stockEl.style.color = stock < 100 ? 'var(--amber)' : 'var(--green)';
 
-  // reset kg
   const inp = document.getElementById('from-kg');
-  inp.value = 0;
+  inp.value = '';
   inp.max   = stock;
-  document.getElementById('btn-next-kg').disabled = true;
+  document.getElementById('btn-next-1').disabled = true;
 }
 
 function stepKg(delta) {
   const inp   = document.getElementById('from-kg');
   const stock = Number(selectedFrom?.stock_qty || 0);
-  let val = Math.round((parseFloat(inp.value) || 0) * 10) / 10;
-  val = Math.min(stock, Math.max(0, val + delta * 0.1));
-  inp.value = Math.round(val * 10) / 10;
+  let val = Math.round(((parseFloat(inp.value) || 0) + delta * 0.1) * 10) / 10;
+  val = Math.min(stock, Math.max(0.1, val));
+  inp.value = val;
   onKgInput();
 }
 
@@ -513,26 +530,29 @@ function onKgInput() {
   const stock = Number(selectedFrom?.stock_qty || 0);
   let val = parseFloat(inp.value) || 0;
   if (val > stock) { val = stock; inp.value = stock; }
-  document.getElementById('btn-next-kg').disabled = val <= 0;
+  // ต้องมากกว่า 0.1 กก. ขึ้นไป
+  document.getElementById('btn-next-1').disabled = val < 0.1;
 }
 
 // ══════════════════════════════════════════
-//  STEP 2 — RENDER ผลลัพธ์
+//  STEP 2 — เลือกผลลัพธ์
 // ══════════════════════════════════════════
 function renderGrid2() {
-  // อัปเดต from-chip
-  document.getElementById('from-chip-icon').textContent = selectedFrom.icon;
-  document.getElementById('from-chip-name').textContent = selectedFrom.name;
-  document.getElementById('from-chip-kg').textContent   = getFromKg() + ' กก.';
+  // อัปเดต chip
+  document.getElementById('s2-from-icon').textContent = selectedFrom.icon;
+  document.getElementById('s2-from-name').textContent = selectedFrom.name;
+  document.getElementById('s2-from-kg').textContent   = getFromKg() + ' กก.';
 
   const grid = document.getElementById('grid-2');
-  const list = ALL_ITEMS.filter(x => x.id !== selectedFrom?.id);
+  // แสดงสินค้าทั้งหมดยกเว้นวัตถุดิบที่เลือก
+  const list = ALL_ITEMS.filter(x => x.id !== selectedFrom.id);
 
   if (!list.length) {
     grid.innerHTML = `<div class="grid-empty" style="grid-column:1/-1;"><i class="ph ph-package"></i><p>ไม่มีสินค้าอื่น</p></div>`;
     return;
   }
 
+  // จัดกลุ่มตาม cat
   const cats = [...new Set(list.map(x => x.cat))];
   const catLabel = {metal:'โลหะ',paper:'กระดาษ',plastic:'พลาสติก',glass:'แก้ว',electric:'ไฟฟ้า'};
   const catEmoji = {metal:'🔩',paper:'📰',plastic:'♻️',glass:'🪟',electric:'⚡'};
@@ -540,22 +560,22 @@ function renderGrid2() {
   grid.innerHTML = cats.map(cat => {
     const items = list.filter(x => x.cat === cat);
     return `
-      <div style="grid-column:1/-1;">
-        <div class="result-section-label">${catEmoji[cat]||''} ${catLabel[cat]||cat}</div>
-      </div>
-      ${items.map(item => {
-        const sel = !!selectedTos[item.id];
-        return `
-        <div class="result-card ${sel?'selected':''}" onclick="toggleTo(${item.id})">
-          <div class="card-check"><i class="ph ph-check-bold"></i></div>
-          <div class="result-icon">${item.icon}</div>
-          <div class="result-name">${item.name}</div>
-          <div class="result-price">฿${Number(item.sell_price).toFixed(2)}<span class="result-price-unit">/กก.</span></div>
-        </div>`;
-      }).join('')}`;
+    <div style="grid-column:1/-1;padding-top:6px;">
+      <div style="font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;padding:0 4px 6px;">${catEmoji[cat]||''} ${catLabel[cat]||cat}</div>
+    </div>
+    ${items.map(item => {
+      const sel = !!selectedTos[item.id];
+      return `
+      <div class="result-card ${sel ? 'selected' : ''}" onclick="toggleTo(${item.id})">
+        <div class="card-check"><i class="ph ph-check-bold"></i></div>
+        <div class="result-icon">${item.icon}</div>
+        <div class="result-name">${item.name}</div>
+        <div class="result-price">฿${Number(item.sell_price).toFixed(2)}<span class="result-price-unit">/กก.</span></div>
+      </div>`;
+    }).join('')}`;
   }).join('');
 
-  renderResultRows();
+  updateStep2Footer();
 }
 
 function toggleTo(id) {
@@ -566,44 +586,65 @@ function toggleTo(id) {
   } else {
     selectedTos[id] = { item, kg: 0 };
   }
-  renderGrid2();
+  // re-render เฉพาะ card ที่คลิก ไม่ต้อง render ทั้ง grid
+  const cards = document.querySelectorAll('#grid-2 .result-card');
+  // หา index ใน list
+  const list = ALL_ITEMS.filter(x => x.id !== selectedFrom.id);
+  const idx  = list.findIndex(x => x.id === id);
+  if (cards[idx]) {
+    cards[idx].classList.toggle('selected', !!selectedTos[id]);
+  }
+  updateStep2Footer();
 }
 
-function renderResultRows() {
-  const keys = Object.keys(selectedTos);
-  const wrap = document.getElementById('result-rows-wrap');
-  const rows = document.getElementById('result-rows');
-  const yieldEl = document.getElementById('yield-preview');
-
-  if (!keys.length) {
-    wrap.style.display = 'none';
-    yieldEl.style.display = 'none';
-    document.getElementById('btn-save').disabled = true;
-    return;
+function updateStep2Footer() {
+  const count = Object.keys(selectedTos).length;
+  const btn   = document.getElementById('btn-next-2');
+  const badge = document.getElementById('sel-count-wrap');
+  const text  = document.getElementById('sel-count-text');
+  btn.disabled = count === 0;
+  if (count > 0) {
+    badge.style.display = 'inline-flex';
+    text.textContent = `${count} ชนิด`;
+  } else {
+    badge.style.display = 'none';
   }
+}
 
-  wrap.style.display = 'block';
-  wrap.style.flexShrink = '0';
-  yieldEl.style.display = 'flex';
+// ══════════════════════════════════════════
+//  STEP 3 — ใส่น้ำหนัก
+// ══════════════════════════════════════════
+function renderStep3() {
+  document.getElementById('s3-from-icon').textContent = selectedFrom.icon;
+  document.getElementById('s3-from-name').textContent = selectedFrom.name;
+  document.getElementById('s3-from-kg').textContent   = getFromKg() + ' กก.';
 
-  rows.innerHTML = keys.map(id => {
-    const t = selectedTos[id];
-    return `
-    <div class="result-row-item">
-      <div class="rri-icon">${t.item.icon}</div>
-      <div class="rri-info">
-        <div class="rri-name">${t.item.name}</div>
-        <div class="rri-price">฿${Number(t.item.sell_price).toFixed(2)}/กก.</div>
+  const wrap = document.getElementById('weight-wrap');
+  const totalCard = document.getElementById('total-card');
+
+  // สร้าง rows สำหรับแต่ละสินค้าที่เลือก
+  const rowsHtml = Object.values(selectedTos).map(t => `
+    <div class="weight-item" id="wi-${t.item.id}">
+      <div class="wi-icon">${t.item.icon}</div>
+      <div class="wi-info">
+        <div class="wi-name">${t.item.name}</div>
+        <div class="wi-price">฿${Number(t.item.sell_price).toFixed(2)}/กก.</div>
       </div>
-      <div class="rri-stepper">
-        <button class="rri-btn" onclick="adjTo(${id},-0.1)">−</button>
-        <input class="rri-inp" type="number" id="to-kg-${id}" value="${t.kg}"
-          min="0" step="0.1" oninput="onToKg(${id})">
-        <button class="rri-btn" onclick="adjTo(${id},0.1)">+</button>
+      <div class="wi-stepper">
+        <button class="wi-btn" onclick="adjTo(${t.item.id}, -0.1)">−</button>
+        <input class="wi-inp" type="number" id="to-kg-${t.item.id}"
+          value="${t.kg || ''}" min="0" step="0.1" placeholder="0"
+          oninput="onToKg(${t.item.id})">
+        <button class="wi-btn" onclick="adjTo(${t.item.id}, 0.1)">+</button>
       </div>
-      <button class="rri-remove" onclick="toggleTo(${id})"><i class="ph ph-x-bold"></i></button>
-    </div>`;
-  }).join('');
+      <button class="wi-remove" onclick="removeTo(${t.item.id})" title="ลบ">
+        <i class="ph ph-x-bold"></i>
+      </button>
+    </div>
+  `).join('');
+
+  wrap.innerHTML = rowsHtml;
+  wrap.appendChild(totalCard);
 
   updateTotalYield();
 }
@@ -611,19 +652,30 @@ function renderResultRows() {
 function adjTo(id, delta) {
   if (!selectedTos[id]) return;
   const inp = document.getElementById(`to-kg-${id}`);
-  let val = Math.round(((parseFloat(inp.value)||0) + delta) * 10) / 10;
+  let val = Math.round(((parseFloat(inp.value) || 0) + delta) * 10) / 10;
   val = Math.max(0, val);
-  inp.value = val;
+  inp.value = val || '';
   selectedTos[id].kg = val;
   updateTotalYield();
 }
 
 function onToKg(id) {
   const inp = document.getElementById(`to-kg-${id}`);
-  const val = Math.max(0, parseFloat(inp.value)||0);
-  inp.value = val;
+  const val = Math.max(0, parseFloat(inp.value) || 0);
   if (selectedTos[id]) selectedTos[id].kg = val;
   updateTotalYield();
+}
+
+function removeTo(id) {
+  delete selectedTos[id];
+  const el = document.getElementById(`wi-${id}`);
+  if (el) el.remove();
+  updateTotalYield();
+  // ถ้าไม่เหลือเลย ย้อนกลับ step2
+  if (!Object.keys(selectedTos).length) {
+    toast('กรุณาเลือกผลลัพธ์อย่างน้อย 1 ชนิด', 'error');
+    goStep(2);
+  }
 }
 
 function updateTotalYield() {
@@ -631,39 +683,33 @@ function updateTotalYield() {
   Object.values(selectedTos).forEach(t => {
     total += (t.kg || 0) * Number(t.item.sell_price);
   });
-  document.getElementById('yield-val').textContent =
+  document.getElementById('total-val').textContent =
     '฿' + total.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
 
-  // enable บันทึก ถ้ามีอย่างน้อย 1 ชนิดที่ใส่ kg > 0
   const hasKg = Object.values(selectedTos).some(t => t.kg > 0);
   document.getElementById('btn-save').disabled = !hasKg;
 }
 
 // ══════════════════════════════════════════
-//  STEP 3 — SUMMARY + KG
-// ══════════════════════════════════════════
-function renderStep3() { /* ไม่ใช้แล้ว */ }
-
-// adjustKg / updateYield ย้ายไปใช้ updateTotalYield แล้ว
-
-// ══════════════════════════════════════════
-//  STEP NAVIGATION
+//  NAVIGATION
 // ══════════════════════════════════════════
 function getFromKg() {
   return parseFloat(document.getElementById('from-kg').value) || 0;
 }
 
 function goStep(n) {
+  // ซ่อน panel ปัจจุบัน
   document.getElementById(`panel-${currentStep}`).classList.remove('active');
-  currentStep = n;
+  // แสดง panel ใหม่
   document.getElementById(`panel-${n}`).classList.add('active');
+  currentStep = n;
   updateStepBar(n);
+
   if (n === 2) renderGrid2();
+  if (n === 3) renderStep3();
 }
 
-function updateStepBar(n) {
-  // step bar ถูกลบออกแล้ว — ไม่ต้องทำอะไร
-}
+function updateStepBar(n) { /* ไม่ใช้แล้ว */ }
 
 // ══════════════════════════════════════════
 //  SAVE
@@ -673,7 +719,7 @@ async function saveSort() {
   const fromStock = Number(selectedFrom.stock_qty || 0);
   const results   = Object.values(selectedTos).filter(t => t.kg > 0);
 
-  if (fromKg <= 0) { toast('กรุณากรอกน้ำหนักวัตถุดิบ', 'error'); return; }
+  if (fromKg < 0.1) { toast('กรุณากรอกน้ำหนักวัตถุดิบอย่างน้อย 0.1 กก.', 'error'); return; }
   if (fromKg > fromStock) {
     toast(`❌ สต๊อก${selectedFrom.name}มีแค่ ${fromStock.toLocaleString('th-TH')} กก.`, 'error');
     return;
@@ -684,11 +730,11 @@ async function saveSort() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i> กำลังบันทึก...';
 
-  const totalValue = results.reduce((s, t) => s + t.kg * Number(t.item.sell_price), 0);
   const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
 
   if (!SUPABASE_READY) {
-    await new Promise(r => setTimeout(r, 700));
+    // Demo mode
+    await new Promise(r => setTimeout(r, 600));
     const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
     if (fi) fi.stock_qty = Math.max(0, Number(fi.stock_qty) - fromKg);
     results.forEach(t => {
@@ -696,13 +742,13 @@ async function saveSort() {
       if (ti) ti.stock_qty = Number(ti.stock_qty || 0) + t.kg;
     });
     const summary = results.map(t => `${t.item.name} +${t.kg}กก.`).join(', ');
-    toast(`✅ ${selectedFrom.name} −${fromKg}กก. → ${summary} (Demo)`, 'success');
+    toast(`✅ ${selectedFrom.name} −${fromKg}กก. → ${summary}`, 'success');
     setTimeout(resetAll, 1800);
     return;
   }
 
   try {
-    // 1. บันทึก sort_logs (1 row ต่อผลลัพธ์)
+    // 1. บันทึก sort_logs
     for (const t of results) {
       await sbFetch('sort_logs', {
         method: 'POST', prefer: 'return=minimal',
@@ -718,14 +764,12 @@ async function saveSort() {
         },
       });
     }
-
     // 2. หัก stock วัตถุดิบ
     await sbFetch(`items?id=eq.${selectedFrom.id}`, {
       method: 'PATCH', prefer: 'return=minimal',
       body: { stock_qty: Math.max(0, fromStock - fromKg), updated_at: new Date().toISOString() },
     });
-
-    // 3. เพิ่ม stock ผลลัพธ์แต่ละชนิด
+    // 3. เพิ่ม stock ผลลัพธ์
     for (const t of results) {
       const ti  = ALL_ITEMS.find(x => x.id === t.item.id);
       const cur = Number(ti?.stock_qty || 0);
@@ -735,8 +779,6 @@ async function saveSort() {
       });
       if (ti) ti.stock_qty = cur + t.kg;
     }
-
-    // อัปเดต local state
     const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
     if (fi) fi.stock_qty = Math.max(0, fromStock - fromKg);
 
@@ -756,13 +798,21 @@ async function saveSort() {
 function resetAll() {
   selectedFrom = null;
   selectedTos  = {};
-  // ซ่อน kg-bar กลับไปแสดง selected-bar
-  document.getElementById('selected-bar').style.display = 'flex';
-  document.getElementById('kg-bar').style.display = 'none';
-  document.getElementById('from-kg').value = 0;
-  document.getElementById('btn-next-2').disabled = true;
-  document.getElementById('btn-save').disabled = false;
-  document.getElementById('btn-save').innerHTML = '<i class="ph ph-check-circle"></i> บันทึก';
+  activeCat    = 'all';
+  q1           = '';
+  document.getElementById('search-1').value = '';
+
+  // reset step 1 UI
+  document.getElementById('bar-idle').style.display = 'flex';
+  document.getElementById('bar-kg').style.display   = 'none';
+  document.getElementById('from-kg').value = '';
+  document.getElementById('btn-next-1').disabled = true;
+
+  // reset cat buttons
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.cat === 'all');
+  });
+
   goStep(1);
   renderGrid1();
 }
@@ -784,6 +834,9 @@ document.getElementById('search-1').addEventListener('input', e => {
   renderGrid1();
 });
 
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -793,7 +846,7 @@ function toast(msg, type = '') {
 }
 
 // ══════════════════════════════════════════
-//  INIT — SDK Auth
+//  INIT
 // ══════════════════════════════════════════
 (async () => {
   const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -803,8 +856,8 @@ function toast(msg, type = '') {
     return;
   }
   window.AUTH = {
-    token: session.access_token,
-    user:  session.user,
+    token:  session.access_token,
+    user:   session.user,
     logout: async () => { await _sb.auth.signOut(); window.location.replace('login.html'); }
   };
   loadItems();

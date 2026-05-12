@@ -352,6 +352,26 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
         </button>
       </div>
     </div>
+    <div class="stat-card" style="grid-column:1/-1;background:linear-gradient(135deg,rgba(26,107,255,0.06) 0%,rgba(26,107,255,0.02) 100%);border:1px solid rgba(26,107,255,0.12);">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="stat-icon" style="background:rgba(26,107,255,0.1);color:#1A6BFF;"><i class="ph ph-package"></i></div>
+          <span class="stat-label">มูลค่าสินค้าคงเหลือ</span>
+        </div>
+        <span style="font-size:10px;color:var(--ink3);">ราคาขาย × สต๊อก</span>
+      </div>
+      <div class="stat-value" id="s-stock-val" style="color:#1A6BFF;">–</div>
+      <div style="display:flex;gap:16px;margin-top:6px;">
+        <div>
+          <div style="font-size:10px;color:var(--ink3);margin-bottom:2px;">ทุนสะสม</div>
+          <div style="font-size:13px;font-weight:700;color:var(--ink2);" id="s-stock-cost">–</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--ink3);margin-bottom:2px;">กำไรแฝง</div>
+          <div style="font-size:13px;font-weight:700;" id="s-stock-profit">–</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- CHART -->
@@ -834,6 +854,13 @@ function render(mult) {
   animateNum(document.getElementById('s-net'),    fmt(D.netProfit));
   animateNum(document.getElementById('s-margin'), D.margin.toFixed(1)+'%');
   animateNum(document.getElementById('s-cash'),   fmt(D.cash));
+  animateNum(document.getElementById('s-stock-val'),    '฿'+fmt(D.stockSellVal));
+  animateNum(document.getElementById('s-stock-cost'),   '฿'+fmt(D.stockCost));
+  const profitEl = document.getElementById('s-stock-profit');
+  if (profitEl) {
+    profitEl.textContent = (D.stockProfit >= 0 ? '+' : '') + '฿' + fmt(D.stockProfit);
+    profitEl.style.color = D.stockProfit >= 0 ? 'var(--green)' : 'var(--red)';
+  }
 
   animateNum(document.getElementById('n-net'),     fmt(D.netProfit));
   animateNum(document.getElementById('n-income'),  '฿'+fmt(D.totalSell));

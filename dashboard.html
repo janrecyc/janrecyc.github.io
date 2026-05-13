@@ -773,19 +773,13 @@ async function saveCash() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i> กำลังบันทึก...';
 
-  const body = {
-    type:         cashType,
-    total_amount: amt,
-    total_kg:     null,
-    factory_id:   null,
-    factory_name: note || (cashType === 'deposit' ? 'เติมเงิน' : 'ถอนเงิน'),
-    lines:        null,
-    created_at:   new Date().toISOString(),
-  };
-
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 500));
-    ALL_TXNS.push({...body, id: Date.now()});
+    ALL_TXNS.push({
+      type: cashType, total_amount: amt,
+      factory_name: note || (cashType === 'deposit' ? 'เติมเงิน' : 'ถอนเงิน'),
+      created_at: new Date().toISOString(), id: Date.now(),
+    });
     toast(cashType === 'deposit' ? `✅ เติมเงิน ฿${fmt(amt)}` : `✅ ถอนเงิน ฿${fmt(amt)}`);
     document.getElementById('cash-modal').classList.remove('show');
     render(RANGE_MULT[activeRange]);
@@ -794,13 +788,24 @@ async function saveCash() {
   }
 
   try {
-    await sbFetch('transactions', { method:'POST', prefer:'return=minimal', body });
+    // ใช้ RPC — validate type + insert transaction แบบ atomic
+    const result = await sbFetch('rpc/record_cash', {
+      method: 'POST',
+      body: {
+        p_type:   cashType,
+        p_amount: amt,
+        p_note:   note || null,
+      },
+      prefer: 'return=representation',
+    });
+
+    if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
+
     // โหลด transactions ใหม่
     ALL_TXNS = await sbFetch(
       'transactions?select=type,total_amount,total_kg,factory_name,created_at&order=created_at.asc'
     ) || [];
 
-    // load categories for stock table labels
     await loadCats();
     toast(cashType === 'deposit' ? `✅ เติมเงิน ฿${fmt(amt)}` : `✅ ถอนเงิน ฿${fmt(amt)}`);
     document.getElementById('cash-modal').classList.remove('show');

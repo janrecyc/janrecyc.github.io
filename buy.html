@@ -661,28 +661,14 @@ async function saveBuyTransaction() {
   }
 
   try {
-    // Insert transaction
-    // ตาราง: transactions (type, total_kg, total_amount, lines jsonb, created_at)
-    await sbFetch('transactions', {
+    // ใช้ RPC — insert transaction + เพิ่ม stock ทุก item แบบ atomic
+    const result = await sbFetch('rpc/record_buy_transaction', {
       method: 'POST',
-      body: {
-        type: 'buy',
-        total_kg: totalKg,
-        total_amount: totalAmt,
-        lines: lines,
-        created_at: new Date().toISOString(),
-      },
-      prefer: 'return=minimal',
+      body: { p_lines: lines },
+      prefer: 'return=representation',
     });
 
-    // Update stock_qty ใน items
-    for (const l of lines) {
-      await sbFetch(`items?id=eq.${l.item_id}`, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=minimal' },
-        body: { stock_qty: undefined }, // ใช้ RPC หรือ trigger ใน Supabase แทน
-      });
-    }
+    if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
 
     toast(`✓ บันทึกเรียบร้อย | ฿${totalAmt.toFixed(2)}`);
     setTimeout(() => { cart = {}; renderGrid(); renderOrder(); loadItems(); }, 400);

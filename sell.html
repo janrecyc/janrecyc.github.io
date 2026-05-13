@@ -443,8 +443,32 @@ function renderCatBar() {
   });
 }
 
+let FACTORIES = [];
+
+async function loadFactories() {
+  try {
+    const r = await sbFetch('factories?select=id,name,location&order=id&is_active=eq.true');
+    if (r && r.length) FACTORIES = r;
+  } catch(_) {}
+}
+
+function renderFactorySelect() {
+  const sel = document.getElementById('factory-select');
+  if (!sel) return;
+  if (!FACTORIES.length) return; // ใช้ hardcode fallback เดิม
+  sel.innerHTML = FACTORIES.map(f =>
+    `<option value="${f.id}" data-name="${f.name}${f.location ? ' — '+f.location : ''}">🏭 ${f.name}${f.location ? ' — '+f.location : ''}</option>`
+  ).join('');
+}
+
 let activeCat = 'all';
 let query = '';
+
+function stockClass(qty) {
+  if (qty <= 0)  return 'empty';
+  if (qty < 100) return 'low';
+  return '';
+}
 
 async function sbFetch(path, opts = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -481,7 +505,9 @@ async function loadItems() {
   document.getElementById('config-banner').style.display = 'none';
   try {
     await loadCats();
+    await loadFactories();
     renderCatBar();
+    renderFactorySelect();
     ITEMS = await sbFetch('items?select=id,name,icon,sell_price,unit,cat,stock_qty&order=cat,name') || [];
     renderGrid();
   } catch (err) {
@@ -608,8 +634,9 @@ async function saveSellTransaction() {
   payBtn.disabled = true;
   payBtn.innerHTML = '<i class="ph ph-spinner-gap spin"></i><span>กำลังบันทึก...</span>';
 
-  const factory = document.getElementById('factory-select').value;
-  const factoryLabel = document.getElementById('factory-select').options[document.getElementById('factory-select').selectedIndex].text;
+  const sel = document.getElementById('factory-select');
+  const factoryId   = FACTORIES.length ? parseInt(sel.value) : null;
+  const factoryName = sel.options[sel.selectedIndex].text.replace('🏭 ','');
 
   const lines = Object.values(cart).map(c => ({
     item_id:   c.item.id,
@@ -620,31 +647,29 @@ async function saveSellTransaction() {
   }));
 
   const totalAmt = lines.reduce((s, l) => s + l.subtotal, 0);
-  const totalKg  = lines.reduce((s, l) => s + l.kg, 0);
 
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 800));
-    toast(`✓ ส่งแล้ว → ${factoryLabel.replace('🏭 ','').split(' — ')[0]} (Demo)`);
+    toast(`✓ ส่งแล้ว → ${factoryName.split(' — ')[0]} (Demo)`);
     setTimeout(() => { cart = {}; renderGrid(); renderOrder(); }, 400);
     return;
   }
 
   try {
-    await sbFetch('transactions', {
+    // ใช้ RPC — ตรวจ stock + insert transaction + หัก stock แบบ atomic
+    const result = await sbFetch('rpc/record_sell_transaction', {
       method: 'POST',
       body: {
-        type: 'sell',
-        factory_id: factory,
-        factory_name: factoryLabel,
-        total_kg: totalKg,
-        total_amount: totalAmt,
-        lines: lines,
-        created_at: new Date().toISOString(),
+        p_factory_id:   factoryId,
+        p_factory_name: factoryName,
+        p_lines:        lines,
       },
-      prefer: 'return=minimal',
+      prefer: 'return=representation',
     });
 
-    toast(`✓ ส่งแล้ว → ${factoryLabel.replace('🏭 ','').split(' — ')[0]}`);
+    if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
+
+    toast(`✓ ส่งแล้ว → ${factoryName.split(' — ')[0]}`);
     setTimeout(() => { cart = {}; renderGrid(); renderOrder(); loadItems(); }, 400);
   } catch (err) {
     toast('❌ บันทึกไม่สำเร็จ: ' + err.message, 'error');

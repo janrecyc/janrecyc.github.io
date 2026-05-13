@@ -752,7 +752,6 @@ async function saveSort() {
   const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
 
   if (!SUPABASE_READY) {
-    // Demo mode
     await new Promise(r => setTimeout(r, 600));
     const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
     if (fi) fi.stock_qty = Math.max(0, Number(fi.stock_qty) - fromKg);
@@ -767,39 +766,32 @@ async function saveSort() {
   }
 
   try {
-    // 1. บันทึก sort_logs
-    for (const t of results) {
-      await sbFetch('sort_logs', {
-        method: 'POST', prefer: 'return=minimal',
-        body: {
-          from_item_id:   selectedFrom.id,
-          from_item_name: selectedFrom.name,
-          to_item_id:     t.item.id,
-          to_item_name:   t.item.name,
-          sort_kg:        fromKg,
-          result_kg:      t.kg,
-          result_value:   t.kg * Number(t.item.sell_price),
-          created_at:     new Date().toISOString(),
-        },
-      });
-    }
-    // 2. หัก stock วัตถุดิบ
-    await sbFetch(`items?id=eq.${selectedFrom.id}`, {
-      method: 'PATCH', prefer: 'return=minimal',
-      body: { stock_qty: Math.max(0, fromStock - fromKg), updated_at: new Date().toISOString() },
+    // ใช้ RPC — หัก from + เพิ่ม to + บันทึก sort_logs แบบ atomic ในขั้นตอนเดียว
+    const result = await sbFetch('rpc/record_sort', {
+      method: 'POST',
+      body: {
+        p_from_item_id:   selectedFrom.id,
+        p_from_item_name: selectedFrom.name,
+        p_from_kg:        fromKg,
+        p_results: results.map(t => ({
+          item_id:    t.item.id,
+          item_name:  t.item.name,
+          kg:         t.kg,
+          sell_price: Number(t.item.sell_price),
+        })),
+      },
+      prefer: 'return=representation',
     });
-    // 3. เพิ่ม stock ผลลัพธ์
-    for (const t of results) {
-      const ti  = ALL_ITEMS.find(x => x.id === t.item.id);
-      const cur = Number(ti?.stock_qty || 0);
-      await sbFetch(`items?id=eq.${t.item.id}`, {
-        method: 'PATCH', prefer: 'return=minimal',
-        body: { stock_qty: cur + t.kg, updated_at: new Date().toISOString() },
-      });
-      if (ti) ti.stock_qty = cur + t.kg;
-    }
+
+    if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
+
+    // อัปเดต local state
     const fi = ALL_ITEMS.find(x => x.id === selectedFrom.id);
     if (fi) fi.stock_qty = Math.max(0, fromStock - fromKg);
+    results.forEach(t => {
+      const ti = ALL_ITEMS.find(x => x.id === t.item.id);
+      if (ti) ti.stock_qty = Number(ti.stock_qty || 0) + t.kg;
+    });
 
     const summary = results.map(t => `${t.item.name} +${t.kg}กก.`).join(', ');
     toast(`✅ ${selectedFrom.name} −${fromKg}กก. → ${summary}`, 'success');

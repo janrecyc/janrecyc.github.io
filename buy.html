@@ -212,6 +212,13 @@ header {
 }
 .step-btn:active{background:#e0e0ec;}
 .step-val { font-size:14px; font-weight:700; min-width:26px; text-align:center; }
+.step-val-input {
+  font-family:'Prompt',sans-serif; font-size:14px; font-weight:700;
+  width:52px; text-align:center; border:1.5px solid rgba(10,10,30,0.12);
+  border-radius:8px; padding:3px 4px; background:var(--surface);
+  color:var(--ink); outline:none;
+}
+.step-val-input:focus { border-color:var(--primary); background:white; }
 
 .order-footer { flex-shrink:0; padding:10px 20px calc(env(safe-area-inset-bottom,0px)+10px); border-top:1px solid rgba(10,10,30,0.06); }
 .totals { margin-bottom:10px; }
@@ -538,7 +545,7 @@ function renderGrid() {
     const qty = inCart ? cart[item.id].kg : 0;
     return `
     <div class="item-card ${inCart?'selected':''}" onclick="addItem(${item.id},event)">
-      <div class="card-badge">${qty}</div>
+      <div class="card-badge">${qty % 1 === 0 ? qty : qty.toFixed(1)}</div>
       <div class="card-icon">${item.icon}</div>
       <div class="card-name">${item.name}</div>
       <div class="card-bottom">
@@ -559,10 +566,10 @@ function addItem(id, e) {
   const item = ITEMS.find(x => x.id === id);
   if (!item) return;
   if (!cart[id]) {
-    cart[id] = {item, kg: 1};
+    cart[id] = {item, kg: 0.1};
     toast(`+ ${item.name}`);
   } else {
-    cart[id].kg += 1;
+    cart[id].kg = Math.round((cart[id].kg + 0.1) * 10) / 10;
   }
   renderGrid();
   renderOrder();
@@ -570,13 +577,27 @@ function addItem(id, e) {
 
 function setKg(id, delta) {
   if (!cart[id]) return;
-  cart[id].kg = Math.max(0, cart[id].kg + delta);
-  if (cart[id].kg === 0) delete cart[id];
+  const newKg = Math.round((cart[id].kg + delta) * 10) / 10;
+  if (newKg <= 0) {
+    delete cart[id];
+  } else {
+    cart[id].kg = newKg;
+  }
   renderGrid();
   renderOrder();
 }
 
-function renderOrder() {
+function setKgDirect(id, val) {
+  if (!cart[id]) return;
+  const newKg = Math.round(parseFloat(val) * 10) / 10;
+  if (!newKg || newKg <= 0) {
+    delete cart[id];
+  } else {
+    cart[id].kg = newKg;
+  }
+  renderGrid();
+  renderOrder();
+}
   const list   = document.getElementById('order-list');
   const count  = document.getElementById('order-count');
   const tItems = document.getElementById('t-items');
@@ -617,9 +638,12 @@ function renderOrder() {
         <div class="order-row-sub">${c.kg} กก. × ฿${price} = <b>฿${sub.toFixed(2)}</b></div>
       </div>
       <div class="stepper">
-        <button class="step-btn" onclick="setKg(${id},-1)">−</button>
-        <div class="step-val">${c.kg}</div>
-        <button class="step-btn" onclick="setKg(${id},1)">+</button>
+        <button class="step-btn" onclick="setKg(${id},-0.1)">−</button>
+        <input class="step-val-input" type="number" min="0.1" step="0.1"
+          value="${c.kg}"
+          onchange="setKgDirect(${id}, this.value)"
+          onclick="this.select()">
+        <button class="step-btn" onclick="setKg(${id},0.1)">+</button>
       </div>
     </div>`;
   }).join('');

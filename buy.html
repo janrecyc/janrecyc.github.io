@@ -476,8 +476,15 @@ let query = '';
 // ══════════════════════════════════════════
 //  SUPABASE REST
 // ══════════════════════════════════════════
+let _sb = null; // Supabase client instance (shared)
+
 async function sbFetch(path, opts = {}) {
-  const token = (window.AUTH && window.AUTH.token) ? window.AUTH.token : SUPABASE_ANON;
+  // ดึง token สดทุกครั้ง — SDK จะ refresh อัตโนมัติถ้า expired
+  let token = SUPABASE_ANON;
+  if (_sb) {
+    const { data: { session } } = await _sb.auth.getSession();
+    if (session) token = session.access_token;
+  }
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: {
       'apikey': SUPABASE_ANON,
@@ -688,15 +695,13 @@ async function saveBuyTransaction() {
 
   try {
     // ใช้ RPC — insert transaction + เพิ่ม stock ทุก item แบบ atomic
-    const result = await sbFetch('rpc/record_buy_transaction', {
+    await sbFetch('rpc/record_buy_transaction', {
       method: 'POST',
       body: { p_lines: lines },
       prefer: 'return=representation',
     });
 
-    const data = Array.isArray(result) ? result[0] : result;
-    if (!data || !data.success) throw new Error('RPC ไม่สำเร็จ');
-
+    // ถ้าไม่ throw = สำเร็จ
     toast(`✓ บันทึกเรียบร้อย | ฿${totalAmt.toFixed(2)}`);
     setTimeout(() => { cart = {}; renderGrid(); renderOrder(); loadItems(); }, 400);
   } catch (err) {
@@ -736,13 +741,13 @@ function toast(msg, type = '') {
 
 // ── INIT — ใช้ Supabase SDK เช็ค session ──
 (async () => {
-  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) {
     window.location.replace('login.html');
     return;
   }
-  window.AUTH = { token: session.access_token, user: session.user,
+  window.AUTH = { user: session.user,
     logout: async () => { await _sb.auth.signOut(); window.location.replace('login.html'); }
   };
   loadItems();

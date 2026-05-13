@@ -223,9 +223,9 @@ header {
 
 .order-footer {
   flex-shrink:0;
-  padding:12px 16px calc(env(safe-area-inset-bottom,0px)+12px);
-  border-top:1px solid rgba(10,10,30,0.06);
   background:var(--white);
+  border-top:1px solid rgba(10,10,30,0.06);
+  padding:10px 16px calc(env(safe-area-inset-bottom,0px)+6px);
 }
 .totals {
   background:var(--surface); border-radius:14px;
@@ -244,22 +244,19 @@ header {
 .cur { font-size:13px; font-weight:600; margin-right:1px; }
 
 .pay-btn {
-  width:100%; padding:13px 16px; border-radius:16px;
-  background:linear-gradient(135deg, #1A6BFF 0%, #0040CC 100%);
-  color:white; border:none;
-  font-family:'Prompt',sans-serif; font-size:15px; font-weight:700;
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  cursor:pointer;
-  transition:opacity .15s, transform .1s;
-  box-shadow:0 4px 16px rgba(26,107,255,0.35);
+  padding:12px 20px; border-radius:14px;
+  background:var(--primary); color:white; border:none;
+  font-family:'Prompt',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; gap:6px;
+  white-space:nowrap; flex-shrink:0;
+  transition:background .15s;
 }
-.pay-btn:disabled { opacity:0.35; pointer-events:none; box-shadow:none; }
-.pay-btn:active { opacity:0.85; transform:scale(0.98); }
+.pay-btn:disabled { opacity:.35; pointer-events:none; }
+.pay-btn:active { background:var(--primary-d); }
 .pay-amount-tag {
   background:rgba(255,255,255,0.22);
-  padding:4px 12px; border-radius:100px;
-  font-size:14px; font-weight:700;
-  letter-spacing:0.2px;
+  padding:3px 10px; border-radius:100px;
+  font-size:12px; font-weight:700;
 }
 
 /* BOTTOM NAV */
@@ -390,16 +387,18 @@ nav {
           <span class="total-label">น้ำหนักรวม</span>
           <span class="total-value" id="t-weight">0.00 กก.</span>
         </div>
-        <div class="grand-row">
-          <span class="grand-label">ยอดจ่าย</span>
-          <span class="grand-value" id="t-amount"><span class="cur">฿</span>0.00</span>
-        </div>
       </div>
-      <button class="pay-btn" id="pay-btn" disabled>
-        <i class="ph ph-check-circle"></i>
-        <span>บันทึกและจ่ายเงิน</span>
-        <span class="pay-amount-tag" id="pay-tag">฿0</span>
-      </button>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-size:12px;color:var(--ink3);font-weight:500;">ยอดจ่าย</div>
+          <div id="t-amount" style="font-size:20px;font-weight:800;color:var(--primary);line-height:1.2;"><span class="cur">฿</span>0.00</div>
+        </div>
+        <button class="pay-btn" id="pay-btn" disabled>
+          <i class="ph ph-check-circle"></i>
+          <span>บันทึกและจ่ายเงิน</span>
+          <span class="pay-amount-tag" id="pay-tag">฿0</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

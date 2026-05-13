@@ -303,7 +303,14 @@ nav {
       </div>
     </div>
 
-    <div class="cat-bar" id="cat-bar"><button class="cat-btn on" data-cat="all">ทั้งหมด</button></div>
+    <div class="cat-bar">
+      <button class="cat-btn on" data-cat="all">ทั้งหมด</button>
+      <button class="cat-btn" data-cat="metal">🔩 โลหะ</button>
+      <button class="cat-btn" data-cat="paper">📰 กระดาษ</button>
+      <button class="cat-btn" data-cat="plastic">♻️ พลาสติก</button>
+      <button class="cat-btn" data-cat="glass">🪟 แก้ว</button>
+      <button class="cat-btn" data-cat="electric">⚡ ไฟฟ้า</button>
+    </div>
 
     <div class="item-grid-wrap">
       <div class="item-grid" id="item-grid">
@@ -418,31 +425,6 @@ const DEMO_ITEMS = [
 
 let ITEMS = [];
 let cart = {};
-let CATS = [];
-function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
-function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
-
-async function loadCats() {
-  try {
-    const res = await sbFetch('categories?select=slug,label,icon&order=id');
-    if (res && res.length) CATS = res;
-  } catch(_) {}
-}
-
-function renderCatBar() {
-  const bar = document.getElementById('cat-bar');
-  if (!bar) return;
-  bar.innerHTML = '<button class="cat-btn on" data-cat="all">ทั้งหมด</button>'
-    + CATS.map(c=>`<button class="cat-btn" data-cat="${c.slug}">${c.icon} ${c.label}</button>`).join('');
-  bar.querySelectorAll('.cat-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      bar.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('on', b===btn));
-      activeCat = btn.dataset.cat;
-      renderGrid();
-    });
-  });
-}
-
 let activeCat = 'all';
 let query = '';
 
@@ -481,9 +463,8 @@ async function loadItems() {
   document.getElementById('config-banner').style.display = 'none';
 
   try {
-    await loadCats();
-    renderCatBar();
-    ITEMS = await sbFetch('items?select=id,name,icon,sell_price,unit,cat,stock_qty&order=cat,name') || [];
+    // ตาราง: items (id, name, icon, sell_price, unit, cat, stock_qty)
+    ITEMS = await sbFetch('items?select=id,name,icon,sell_price,unit,cat,stock_qty&order=cat,name');
     renderGrid();
   } catch (err) {
     grid.innerHTML = `<div class="grid-loading"><i class="ph ph-warning-circle" style="font-size:28px;color:var(--red);"></i><span style="font-size:13px;color:var(--red);">โหลดไม่สำเร็จ: ${err.message}</span></div>`;
@@ -669,8 +650,11 @@ document.getElementById('clear-btn').addEventListener('click', () => {
 
 document.getElementById('pay-btn').addEventListener('click', saveSellTransaction);
 
-// cat-btn handled by renderCatBar
-if(false) {
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    activeCat = btn.dataset.cat;
     renderGrid();
   });
 });

@@ -273,7 +273,8 @@ nav {
   background:rgba(10,10,30,0.88); color:white;
   padding:10px 20px; border-radius:100px;
   font-size:13px; font-weight:500;
-  opacity:0; transition:all .25s; pointer-events:none; white-space:nowrap;
+  opacity:0; transition:all .25s; pointer-events:none;
+  white-space:normal; max-width:calc(100vw - 40px); text-align:center;
   backdrop-filter:blur(8px); z-index:999;
 }
 #toast.toast-show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -596,14 +597,41 @@ function setKg(id, delta) {
 
 function setKgDirect(id, val) {
   if (!cart[id]) return;
-  const newKg = Math.round(parseFloat(val) * 10) / 10;
-  if (!newKg || newKg <= 0) {
-    delete cart[id];
-  } else {
-    cart[id].kg = newKg;
+  const parsed = parseFloat(val);
+  // ยังพิมพ์ไม่เสร็จ (ว่าง หรือ 0) — แค่อัปเดต cart แต่ไม่ลบ
+  if (!val || isNaN(parsed) || parsed <= 0) {
+    cart[id].kg = 0;
+    updateTotalsOnly();
+    return;
   }
-  renderGrid();
-  renderOrder();
+  cart[id].kg = Math.round(parsed * 100) / 100;
+  updateTotalsOnly(); // อัปเดตเฉพาะยอดรวม ไม่ re-render list (กันเสีย focus)
+}
+
+function updateTotalsOnly() {
+  const keys = Object.keys(cart).filter(id => cart[id].kg > 0);
+  let totalKg = 0, totalAmt = 0;
+  keys.forEach(id => {
+    const c = cart[id];
+    const price = Number(c.item.buy_price);
+    // อัปเดต sub-text ของแต่ละ row
+    const sub = c.kg * price;
+    totalKg  += c.kg;
+    totalAmt += sub;
+    const subEl = document.querySelector(`[data-order-id="${id}"] .order-row-sub`);
+    if (subEl) subEl.innerHTML = `${c.kg} กก. × ฿${price} = <b>฿${sub.toFixed(2)}</b>`;
+  });
+  const fmt = n => n.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const tItems = document.getElementById('t-items');
+  const tWt    = document.getElementById('t-weight');
+  const tAmt   = document.getElementById('t-amount');
+  const payTag = document.getElementById('pay-tag');
+  const payBtn = document.getElementById('pay-btn');
+  if (tItems) tItems.textContent = `${keys.length} รายการ`;
+  if (tWt)    tWt.textContent    = `${totalKg.toFixed(2)} กก.`;
+  if (tAmt)   tAmt.innerHTML     = `<span class="cur">฿</span>${fmt(totalAmt)}`;
+  if (payTag) payTag.textContent = `฿${Math.round(totalAmt).toLocaleString('th-TH')}`;
+  if (payBtn) payBtn.disabled    = totalAmt <= 0;
 }
 
 function renderOrder() {
@@ -640,7 +668,7 @@ function renderOrder() {
     totalKg += c.kg;
     totalAmt += sub;
     return `
-    <div class="order-row">
+    <div class="order-row" data-order-id="${id}">
       <div class="order-row-icon">${c.item.icon}</div>
       <div class="order-row-info">
         <div class="order-row-name">${c.item.name}</div>
@@ -650,7 +678,7 @@ function renderOrder() {
         <button class="step-btn" onclick="setKg(${id},-0.1)">−</button>
         <input class="step-val-input" type="number" min="0.1" step="0.1"
           value="${c.kg}"
-          onchange="setKgDirect(${id}, this.value)"
+          oninput="setKgDirect(${id}, this.value)"
           onclick="this.select()">
         <button class="step-btn" onclick="setKg(${id},0.1)">+</button>
       </div>
@@ -703,7 +731,15 @@ async function saveBuyTransaction() {
 
     // ถ้าไม่ throw = สำเร็จ
     toast(`✓ บันทึกเรียบร้อย | ฿${totalAmt.toFixed(2)}`);
-    setTimeout(() => { cart = {}; renderGrid(); renderOrder(); loadItems(); }, 400);
+    setTimeout(() => {
+      cart = {};
+      // reset ปุ่มก่อน render
+      payBtn.innerHTML = '<i class="ph ph-check-circle"></i><span>บันทึกและจ่ายเงิน</span><span class="pay-amount-tag" id="pay-tag">฿0</span>';
+      payBtn.disabled = true;
+      renderGrid();
+      renderOrder();
+      loadItems();
+    }, 400);
   } catch (err) {
     toast('❌ บันทึกไม่สำเร็จ: ' + err.message, 'error');
     payBtn.disabled = false;

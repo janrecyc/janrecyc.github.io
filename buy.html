@@ -694,7 +694,8 @@ async function saveBuyTransaction() {
       prefer: 'return=representation',
     });
 
-    if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
+    const data = Array.isArray(result) ? result[0] : result;
+    if (!data || !data.success) throw new Error('RPC ไม่สำเร็จ');
 
     toast(`✓ บันทึกเรียบร้อย | ฿${totalAmt.toFixed(2)}`);
     setTimeout(() => { cart = {}; renderGrid(); renderOrder(); loadItems(); }, 400);

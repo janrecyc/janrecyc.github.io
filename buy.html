@@ -512,7 +512,7 @@ async function loadItems() {
 
   try {
     // ตาราง: items (id, name, icon, buy_price, unit, cat)
-    ITEMS = await sbFetch('items?select=id,name,icon,buy_price,unit,cat&order=cat,name');
+    ITEMS = await sbFetch('items?select=id,name,icon,buy_price,unit,cat&order=cat,name') || [];
     renderGrid();
   } catch (err) {
     grid.innerHTML = `<div class="grid-loading"><i class="ph ph-warning-circle" style="font-size:28px;color:var(--red);"></i><span style="font-size:13px;color:var(--red);">โหลดไม่สำเร็จ: ${err.message}</span></div>`;

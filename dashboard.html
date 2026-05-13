@@ -550,6 +550,18 @@ async function sbFetch(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+
+// ── CATEGORIES (dynamic) ──
+let CATS = [];
+function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
+function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
+async function loadCats() {
+  try {
+    const res = await sbFetch('categories?select=slug,label,icon&order=id');
+    if (res && res.length) CATS = res;
+  } catch(_) {}
+}
+
 // ══════════════════════════════════════════
 //  LOAD DATA
 // ══════════════════════════════════════════
@@ -575,6 +587,9 @@ async function loadDashboard() {
     ALL_TXNS = await sbFetch(
       'transactions?select=type,total_amount,total_kg,factory_name,created_at&order=created_at.asc'
     ) || [];
+
+    // load categories for stock table labels
+    await loadCats();
 
     // 3. สร้าง weekly chart จาก transactions จริง 7 วันล่าสุด
     WEEKLY_DATA = buildWeeklyData(ALL_TXNS);
@@ -784,6 +799,9 @@ async function saveCash() {
     ALL_TXNS = await sbFetch(
       'transactions?select=type,total_amount,total_kg,factory_name,created_at&order=created_at.asc'
     ) || [];
+
+    // load categories for stock table labels
+    await loadCats();
     toast(cashType === 'deposit' ? `✅ เติมเงิน ฿${fmt(amt)}` : `✅ ถอนเงิน ฿${fmt(amt)}`);
     document.getElementById('cash-modal').classList.remove('show');
     render(RANGE_MULT[activeRange]);

@@ -233,14 +233,7 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
         <input type="text" id="search-1" placeholder="ค้นหาวัตถุดิบ...">
       </div>
     </div>
-    <div class="cat-bar">
-      <button class="cat-btn on" data-cat="all">ทั้งหมด</button>
-      <button class="cat-btn" data-cat="metal">🔩 โลหะ</button>
-      <button class="cat-btn" data-cat="paper">📰 กระดาษ</button>
-      <button class="cat-btn" data-cat="plastic">♻️ พลาสติก</button>
-      <button class="cat-btn" data-cat="glass">🪟 แก้ว</button>
-      <button class="cat-btn" data-cat="electric">⚡ ไฟฟ้า</button>
-    </div>
+    <div class="cat-bar" id="cat-bar"><button class="cat-btn on" data-cat="all">ทั้งหมด</button></div>
     <div class="item-grid-wrap">
       <div class="item-grid" id="grid-1">
         <div class="grid-empty">
@@ -414,6 +407,31 @@ const DEMO_ITEMS = [
 let ALL_ITEMS    = [];
 let selectedFrom = null;
 let selectedTos  = {};   // { id: { item, kg } }
+let CATS = [];
+function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
+function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
+
+async function loadCats() {
+  try {
+    const res = await sbFetch('categories?select=slug,label,icon&order=id');
+    if (res && res.length) CATS = res;
+  } catch(_) {}
+}
+
+function renderCatBar() {
+  const bar = document.getElementById('cat-bar');
+  if (!bar) return;
+  bar.innerHTML = '<button class="cat-btn on" data-cat="all">ทั้งหมด</button>'
+    + CATS.map(c=>`<button class="cat-btn" data-cat="${c.slug}">${c.icon} ${c.label}</button>`).join('');
+  bar.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('on', b===btn));
+      activeCat = btn.dataset.cat;
+      renderGrid1();
+    });
+  });
+}
+
 let activeCat    = 'all';
 let q1           = '';
 let currentStep  = 1;
@@ -446,6 +464,8 @@ async function sbFetch(path, opts = {}) {
 //  LOAD ITEMS
 // ══════════════════════════════════════════
 async function loadItems() {
+  await loadCats();
+  renderCatBar();
   const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
   if (!SUPABASE_READY) {
     ALL_ITEMS = DEMO_ITEMS;
@@ -554,14 +574,13 @@ function renderGrid2() {
 
   // จัดกลุ่มตาม cat
   const cats = [...new Set(list.map(x => x.cat))];
-  const catLabel = {metal:'โลหะ',paper:'กระดาษ',plastic:'พลาสติก',glass:'แก้ว',electric:'ไฟฟ้า'};
-  const catEmoji = {metal:'🔩',paper:'📰',plastic:'♻️',glass:'🪟',electric:'⚡'};
+  // cat label/icon from dynamic CATS
 
   grid.innerHTML = cats.map(cat => {
     const items = list.filter(x => x.cat === cat);
     return `
     <div style="grid-column:1/-1;padding-top:6px;">
-      <div style="font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;padding:0 4px 6px;">${catEmoji[cat]||''} ${catLabel[cat]||cat}</div>
+      <div style="font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:1px;text-transform:uppercase;padding:0 4px 6px;">${catIcon(cat)} ${catLabel(cat)}</div>
     </div>
     ${items.map(item => {
       const sel = !!selectedTos[item.id];
@@ -808,10 +827,8 @@ function resetAll() {
   document.getElementById('from-kg').value = '';
   document.getElementById('btn-next-1').disabled = true;
 
-  // reset cat buttons
-  document.querySelectorAll('.cat-btn').forEach(b => {
-    b.classList.toggle('on', b.dataset.cat === 'all');
-  });
+  activeCat = 'all';
+  renderCatBar();
 
   goStep(1);
   renderGrid1();

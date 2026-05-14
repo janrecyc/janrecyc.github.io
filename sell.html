@@ -325,11 +325,16 @@ nav{
   margin:0 20px 10px;
   padding:8px 14px;border-radius:12px;
   font-size:12px;font-weight:500;
-  display:flex;align-items:center;gap:6px;
+  align-items:center;gap:6px;
   background:rgba(255,159,10,0.1);color:#7A4A00;
-  display:none;
+  display:flex;
+  max-height:0; overflow:hidden; opacity:0;
+  transition: max-height .2s, opacity .2s, margin .2s;
+  margin-bottom:0;
 }
-.kg-stock-warning.show{display:flex;}
+.kg-stock-warning.show{
+  max-height:60px; opacity:1; margin-bottom:10px;
+}
 .kg-stock-warning i{font-size:14px;color:var(--amber);}
 
 /* Presets */
@@ -815,6 +820,7 @@ let kgModalItemId = null;
 let kgBuffer      = '';
 
 function openKgModal(id) {
+  id = Number(id);
   const item = ITEMS.find(x => x.id === id);
   if (!item) return;
   kgModalItemId = id;
@@ -923,7 +929,7 @@ function rippleKey(e) {
 function confirmKg() {
   const val = parseFloat(kgBuffer);
   if (!val || val <= 0 || !kgModalItemId) { closeKgModal(); return; }
-  const id   = kgModalItemId;
+  const id   = Number(kgModalItemId);
   const item = ITEMS.find(x => x.id === id);
   if (!item) { closeKgModal(); return; }
 
@@ -959,10 +965,15 @@ function clearCart() {
   toast('ล้างรายการแล้ว');
 }
 function removeFromCart(id) {
-  delete cart[id];
+  delete cart[Number(id)];
   renderCartList();
   renderGrid();
   renderCartBadge();
+}
+
+function editFromCart(id) {
+  closeCartModal();
+  setTimeout(() => openKgModal(Number(id)), 350);
 }
 
 function renderCartBadge() {
@@ -1009,7 +1020,7 @@ function renderCartList() {
         <div class="cart-row-name">${c.item.name}</div>
         <div class="cart-row-sub">${kgDisp} กก. × ฿${price} = <b>฿${sub.toFixed(2)}</b></div>
       </div>
-      <button class="cart-row-weight-btn" onclick="closeCartModal();openKgModal(${id})">
+      <button class="cart-row-weight-btn" onclick="editFromCart(${id})">
         <span class="cart-row-weight-val">${kgDisp}</span>
         <span class="cart-row-weight-unit">กก.</span>
         <i class="ph ph-pencil-simple cart-row-weight-icon"></i>
@@ -1140,14 +1151,15 @@ function renderGrid() {
   }
 
   grid.innerHTML = list.map(item => {
-    const inCart = !!cart[item.id];
-    const qty    = inCart ? cart[item.id].kg : 0;
+    const nid    = Number(item.id);
+    const inCart = !!cart[nid];
+    const qty    = inCart ? cart[nid].kg : 0;
     const stock  = item.stock_qty || 0;
     const cls    = stockClass(stock);
     const oos    = stock <= 0;
     const kgDisp = qty % 1 === 0 ? qty : qty.toFixed(1);
     return `
-    <div class="item-card ${inCart?'selected':''} ${oos?'out-of-stock':''}" onclick="openKgModal(${item.id})">
+    <div class="item-card ${inCart?'selected':''} ${oos?'out-of-stock':''}" onclick="openKgModal(${nid})">
       <div class="card-badge">${kgDisp}</div>
       <div class="card-icon">${renderIcon(item.icon, item.cat, 26)}</div>
       <div class="card-name">${item.name}</div>
@@ -1157,7 +1169,7 @@ function renderGrid() {
       </div>
       <div class="card-bottom">
         <div class="card-price">฿${Number(item.sell_price).toFixed(2)}<span class="card-price-unit">/${item.unit||'กก.'}</span></div>
-        <button class="card-add-btn" onclick="event.stopPropagation();openKgModal(${item.id})">
+        <button class="card-add-btn" onclick="event.stopPropagation();openKgModal(${nid})">
           <i class="ph ${inCart?'ph-pencil':'ph-plus'}"></i>
         </button>
       </div>
@@ -1244,6 +1256,13 @@ function toast(msg, type = '') {
 // INIT
 (async () => {
   _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  if (!SUPABASE_READY) {
+    window.AUTH = { user: { email: 'demo@demo.com' }, logout: () => {} };
+    loadItems();
+    return;
+  }
+
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) {
     window.location.replace('login.html');

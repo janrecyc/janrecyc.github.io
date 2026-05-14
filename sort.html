@@ -194,10 +194,34 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 .nav-tab.on .nav-tab-indicator{width:24px;}
 
 /* ── TOAST ── */
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,10,30,0.88);color:white;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px);z-index:999;}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-#toast.success{background:rgba(0,184,107,0.92);}
-#toast.error{background:rgba(255,59,48,0.9);}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,10,30,0.88);color:white;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;white-space:normal;max-width:calc(100vw - 40px);text-align:center;backdrop-filter:blur(8px);z-index:999;}
+#toast.toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.toast-success{background:rgba(0,184,107,0.92);}
+#toast.toast-error{background:rgba(255,59,48,0.9);}
+
+/* Phosphor icon pill (iOS app-icon style) */
+.ph-icon-wrap {
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:14px;
+  flex-shrink:0;
+}
+
+/* SUPABASE CONFIG BANNER */
+.config-banner {
+  background:#FFF3CD; border-bottom:2px solid #FF9F0A;
+  padding:8px 20px; font-size:12px; font-weight:500; color:#664D03;
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
+}
+.config-banner i { color:var(--amber); font-size:16px; }
+
+/* LOADING OVERLAY */
+.loading-overlay {
+  position:fixed; inset:0; background:rgba(245,245,250,0.85);
+  display:flex; align-items:center; justify-content:center;
+  z-index:500; backdrop-filter:blur(4px);
+  transition:opacity .3s;
+}
+.loading-overlay.hidden { opacity:0; pointer-events:none; }
 
 .spin{animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -206,6 +230,11 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 <body>
 
 <div class="status-bar"></div>
+
+<div class="config-banner" id="config-banner" style="display:none;">
+  <i class="ph ph-warning-circle"></i>
+  <span>กรุณาตั้งค่า Supabase ใน <b>supabase.js</b> — ตอนนี้ใช้ข้อมูล Demo</span>
+</div>
 
 <header>
   <div class="header-top">
@@ -386,20 +415,42 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 //  DEMO DATA
 // ══════════════════════════════════════════
 const DEMO_ITEMS = [
-  {id:1,  name:'เหล็กหนัก',          icon:'🔩', buy_price:4.50, sell_price:5.80, stock_qty:4200, cat:'metal'},
-  {id:2,  name:'เหล็กบาง',           icon:'🔧', buy_price:2.80, sell_price:3.50, stock_qty:1800, cat:'metal'},
-  {id:3,  name:'ทองแดง',             icon:'🪙', buy_price:195,  sell_price:215,  stock_qty:320,  cat:'metal'},
-  {id:4,  name:'อลูมิเนียม',         icon:'🫗', buy_price:42,   sell_price:50,   stock_qty:960,  cat:'metal'},
-  {id:5,  name:'สแตนเลส',            icon:'⚙️', buy_price:18,   sell_price:22,   stock_qty:550,  cat:'metal'},
-  {id:6,  name:'กระดาษหนังสือพิมพ์', icon:'📰', buy_price:2.20, sell_price:2.80, stock_qty:3000, cat:'paper'},
-  {id:7,  name:'กระดาษลัง',          icon:'📦', buy_price:2.50, sell_price:3.20, stock_qty:5200, cat:'paper'},
-  {id:8,  name:'กระดาษขาว',          icon:'📄', buy_price:3.00, sell_price:3.80, stock_qty:1100, cat:'paper'},
-  {id:9,  name:'พลาสติกขาว',         icon:'🥛', buy_price:8.50, sell_price:11,   stock_qty:780,  cat:'plastic'},
-  {id:10, name:'ขวด PET',            icon:'🍶', buy_price:6.00, sell_price:8.00, stock_qty:620,  cat:'plastic'},
-  {id:11, name:'แก้วใส',             icon:'🪟', buy_price:1.20, sell_price:1.60, stock_qty:2100, cat:'glass'},
-  {id:12, name:'สายไฟทองแดง',        icon:'🔌', buy_price:85,   sell_price:100,  stock_qty:180,  cat:'electric'},
-  {id:13, name:'มอเตอร์เก่า',        icon:'⚡', buy_price:25,   sell_price:32,   stock_qty:95,   cat:'electric'},
+  {id:1,  name:'เหล็กหนัก',          icon:'ph-wrench',         buy_price:4.50, sell_price:5.80, stock_qty:4200, cat:'metal'},
+  {id:2,  name:'เหล็กบาง',           icon:'ph-pipe',           buy_price:2.80, sell_price:3.50, stock_qty:1800, cat:'metal'},
+  {id:3,  name:'ทองแดง',             icon:'ph-coins',          buy_price:195,  sell_price:215,  stock_qty:320,  cat:'metal'},
+  {id:4,  name:'อลูมิเนียม',         icon:'ph-steps',          buy_price:42,   sell_price:50,   stock_qty:960,  cat:'metal'},
+  {id:5,  name:'สแตนเลส',            icon:'ph-gear-six',       buy_price:18,   sell_price:22,   stock_qty:550,  cat:'metal'},
+  {id:6,  name:'กระดาษหนังสือพิมพ์', icon:'ph-newspaper',      buy_price:2.20, sell_price:2.80, stock_qty:3000, cat:'paper'},
+  {id:7,  name:'กระดาษลัง',          icon:'ph-package',        buy_price:2.50, sell_price:3.20, stock_qty:5200, cat:'paper'},
+  {id:8,  name:'กระดาษขาว',          icon:'ph-file-text',      buy_price:3.00, sell_price:3.80, stock_qty:1100, cat:'paper'},
+  {id:9,  name:'พลาสติกขาว',         icon:'ph-cube',           buy_price:8.50, sell_price:11,   stock_qty:780,  cat:'plastic'},
+  {id:10, name:'ขวด PET',            icon:'ph-flask',          buy_price:6.00, sell_price:8.00, stock_qty:620,  cat:'plastic'},
+  {id:11, name:'แก้วใส',             icon:'ph-coffee',         buy_price:1.20, sell_price:1.60, stock_qty:2100, cat:'glass'},
+  {id:12, name:'สายไฟทองแดง',        icon:'ph-plug-charging',  buy_price:85,   sell_price:100,  stock_qty:180,  cat:'electric'},
+  {id:13, name:'มอเตอร์เก่า',        icon:'ph-lightning',      buy_price:25,   sell_price:32,   stock_qty:95,   cat:'electric'},
 ];
+
+// icon bg color per category — iOS-style colored pill
+const CAT_COLOR = {
+  metal:    {bg:'#E8EDF8', fg:'#3A6CC8'},
+  paper:    {bg:'#FFF3E0', fg:'#E07A20'},
+  plastic:  {bg:'#E8F5E9', fg:'#2E7D32'},
+  glass:    {bg:'#E3F2FD', fg:'#1565C0'},
+  electric: {bg:'#FFF9C4', fg:'#F57F17'},
+  default:  {bg:'#F3F0FF', fg:'#5E35B1'},
+};
+function itemColor(cat){ return CAT_COLOR[cat] || CAT_COLOR.default; }
+
+// render icon — if it looks like a ph-* class use Phosphor, else show as emoji text
+function renderIcon(icon, cat, size=28) {
+  if (icon && icon.startsWith('ph-')) {
+    const c = itemColor(cat);
+    return `<span class="ph-icon-wrap" style="background:${c.bg};color:${c.fg};width:${size+16}px;height:${size+16}px;font-size:${size}px;">
+      <i class="ph-fill ${icon}"></i></span>`;
+  }
+  // fallback: emoji
+  return `<span style="font-size:${size}px;line-height:1;">${icon}</span>`;
+}
 
 // ══════════════════════════════════════════
 //  STATE
@@ -469,7 +520,9 @@ async function loadItems() {
   const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
   if (!SUPABASE_READY) {
     ALL_ITEMS = DEMO_ITEMS;
+    document.getElementById('config-banner').style.display = 'flex';
   } else {
+    document.getElementById('config-banner').style.display = 'none';
     try {
       ALL_ITEMS = await sbFetch('items?select=id,name,icon,buy_price,sell_price,stock_qty,cat&order=cat,name');
     } catch (err) {
@@ -504,7 +557,7 @@ function renderGrid1() {
       onclick="${empty ? `toast('สต๊อกหมด','error')` : `selectFrom(${item.id})`}"
       style="${empty ? 'opacity:.45;' : ''}">
       <div class="card-check"><i class="ph ph-check-bold"></i></div>
-      <div class="card-icon">${item.icon}</div>
+      <div class="card-icon">${renderIcon(item.icon, item.cat, 26)}</div>
       <div class="card-name">${item.name}</div>
       <div class="card-stock" style="${stockColor}">
         ${empty ? '❌ หมดสต๊อก' : stock.toLocaleString('th-TH') + ' กก.'}
@@ -523,7 +576,7 @@ function selectFrom(id) {
   document.getElementById('bar-idle').style.display = 'none';
   document.getElementById('bar-kg').style.display   = 'block';
   document.getElementById('kg-bar-item-name').textContent = selectedFrom.name;
-  document.getElementById('sel-item-name-bar').textContent = `${selectedFrom.icon} ${selectedFrom.name}`;
+  document.getElementById('sel-item-name-bar').innerHTML  = `${renderIcon(selectedFrom.icon, selectedFrom.cat, 16)} ${selectedFrom.name}`;
   document.getElementById('sel-item-sub-bar').textContent  = 'กรอกน้ำหนักที่ต้องการคัดแยก';
 
   const stockEl = document.getElementById('kg-bar-stock');
@@ -559,7 +612,7 @@ function onKgInput() {
 // ══════════════════════════════════════════
 function renderGrid2() {
   // อัปเดต chip
-  document.getElementById('s2-from-icon').textContent = selectedFrom.icon;
+  document.getElementById('s2-from-icon').innerHTML = renderIcon(selectedFrom.icon, selectedFrom.cat, 20);
   document.getElementById('s2-from-name').textContent = selectedFrom.name;
   document.getElementById('s2-from-kg').textContent   = getFromKg() + ' กก.';
 
@@ -587,7 +640,7 @@ function renderGrid2() {
       return `
       <div class="result-card ${sel ? 'selected' : ''}" onclick="toggleTo(${item.id})">
         <div class="card-check"><i class="ph ph-check-bold"></i></div>
-        <div class="result-icon">${item.icon}</div>
+        <div class="result-icon">${renderIcon(item.icon, item.cat, 24)}</div>
         <div class="result-name">${item.name}</div>
         <div class="result-price">฿${Number(item.sell_price).toFixed(2)}<span class="result-price-unit">/กก.</span></div>
       </div>`;
@@ -634,7 +687,7 @@ function updateStep2Footer() {
 //  STEP 3 — ใส่น้ำหนัก
 // ══════════════════════════════════════════
 function renderStep3() {
-  document.getElementById('s3-from-icon').textContent = selectedFrom.icon;
+  document.getElementById('s3-from-icon').innerHTML = renderIcon(selectedFrom.icon, selectedFrom.cat, 20);
   document.getElementById('s3-from-name').textContent = selectedFrom.name;
   document.getElementById('s3-from-kg').textContent   = getFromKg() + ' กก.';
 
@@ -644,7 +697,7 @@ function renderStep3() {
   // สร้าง rows สำหรับแต่ละสินค้าที่เลือก
   const rowsHtml = Object.values(selectedTos).map(t => `
     <div class="weight-item" id="wi-${t.item.id}">
-      <div class="wi-icon">${t.item.icon}</div>
+      <div class="wi-icon">${renderIcon(t.item.icon, t.item.cat, 22)}</div>
       <div class="wi-info">
         <div class="wi-name">${t.item.name}</div>
         <div class="wi-price">฿${Number(t.item.sell_price).toFixed(2)}/กก.</div>
@@ -849,7 +902,7 @@ document.getElementById('search-1').addEventListener('input', e => {
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = type ? `show ${type}` : 'show';
+  el.className = 'toast-show' + (type === 'error' ? ' toast-error' : type === 'success' ? ' toast-success' : '');
   clearTimeout(toast._t);
   toast._t = setTimeout(() => { el.className = ''; }, 2400);
 }
@@ -859,6 +912,15 @@ function toast(msg, type = '') {
 // ══════════════════════════════════════════
 (async () => {
   const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
+
+  if (!SUPABASE_READY) {
+    // Demo mode — ข้าม auth
+    window.AUTH = { token: null, user: { email: 'demo@demo.com' }, logout: () => {} };
+    loadItems();
+    return;
+  }
+
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) {
     window.location.replace('login.html');

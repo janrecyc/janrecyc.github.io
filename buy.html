@@ -518,21 +518,18 @@ nav {
 
     <div class="kg-numpad">
       <!-- Row 1 -->
-      <button class="kg-key" onclick="kpNum('1')"><span class="kg-key-num">1</span></button>
-      <button class="kg-key" onclick="kpNum('2')"><span class="kg-key-num">2</span><span class="kg-key-sub">ABC</span></button>
-      <button class="kg-key" onclick="kpNum('3')"><span class="kg-key-num">3</span><span class="kg-key-sub">DEF</span></button>
-      <!-- Row 2 -->
-      <button class="kg-key" onclick="kpNum('4')"><span class="kg-key-num">4</span><span class="kg-key-sub">GHI</span></button>
-      <button class="kg-key" onclick="kpNum('5')"><span class="kg-key-num">5</span><span class="kg-key-sub">JKL</span></button>
-      <button class="kg-key" onclick="kpNum('6')"><span class="kg-key-num">6</span><span class="kg-key-sub">MNO</span></button>
-      <!-- Row 3 -->
-      <button class="kg-key" onclick="kpNum('7')"><span class="kg-key-num">7</span><span class="kg-key-sub">PQRS</span></button>
-      <button class="kg-key" onclick="kpNum('8')"><span class="kg-key-num">8</span><span class="kg-key-sub">TUV</span></button>
-      <button class="kg-key" onclick="kpNum('9')"><span class="kg-key-num">9</span><span class="kg-key-sub">WXYZ</span></button>
-      <!-- Row 4 -->
-      <button class="kg-key dark" onclick="kpDot()"><span class="kg-key-num" style="font-size:20px">.</span></button>
-      <button class="kg-key" onclick="kpNum('0')"><span class="kg-key-num">0</span></button>
-      <button class="kg-key dark" onclick="kpBack()"><i class="ph ph-delete-simple kg-key-icon"></i></button>
+      <button class="kg-key" onclick="kpNum('1',event)"><span class="kg-key-num">1</span></button>
+      <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span><span class="kg-key-sub">ABC</span></button>
+      <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span><span class="kg-key-sub">DEF</span></button>
+      <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span><span class="kg-key-sub">GHI</span></button>
+      <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span><span class="kg-key-sub">JKL</span></button>
+      <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span><span class="kg-key-sub">MNO</span></button>
+      <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span><span class="kg-key-sub">PQRS</span></button>
+      <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span><span class="kg-key-sub">TUV</span></button>
+      <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span><span class="kg-key-sub">WXYZ</span></button>
+      <button class="kg-key dark" onclick="kpDot(event)"><span class="kg-key-num" style="font-size:20px">.</span></button>
+      <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
+      <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
     </div>
 
     <div class="kg-confirm-row">
@@ -650,27 +647,25 @@ function updateKgDisplay() {
   }
 }
 
-function kpNum(n) {
-  // max 7 chars to prevent overflow
+function kpNum(n, e) {
   if (kgBuffer.length >= 7) return;
-  // ป้องกัน leading zeros
   if (kgBuffer === '0') kgBuffer = n;
   else kgBuffer += n;
-  rippleKey(event);
+  rippleKey(e);
   updateKgDisplay();
 }
 
-function kpDot() {
-  if (kgBuffer.includes('.')) return; // dot once only
+function kpDot(e) {
+  if (kgBuffer.includes('.')) return;
   if (!kgBuffer) kgBuffer = '0';
   kgBuffer += '.';
-  rippleKey(event);
+  rippleKey(e);
   updateKgDisplay();
 }
 
-function kpBack() {
+function kpBack(e) {
   kgBuffer = kgBuffer.slice(0, -1);
-  rippleKey(event);
+  rippleKey(e);
   updateKgDisplay();
 }
 
@@ -893,6 +888,14 @@ function toast(msg, type = '') {
 // INIT
 (async () => {
   _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  if (!SUPABASE_READY) {
+    // Demo mode — ข้าม auth
+    window.AUTH = { user: { email: 'demo@demo.com' }, logout: () => {} };
+    loadItems();
+    return;
+  }
+
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) {
     window.location.replace('login.html');

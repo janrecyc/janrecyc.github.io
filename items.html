@@ -647,8 +647,7 @@ const DEMO_ITEMS = [
   {id:13, name:'มอเตอร์เก่า',        icon:'⚡', buy_price:25,    sell_price:32,    stock_qty:95,   unit:'กก.', cat:'electric'},
 ];
 
-const ICONS = ['🔩','🔧','🪙','🫗','⚙️','📰','📦','📄','🥛','🍶','🪟','🔌','⚡','🏗️','🛢️','🪤','🔑','🪝','🛞','🪜','🧲','💡','🔋','📡','🪚','🔨','⛏️','🪛'];
-const ICON_OPTS = ['📦','🔩','🔧','🪙','🫗','⚙️','📰','📄','🥛','🍶','🪟','🔌','⚡','🏗️','🛢️','♻️','🪤','🔑','🪝','🛞','🪜','🧲','💡','🔋','📡','🪚','🔨','⛏️','🪛'];
+const ICONS = ['📦','🔩','🔧','🪙','🫗','⚙️','📰','📄','🥛','🍶','🪟','🔌','⚡','🏗️','🛢️','♻️','🪤','🔑','🪝','🛞','🪜','🧲','💡','🔋','📡','🪚','🔨','⛏️','🪛'];
 
 // หมวดหมู่ dynamic (โหลดจาก Supabase)
 let CATS = [
@@ -761,7 +760,7 @@ function renderList() {
     const spread = sell - buy;
     return `
     <div class="item-row" onclick="openEdit(${item.id})">
-      <div class="item-icon">${item.icon || '📦'}</div>
+      <div class="item-icon">${item.icon && item.icon.trim() ? item.icon.trim() : '📦'}</div>
       <div class="item-info">
         <div class="item-name">${item.name}</div>
         <div class="item-meta">

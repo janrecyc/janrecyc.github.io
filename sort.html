@@ -94,27 +94,82 @@ header{background:var(--white);padding:14px 20px 12px;flex-shrink:0;border-botto
 .spin{animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── ITEM SELECTED INFO (panel-1 footer, normal flow) ── */
-.bottom-bar{flex-shrink:0;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);padding:10px 20px calc(env(safe-area-inset-bottom,0px)+6px);display:flex;align-items:center;gap:12px;}
-.bottom-bar-info{flex:1;min-width:0;}
-.bottom-bar-title{font-size:13px;font-weight:700;}
+/* ── BOTTOM BAR ── */
+.bottom-bar{
+  flex-shrink:0;
+  padding:10px 16px calc(env(safe-area-inset-bottom,0px)+10px);
+  background:var(--white);
+  border-top:1px solid rgba(10,10,30,0.06);
+}
+
+/* idle state */
+.bar-idle-inner{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface);
+  border-radius:18px;padding:14px 16px;
+}
+.bar-idle-icon{
+  width:40px;height:40px;border-radius:14px;
+  background:rgba(10,10,30,0.06);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink3);font-size:20px;flex-shrink:0;
+}
+.bar-idle-text{flex:1;}
+.bottom-bar-title{font-size:13px;font-weight:700;color:var(--ink);}
 .bottom-bar-sub{font-size:11px;color:var(--ink3);margin-top:2px;}
+.bar-idle-btn{
+  padding:10px 18px;border-radius:14px;
+  background:rgba(10,10,30,0.06);border:none;
+  font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;
+  color:var(--ink3);display:flex;align-items:center;gap:6px;flex-shrink:0;
+  opacity:.5;pointer-events:none;
+}
+
+/* selected state */
+.bar-selected-inner{display:flex;flex-direction:column;gap:10px;}
+.bar-selected-top{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(0,184,107,0.06);
+  border:1px solid rgba(0,184,107,0.15);
+  border-radius:18px;padding:12px 14px;
+}
+.bar-selected-icon{
+  width:40px;height:40px;border-radius:14px;
+  background:rgba(0,184,107,0.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.bar-selected-info{flex:1;min-width:0;}
+.bar-selected-name{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bar-selected-stock{font-size:11px;color:var(--ink3);margin-top:2px;}
 
 /* weight pill */
 .from-weight-pill{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(0,184,107,0.08);border:1.5px solid rgba(0,184,107,0.2);
-  border-radius:12px;padding:7px 14px;cursor:pointer;
-  transition:all .15s;flex-shrink:0;
+  display:flex;align-items:center;gap:4px;
+  background:var(--white);
+  border:1.5px solid rgba(0,184,107,0.3);
+  border-radius:12px;padding:8px 12px;
+  cursor:pointer;transition:all .15s;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,184,107,0.12);
 }
-.from-weight-pill:active{background:rgba(0,184,107,0.18);}
-.from-weight-val{font-family:'Prompt',sans-serif;font-size:16px;font-weight:800;color:var(--primary);min-width:36px;text-align:right;}
-.from-weight-unit{font-size:11px;color:var(--ink3);font-weight:500;}
-.from-weight-icon{font-size:13px;color:var(--ink3);}
+.from-weight-pill:active{transform:scale(0.94);background:rgba(0,184,107,0.06);}
+.from-weight-val{font-family:'Prompt',sans-serif;font-size:17px;font-weight:800;color:var(--primary);min-width:28px;text-align:right;line-height:1;}
+.from-weight-unit{font-size:10px;color:var(--ink3);font-weight:600;align-self:flex-end;margin-bottom:1px;}
+.from-weight-icon{font-size:12px;color:var(--primary);margin-left:2px;}
 
-.next-btn{padding:13px 20px;border-radius:14px;background:var(--primary);color:white;border:none;font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;transition:background .15s;box-shadow:0 4px 14px rgba(0,184,107,0.3);}
+.bar-selected-bottom{display:flex;gap:10px;}
+
+/* next button */
+.next-btn{
+  flex:1;padding:14px;border-radius:16px;
+  background:var(--primary);color:white;border:none;
+  font-family:'Prompt',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:8px;transition:all .15s;
+  box-shadow:0 4px 16px rgba(0,184,107,0.35);
+}
 .next-btn:disabled{opacity:.35;pointer-events:none;box-shadow:none;}
-.next-btn:active{background:var(--primary-d);}
+.next-btn:active{background:var(--primary-d);transform:scale(0.98);}
 
 /* ── FROM CHIP (step 2 & 3) ── */
 .from-chip{display:flex;align-items:center;gap:10px;background:rgba(0,184,107,0.07);border:1px solid rgba(0,184,107,0.18);border-radius:16px;padding:11px 14px;margin:10px 20px 0;flex-shrink:0;}
@@ -306,27 +361,37 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 
     <!-- bottom bar idle -->
     <div class="bottom-bar" id="bar-idle">
-      <div class="bottom-bar-info">
-        <div class="bottom-bar-title">ยังไม่ได้เลือกวัตถุดิบ</div>
-        <div class="bottom-bar-sub">แตะสินค้าด้านบนเพื่อเลือก</div>
+      <div class="bar-idle-inner">
+        <div class="bar-idle-icon"><i class="ph ph-arrow-fat-lines-right"></i></div>
+        <div class="bar-idle-text">
+          <div class="bottom-bar-title">เลือกวัตถุดิบก่อน</div>
+          <div class="bottom-bar-sub">แตะสินค้าด้านบนเพื่อเริ่ม</div>
+        </div>
+        <div class="bar-idle-btn">ถัดไป <i class="ph ph-arrow-right"></i></div>
       </div>
-      <button class="next-btn" disabled>ถัดไป <i class="ph ph-arrow-right"></i></button>
     </div>
 
     <!-- bottom bar selected -->
     <div class="bottom-bar" id="bar-selected" style="display:none;">
-      <div class="bottom-bar-info">
-        <div class="bottom-bar-title" id="bar-item-name">—</div>
-        <div class="bottom-bar-sub" id="bar-item-stock">—</div>
+      <div class="bar-selected-inner">
+        <div class="bar-selected-top">
+          <div class="bar-selected-icon" id="bar-item-icon">⚡</div>
+          <div class="bar-selected-info">
+            <div class="bar-selected-name" id="bar-item-name">—</div>
+            <div class="bar-selected-stock" id="bar-item-stock">—</div>
+          </div>
+          <button class="from-weight-pill" onclick="openFromKgModal()" id="from-weight-pill">
+            <span class="from-weight-val" id="from-weight-display">0</span>
+            <span class="from-weight-unit">กก.</span>
+            <i class="ph ph-pencil-simple from-weight-icon"></i>
+          </button>
+        </div>
+        <div class="bar-selected-bottom">
+          <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
+            ถัดไป <i class="ph ph-arrow-right"></i>
+          </button>
+        </div>
       </div>
-      <button class="from-weight-pill" onclick="openFromKgModal()" id="from-weight-pill">
-        <span class="from-weight-val" id="from-weight-display">0</span>
-        <span class="from-weight-unit">กก.</span>
-        <i class="ph ph-pencil-simple from-weight-icon"></i>
-      </button>
-      <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
-        ถัดไป <i class="ph ph-arrow-right"></i>
-      </button>
     </div>
   </div>
 
@@ -615,9 +680,10 @@ function selectFrom(id){
   // show bottom bar selected
   document.getElementById('bar-idle').style.display='none';
   document.getElementById('bar-selected').style.display='flex';
+  document.getElementById('bar-item-icon').innerHTML=renderIcon(item.icon,item.cat,22);
   document.getElementById('bar-item-name').textContent=item.name;
   const stock=Number(item.stock_qty||0);
-  document.getElementById('bar-item-stock').textContent=`สต๊อก ${stock.toLocaleString('th-TH')} กก.`;
+  document.getElementById('bar-item-stock').textContent=`สต๊อกคงเหลือ ${stock.toLocaleString('th-TH')} กก.`;
   document.getElementById('from-weight-display').textContent='0';
   document.getElementById('btn-next-1').disabled=true;
 }

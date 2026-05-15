@@ -165,7 +165,8 @@ header {
 .item-row:hover::before, .item-row:focus-within::before { opacity:1; }
 .item-row:active { transform:scale(0.985); }
 
-.item-icon { font-size:30px; flex-shrink:0; line-height:1; }
+.item-icon { flex-shrink:0; }
+.ph-icon-wrap{display:inline-flex;align-items:center;justify-content:center;border-radius:14px;flex-shrink:0;}
 
 .item-info { flex:1; min-width:0; }
 .item-name { font-size:14px; font-weight:700; color:var(--ink); }
@@ -647,7 +648,14 @@ const DEMO_ITEMS = [
   {id:13, name:'มอเตอร์เก่า',        icon:'⚡', buy_price:25,    sell_price:32,    stock_qty:95,   unit:'กก.', cat:'electric'},
 ];
 
-const ICONS = ['📦','🔩','🔧','🪙','🫗','⚙️','📰','📄','🥛','🍶','🪟','🔌','⚡','🏗️','🛢️','♻️','🪤','🔑','🪝','🛞','🪜','🧲','💡','🔋','📡','🪚','🔨','⛏️','🪛'];
+const ICONS = [
+  'ph-package','ph-wrench','ph-pipe','ph-coins','ph-gear-six',
+  'ph-newspaper','ph-file-text','ph-cube','ph-flask','ph-coffee',
+  'ph-plug-charging','ph-lightning','ph-recycle','ph-steps',
+  'ph-hammer','ph-axe','ph-screwdriver','ph-battery-full',
+  'ph-broadcast','ph-cpu','ph-magnet','ph-key','ph-hook',
+  'ph-truck','ph-warehouse','ph-barcode','ph-tag','ph-box-arrow-down',
+];
 
 // หมวดหมู่ dynamic (โหลดจาก Supabase)
 let CATS = [
@@ -657,6 +665,37 @@ let CATS = [
   {slug:'glass',   label:'แก้ว',    icon:'🪟'},
   {slug:'electric',label:'ไฟฟ้า',   icon:'⚡'},
 ];
+// ══════════════════════════════════════════════
+//  ICON / COLOR HELPERS (เหมือน sort.html)
+// ══════════════════════════════════════════════
+const CAT_COLOR = {
+  metal:    {bg:'#E8EDF8', fg:'#3A6CC8'},
+  paper:    {bg:'#FFF3E0', fg:'#E07A20'},
+  plastic:  {bg:'#E8F5E9', fg:'#2E7D32'},
+  glass:    {bg:'#E3F2FD', fg:'#1565C0'},
+  electric: {bg:'#FFF9C4', fg:'#F57F17'},
+  default:  {bg:'#F3F0FF', fg:'#5E35B1'},
+};
+const EMOJI_TO_PH = {
+  '🔩':'ph-wrench','🔧':'ph-pipe','🪙':'ph-coins','🫗':'ph-steps',
+  '⚙️':'ph-gear-six','⚙':'ph-gear-six','📰':'ph-newspaper',
+  '📦':'ph-package','📄':'ph-file-text','🥛':'ph-cube','🍶':'ph-flask',
+  '🪟':'ph-coffee','🔌':'ph-plug-charging','⚡':'ph-lightning',
+  '♻️':'ph-recycle','♻':'ph-recycle',
+};
+function resolveIcon(icon){
+  if(!icon) return 'ph-cube';
+  if(icon.startsWith('ph-')) return icon;
+  return EMOJI_TO_PH[icon] || null;
+}
+function itemColor(cat){ return CAT_COLOR[cat]||CAT_COLOR.default; }
+function renderIcon(icon, cat, size=26){
+  const ph = resolveIcon(icon);
+  const c  = itemColor(cat);
+  if(ph) return `<span class="ph-icon-wrap" style="background:${c.bg};color:${c.fg};width:${size+16}px;height:${size+16}px;font-size:${size}px;"><i class="ph-fill ${ph}"></i></span>`;
+  return `<span class="ph-icon-wrap" style="background:${c.bg};width:${size+16}px;height:${size+16}px;font-size:${size}px;">${icon}</span>`;
+}
+
 function catLabel(slug){ return CATS.find(c=>c.slug===slug)?.label || slug; }
 function catIcon(slug){  return CATS.find(c=>c.slug===slug)?.icon  || '📦'; }
 
@@ -760,7 +799,7 @@ function renderList() {
     const spread = sell - buy;
     return `
     <div class="item-row" onclick="openEdit(${item.id})">
-      <div class="item-icon">${item.icon && item.icon.trim() ? item.icon.trim() : '📦'}</div>
+      <div class="item-icon">${renderIcon(item.icon, item.cat, 24)}</div>
       <div class="item-info">
         <div class="item-name">${item.name}</div>
         <div class="item-meta">
@@ -787,14 +826,14 @@ function renderList() {
 // ══════════════════════════════════════════════
 function buildIconGrid() {
   document.getElementById('icon-grid').innerHTML = ICONS.map(ic => `
-    <div class="icon-opt ${ic===selectedIcon?'selected':''}" onclick="pickIcon('${ic}')">${ic}</div>
+    <div class="icon-opt ${ic===selectedIcon?'selected':''}" data-ic="${ic}" onclick="pickIcon('${ic}')"><i class="ph-fill ${ic}"></i></div>
   `).join('');
 }
 
 function pickIcon(ic) {
   selectedIcon = ic;
   document.querySelectorAll('.icon-opt').forEach(el => {
-    el.classList.toggle('selected', el.textContent === ic);
+    el.classList.toggle('selected', el.dataset.ic === ic);
   });
 }
 
@@ -858,7 +897,7 @@ function updatePreview() {
 // ══════════════════════════════════════════════
 function openAdd() {
   editingId = null;
-  selectedIcon = ICON_OPTS[0];
+  selectedIcon = ICONS[0];
   selectedCat  = '';
   document.getElementById('sheet-title').textContent = 'เพิ่มสินค้าใหม่';
   document.getElementById('save-label').textContent  = 'บันทึกสินค้า';
@@ -881,7 +920,7 @@ function openEdit(id) {
   const item = ALL_ITEMS.find(x => x.id === id);
   if (!item) return;
   editingId    = id;
-  selectedIcon = item.icon || ICON_OPTS[0];
+  selectedIcon = resolveIcon(item.icon) || ICONS[0];
   selectedCat  = item.cat  || '';
 
   document.getElementById('sheet-title').textContent = 'แก้ไขสินค้า';

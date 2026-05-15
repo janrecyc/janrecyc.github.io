@@ -94,14 +94,13 @@ header{background:var(--white);padding:14px 20px 12px;flex-shrink:0;border-botto
 .spin{animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── ITEM SELECTED INFO (inside modal) ── */
-.modal-item-info{padding:0 20px 10px;flex-shrink:0;}
-.modal-item-info-inner{background:var(--surface);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+/* ── ITEM SELECTED INFO (panel-1 footer, normal flow) ── */
+.bottom-bar{flex-shrink:0;background:var(--white);border-top:1px solid rgba(10,10,30,0.06);padding:10px 20px calc(env(safe-area-inset-bottom,0px)+6px);display:flex;align-items:center;gap:12px;}
 .bottom-bar-info{flex:1;min-width:0;}
 .bottom-bar-title{font-size:13px;font-weight:700;}
 .bottom-bar-sub{font-size:11px;color:var(--ink3);margin-top:2px;}
 
-/* weight pill in modal */
+/* weight pill */
 .from-weight-pill{
   display:flex;align-items:center;gap:6px;
   background:rgba(0,184,107,0.08);border:1.5px solid rgba(0,184,107,0.2);
@@ -113,10 +112,9 @@ header{background:var(--white);padding:14px 20px 12px;flex-shrink:0;border-botto
 .from-weight-unit{font-size:11px;color:var(--ink3);font-weight:500;}
 .from-weight-icon{font-size:13px;color:var(--ink3);}
 
-.next-btn{width:100%;padding:14px;border-radius:16px;background:var(--primary);color:white;border:none;font-family:'Prompt',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;flex-shrink:0;transition:background .15s;box-shadow:0 4px 14px rgba(0,184,107,0.3);}
+.next-btn{padding:13px 20px;border-radius:14px;background:var(--primary);color:white;border:none;font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;transition:background .15s;box-shadow:0 4px 14px rgba(0,184,107,0.3);}
 .next-btn:disabled{opacity:.35;pointer-events:none;box-shadow:none;}
 .next-btn:active{background:var(--primary-d);}
-.modal-next-row{padding:0 20px 10px;}
 
 /* ── FROM CHIP (step 2 & 3) ── */
 .from-chip{display:flex;align-items:center;gap:10px;background:rgba(0,184,107,0.07);border:1px solid rgba(0,184,107,0.18);border-radius:16px;padding:11px 14px;margin:10px 20px 0;flex-shrink:0;}
@@ -306,6 +304,30 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
       </div>
     </div>
 
+    <!-- bottom bar idle -->
+    <div class="bottom-bar" id="bar-idle">
+      <div class="bottom-bar-info">
+        <div class="bottom-bar-title">ยังไม่ได้เลือกวัตถุดิบ</div>
+        <div class="bottom-bar-sub">แตะสินค้าด้านบนเพื่อเลือก</div>
+      </div>
+      <button class="next-btn" disabled>ถัดไป <i class="ph ph-arrow-right"></i></button>
+    </div>
+
+    <!-- bottom bar selected -->
+    <div class="bottom-bar" id="bar-selected" style="display:none;">
+      <div class="bottom-bar-info">
+        <div class="bottom-bar-title" id="bar-item-name">—</div>
+        <div class="bottom-bar-sub" id="bar-item-stock">—</div>
+      </div>
+      <button class="from-weight-pill" onclick="openFromKgModal()" id="from-weight-pill">
+        <span class="from-weight-val" id="from-weight-display">0</span>
+        <span class="from-weight-unit">กก.</span>
+        <i class="ph ph-pencil-simple from-weight-icon"></i>
+      </button>
+      <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
+        ถัดไป <i class="ph ph-arrow-right"></i>
+      </button>
+    </div>
   </div>
 
   <!-- ══ STEP 2 ══ -->
@@ -415,36 +437,6 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
       <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
     </div>
-    <!-- item info (idle) -->
-    <div class="modal-item-info" id="bar-idle" style="display:none;">
-      <div class="modal-item-info-inner">
-        <div class="bottom-bar-info">
-          <div class="bottom-bar-title">ยังไม่ได้เลือกวัตถุดิบ</div>
-          <div class="bottom-bar-sub">แตะสินค้าด้านบนเพื่อเลือก</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- item info (selected) -->
-    <div class="modal-item-info" id="bar-selected" style="display:none;">
-      <div class="modal-item-info-inner">
-        <div class="bottom-bar-info">
-          <div class="bottom-bar-title" id="bar-item-name">—</div>
-          <div class="bottom-bar-sub" id="bar-item-stock">—</div>
-        </div>
-        <button class="from-weight-pill" onclick="openFromKgModal()" id="from-weight-pill">
-          <span class="from-weight-val" id="from-weight-display">0</span>
-          <span class="from-weight-unit">กก.</span>
-          <i class="ph ph-pencil-simple from-weight-icon"></i>
-        </button>
-      </div>
-    </div>
-    <div class="modal-next-row" id="bar-next-row" style="display:none;">
-      <button class="next-btn" id="btn-next-1" disabled onclick="goStep(2)">
-        ถัดไป <i class="ph ph-arrow-right"></i>
-      </button>
-    </div>
-
     <div class="kg-confirm-row">
       <button class="kg-confirm-btn" id="kg-confirm-btn" onclick="confirmKg()" disabled>
         <i class="ph ph-check-circle"></i>
@@ -623,13 +615,11 @@ function selectFrom(id){
   // show bottom bar selected
   document.getElementById('bar-idle').style.display='none';
   document.getElementById('bar-selected').style.display='flex';
-  document.getElementById('bar-next-row').style.display='block';
   document.getElementById('bar-item-name').textContent=item.name;
   const stock=Number(item.stock_qty||0);
   document.getElementById('bar-item-stock').textContent=`สต๊อก ${stock.toLocaleString('th-TH')} กก.`;
   document.getElementById('from-weight-display').textContent='0';
   document.getElementById('btn-next-1').disabled=true;
-  openFromKgModal();
 }
 
 // ── เปิด modal กรอก kg วัตถุดิบ ──
@@ -943,7 +933,6 @@ function resetAll(){
   document.getElementById('search-1').value='';
   document.getElementById('bar-idle').style.display='flex';
   document.getElementById('bar-selected').style.display='none';
-  document.getElementById('bar-next-row').style.display='none';
   document.getElementById('btn-next-1').disabled=true;
   renderCatBar();
   goStep(1);

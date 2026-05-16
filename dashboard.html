@@ -188,7 +188,8 @@ svg{width:100%;height:auto;}
 .stock-see-all{font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;color:var(--primary);background:var(--primary-l);border:none;padding:5px 12px;border-radius:100px;cursor:pointer;}
 .stock-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(10,10,30,0.05);}
 .stock-row:last-child{border-bottom:none;}
-.stock-icon{font-size:24px;flex-shrink:0;}
+.stock-icon{flex-shrink:0;}
+.ph-icon-wrap{display:inline-flex;align-items:center;justify-content:center;border-radius:14px;flex-shrink:0;}
 .stock-info{flex:1;min-width:0;}
 .stock-name{font-size:13px;font-weight:600;}
 .stock-qty{font-size:11px;color:var(--ink3);margin-top:1px;}
@@ -199,7 +200,7 @@ svg{width:100%;height:auto;}
 .stock-val-sell{font-size:11px;margin-top:2px;}
 
 /* BOTTOM NAV */
-nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px);position:sticky;bottom:0;z-index:10;}
+nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px);}
 .nav-row{display:flex;}
 .nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;text-decoration:none;color:var(--ink3);font-size:10px;font-weight:500;position:relative;}
 .nav-tab.on{color:var(--primary);}
@@ -551,6 +552,28 @@ async function sbFetch(path, opts = {}) {
 }
 
 
+// ── ICON / COLOR HELPERS ──
+const CAT_COLOR = {
+  metal:    {bg:'#E8EDF8', fg:'#3A6CC8'},
+  paper:    {bg:'#FFF3E0', fg:'#E07A20'},
+  plastic:  {bg:'#E8F5E9', fg:'#2E7D32'},
+  glass:    {bg:'#E3F2FD', fg:'#1565C0'},
+  electric: {bg:'#FFF9C4', fg:'#F57F17'},
+  default:  {bg:'#F3F0FF', fg:'#5E35B1'},
+};
+function resolveIcon(icon){
+  if(!icon) return 'ph-cube';
+  if(icon.startsWith('ph-')) return icon;
+  const map={'🔩':'ph-wrench','🔧':'ph-pipe','🪙':'ph-coins','🫗':'ph-steps','⚙️':'ph-gear-six','⚙':'ph-gear-six','📰':'ph-newspaper','📦':'ph-package','📄':'ph-file-text','🥛':'ph-cube','🍶':'ph-flask','🪟':'ph-coffee','🔌':'ph-plug-charging','⚡':'ph-lightning','♻️':'ph-recycle','♻':'ph-recycle'};
+  return map[icon]||null;
+}
+function itemColor(cat){ return CAT_COLOR[cat]||CAT_COLOR.default; }
+function renderIcon(icon,cat,size=26){
+  const ph=resolveIcon(icon); const c=itemColor(cat);
+  if(ph) return `<span class="ph-icon-wrap" style="background:${c.bg};color:${c.fg};width:${size+16}px;height:${size+16}px;font-size:${size}px;"><i class="ph-fill ${ph}"></i></span>`;
+  return `<span class="ph-icon-wrap" style="background:${c.bg};width:${size+16}px;height:${size+16}px;font-size:${size}px;">${icon}</span>`;
+}
+
 // ── CATEGORIES (dynamic) ──
 let CATS = [];
 function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
@@ -796,7 +819,6 @@ async function saveCash() {
         p_amount: amt,
         p_note:   note || null,
       },
-      prefer: 'return=representation',
     });
 
     if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
@@ -1051,7 +1073,7 @@ function renderStock() {
     const pct     = Math.round((cost/maxCost)*100);
     return `
     <div class="stock-row">
-      <div class="stock-icon">${s.icon}</div>
+      <div class="stock-icon">${renderIcon(s.icon, s.cat, 22)}</div>
       <div class="stock-info">
         <div class="stock-name">${s.name}</div>
         <div class="stock-qty">${Number(s.stock_qty).toLocaleString('th-TH')} กก.</div>

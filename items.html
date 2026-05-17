@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ScrapPOS — จัดการสินค้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<style>
+:root {
+  --ink:       #0A0A0F;
+  --ink2:      #3A3A4A;
+  --ink3:      #8A8A9A;
+  --surface:   #F5F5FA;
+  --white:     #FFFFFF;
+  --primary:   #7C3AED;
+  --primary-d: #5B21B6;
+  --primary-l: rgba(124,58,237,0.10);
+  --green:     #00C853;
+  --green-l:   rgba(0,200,83,0.10);
+  --red:       #FF3B30;
+  --red-l:     rgba(255,59,48,0.10);
+  --amber:     #FF9F0A;
+  --blue:      #1A6BFF;
+  --card-sh:   0 2px 20px rgba(10,10,30,0.07), 0 0 0 0.5px rgba(10,10,30,0.06);
+  --r: 20px;
+  --r-sm: 13px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body {
+  font-family: 'Prompt', sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+
+/* ── STATUS BAR ── */
+.status-bar { height: env(safe-area-inset-top, 0px); background: var(--white); flex-shrink: 0; }
+
+/* ── HEADER ── */
+header {
+  background: var(--white);
+  padding: 14px 20px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(10,10,30,0.06);
+}
+.header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.app-logo { display:flex; align-items:center; gap:8px; }
+.logo-mark {
+  width:32px; height:32px; background:var(--ink); border-radius:9px;
+  display:flex; align-items:center; justify-content:center; color:white; font-size:16px;
+}
+.app-name { font-size:13px; font-weight:700; color:var(--ink3); letter-spacing:2px; text-transform:uppercase; }
+.header-actions { display:flex; align-items:center; gap:8px; }
+
+.icon-btn {
+  width:36px; height:36px; border-radius:50%; background:var(--surface); border:none;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--ink2); font-size:18px; cursor:pointer; transition:background .15s;
+}
+.icon-btn:active{background:#e8e8f0;}
+
+.add-btn-header {
+  display:flex; align-items:center; gap:6px;
+  padding:0 14px; height:36px; border-radius:100px;
+  background:var(--primary); color:white; border:none;
+  font-family:'Prompt',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; transition:background .15s;
+  white-space:nowrap;
+}
+.add-btn-header:active{background:var(--primary-d);}
+.add-btn-header i{font-size:16px;}
+
+.page-title { font-size:26px; font-weight:800; color:var(--ink); letter-spacing:-0.5px; line-height:1.1; }
+.page-sub { font-size:12px; color:var(--ink3); font-weight:400; margin-left:2px; }
+
+/* ── SEARCH + FILTER BAR ── */
+.toolbar {
+  display:flex; gap:8px; padding:12px 20px 0; flex-shrink:0; align-items:center;
+}
+.search-field {
+  flex:1; display:flex; align-items:center; gap:10px;
+  background:var(--white); border:1px solid rgba(10,10,30,0.08);
+  border-radius:14px; padding:9px 14px;
+  box-shadow:0 1px 6px rgba(10,10,30,0.05);
+  transition:border-color .15s, box-shadow .15s;
+}
+.search-field:focus-within {
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(124,58,237,0.12);
+}
+.search-field i { color:var(--ink3); font-size:17px; flex-shrink:0; }
+.search-field input {
+  flex:1; border:none; outline:none; font-family:'Prompt',sans-serif;
+  font-size:14px; color:var(--ink); background:transparent;
+}
+.search-field input::placeholder{color:var(--ink3);}
+
+/* ── CAT FILTER ── */
+.cat-bar {
+  display:flex; gap:6px; padding:10px 20px 8px;
+  overflow-x:auto; flex-shrink:0; scrollbar-width:none;
+}
+.cat-bar::-webkit-scrollbar{display:none;}
+.cat-btn {
+  flex-shrink:0; padding:6px 14px; border-radius:100px;
+  font-family:'Prompt',sans-serif; font-size:12px; font-weight:500;
+  border:none; cursor:pointer; transition:all .16s; white-space:nowrap;
+}
+.cat-btn.on { background:var(--ink); color:white; box-shadow:0 2px 8px rgba(10,10,30,0.2); }
+.cat-btn:not(.on) { background:var(--white); color:var(--ink2); border:1px solid rgba(10,10,30,0.08); }
+.cat-btn:not(.on):active{background:var(--surface);}
+
+/* ── ITEM LIST ── */
+.list-wrap {
+  flex:1; overflow-y:auto; padding:4px 16px calc(env(safe-area-inset-bottom,0px)+80px);
+  scrollbar-width:none;
+}
+.list-wrap::-webkit-scrollbar{display:none;}
+
+.items-count {
+  font-size:11px; font-weight:600; color:var(--ink3);
+  letter-spacing:1px; text-transform:uppercase;
+  padding:8px 4px 6px; display:flex; align-items:center; gap:8px;
+}
+.items-count::after {
+  content:''; flex:1; height:1px; background:rgba(10,10,30,0.06);
+}
+
+.item-row {
+  background:var(--white);
+  border-radius:var(--r);
+  padding:14px 16px;
+  margin-bottom:8px;
+  box-shadow:var(--card-sh);
+  display:flex; align-items:center; gap:14px;
+  cursor:pointer;
+  transition:transform .12s, box-shadow .12s;
+  border:1.5px solid transparent;
+  position:relative;
+  overflow:hidden;
+}
+.item-row::before {
+  content:'';
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:3px;
+  background:var(--primary);
+  opacity:0;
+  transition:opacity .15s;
+}
+.item-row:hover::before, .item-row:focus-within::before { opacity:1; }
+.item-row:active { transform:scale(0.985); }
+
+.item-icon { flex-shrink:0; }
+.ph-icon-wrap{display:inline-flex;align-items:center;justify-content:center;border-radius:14px;flex-shrink:0;}
+
+.item-info { flex:1; min-width:0; }
+.item-name { font-size:14px; font-weight:700; color:var(--ink); }
+.item-meta {
+  display:flex; flex-wrap:wrap; gap:6px; margin-top:5px;
+}
+.meta-chip {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:11px; font-weight:500; padding:2px 8px; border-radius:100px;
+}
+.meta-chip.buy { background:rgba(26,107,255,0.1); color:var(--blue); }
+.meta-chip.sell { background:rgba(255,107,0,0.1); color:#FF6B00; }
+.meta-chip.stock { background:var(--green-l); color:var(--green); }
+.meta-chip.stock.low { background:rgba(255,159,10,0.12); color:var(--amber); }
+.meta-chip.stock.empty { background:var(--red-l); color:var(--red); }
+.meta-chip.cat { background:var(--primary-l); color:var(--primary); }
+
+.item-actions { display:flex; gap:6px; flex-shrink:0; }
+.action-btn {
+  width:34px; height:34px; border-radius:50%; border:none;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; cursor:pointer; transition:all .15s;
+}
+.action-btn.edit {
+  background:var(--primary-l); color:var(--primary);
+}
+.action-btn.edit:active { background:var(--primary); color:white; }
+
+.action-btn.del {
+  background:var(--red-l); color:var(--red);
+}
+.action-btn.del:active { background:var(--red); color:white; }
+
+/* loading / empty */
+.list-empty {
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px; padding:60px 0; color:var(--ink3); text-align:center;
+}
+.list-empty i { font-size:42px; opacity:0.4; }
+.list-empty p { font-size:14px; }
+
+.spin { animation:spin .8s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── BOTTOM NAV ── */
+nav {
+  background:var(--white); border-top:1px solid rgba(10,10,30,0.06);
+  flex-shrink:0; padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.nav-row { display:flex; }
+.nav-tab {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  gap:3px; padding:8px 4px 6px; text-decoration:none;
+  color:var(--ink3); font-size:10px; font-weight:500; position:relative;
+  transition:color .15s;
+}
+.nav-tab.on { color:var(--primary); }
+.nav-tab i { font-size:20px; }
+.nav-tab-indicator {
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:0; height:2px; background:var(--primary); border-radius:0 0 2px 2px;
+  transition:width .2s;
+}
+.nav-tab.on .nav-tab-indicator { width:24px; }
+
+/* ── MODAL BACKDROP ── */
+.modal-backdrop {
+  position:fixed; inset:0; background:rgba(10,10,30,0.45);
+  backdrop-filter:blur(6px);
+  display:flex; align-items:flex-end; justify-content:center;
+  z-index:200;
+  opacity:0; pointer-events:none;
+  transition:opacity .25s;
+}
+.modal-backdrop.open { opacity:1; pointer-events:all; }
+
+/* ── MODAL SHEET ── */
+.modal-sheet {
+  background:var(--white);
+  border-radius:24px 24px 0 0;
+  width:100%; max-width:520px;
+  padding:0 0 calc(env(safe-area-inset-bottom,0px)+16px);
+  max-height:92dvh;
+  display:flex; flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+}
+.modal-backdrop.open .modal-sheet { transform:translateY(0); }
+
+/* drag handle */
+.sheet-handle {
+  width:36px; height:4px; background:rgba(10,10,30,0.12);
+  border-radius:100px; margin:12px auto 0;
+  flex-shrink:0;
+}
+
+.sheet-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px 0; flex-shrink:0;
+}
+.sheet-title { font-size:18px; font-weight:800; color:var(--ink); }
+.close-btn {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--surface); border:none;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; color:var(--ink3); cursor:pointer;
+}
+.close-btn:active{background:#e0e0ea;}
+
+.sheet-body {
+  flex:1; overflow-y:auto; padding:16px 20px 8px;
+  scrollbar-width:none;
+}
+.sheet-body::-webkit-scrollbar{display:none;}
+
+/* ── FORM ── */
+.form-section { margin-bottom:20px; }
+.form-label {
+  font-size:11px; font-weight:600; color:var(--ink3);
+  letter-spacing:1px; text-transform:uppercase;
+  margin-bottom:8px; display:block;
+}
+.form-row { display:flex; gap:10px; }
+.form-row .form-group { flex:1; }
+
+.form-group { margin-bottom:12px; }
+
+.form-input {
+  width:100%; padding:12px 14px; border-radius:14px;
+  background:var(--surface); border:1.5px solid rgba(10,10,30,0.08);
+  font-family:'Prompt',sans-serif; font-size:14px; font-weight:500;
+  color:var(--ink); outline:none;
+  transition:border-color .15s, box-shadow .15s;
+  -webkit-appearance:none;
+}
+.form-input:focus {
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(124,58,237,0.12);
+  background:var(--white);
+}
+.form-input::placeholder{color:var(--ink3);}
+
+.input-label { font-size:12px; font-weight:500; color:var(--ink3); margin-bottom:5px; display:block; }
+
+/* ICON PICKER */
+.icon-picker-label { font-size:12px; font-weight:500; color:var(--ink3); margin-bottom:6px; display:block; }
+.icon-grid {
+  display:flex; flex-wrap:wrap; gap:6px;
+}
+.icon-opt {
+  width:40px; height:40px; border-radius:12px;
+  background:var(--surface); border:1.5px solid transparent;
+  font-size:22px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .15s;
+}
+.icon-opt.selected {
+  border-color:var(--primary);
+  background:var(--primary-l);
+  box-shadow:0 0 0 2px rgba(124,58,237,0.15);
+}
+.icon-opt:active{transform:scale(0.88);}
+
+/* CAT SELECT */
+.cat-select-grid { display:flex; flex-wrap:wrap; gap:6px; }
+.cat-opt {
+  padding:7px 14px; border-radius:100px;
+  font-family:'Prompt',sans-serif; font-size:12px; font-weight:600;
+  border:1.5px solid rgba(10,10,30,0.1); background:var(--white);
+  color:var(--ink2); cursor:pointer; transition:all .15s;
+}
+.cat-opt.selected {
+  background:var(--ink); color:white;
+  border-color:var(--ink);
+  box-shadow:0 2px 8px rgba(10,10,30,0.2);
+}
+.cat-opt:active{transform:scale(0.95);}
+
+/* PRICE PREVIEW CARD */
+.price-preview {
+  background:linear-gradient(135deg,#0A0A0F,#1A1A2E);
+  border-radius:16px; padding:14px 16px;
+  margin-top:4px;
+  display:flex; justify-content:space-around; align-items:center;
+}
+.preview-block { text-align:center; }
+.preview-label { font-size:10px; color:rgba(255,255,255,0.4); font-weight:500; letter-spacing:0.5px; }
+.preview-val { font-size:18px; font-weight:800; margin-top:3px; letter-spacing:-0.5px; }
+.preview-divider { width:1px; height:36px; background:rgba(255,255,255,0.08); }
+.preview-spread { font-size:11px; font-weight:600; margin-top:2px; }
+
+/* SHEET FOOTER */
+.sheet-footer {
+  padding:12px 20px 0; border-top:1px solid rgba(10,10,30,0.06); flex-shrink:0;
+}
+.btn-row { display:flex; gap:10px; }
+
+.btn-cancel {
+  flex:1; padding:14px; border-radius:16px;
+  background:var(--surface); border:1px solid rgba(10,10,30,0.08);
+  font-family:'Prompt',sans-serif; font-size:15px; font-weight:600;
+  color:var(--ink2); cursor:pointer;
+}
+.btn-cancel:active{background:#e0e0ea;}
+
+.btn-save {
+  flex:2; padding:14px; border-radius:16px;
+  background:var(--primary); border:none; color:white;
+  font-family:'Prompt',sans-serif; font-size:15px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:background .15s, opacity .15s;
+}
+.btn-save:disabled{opacity:0.4;pointer-events:none;}
+.btn-save:active{background:var(--primary-d);}
+
+/* DELETE CONFIRM */
+.modal-backdrop.confirm .modal-sheet { max-height:auto; }
+.confirm-body { padding:20px 20px 0; text-align:center; }
+.confirm-icon { font-size:48px; margin-bottom:10px; }
+.confirm-title { font-size:18px; font-weight:800; color:var(--ink); }
+.confirm-sub { font-size:13px; color:var(--ink3); margin-top:6px; line-height:1.5; }
+.confirm-item-name { font-weight:700; color:var(--red); }
+
+/* TOAST */
+#toast {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:rgba(10,10,30,0.88); color:white;
+  padding:10px 20px; border-radius:100px;
+  font-size:13px; font-weight:500;
+  opacity:0; transition:all .25s; pointer-events:none; white-space:nowrap;
+  backdrop-filter:blur(8px); z-index:999;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.error { background:rgba(255,59,48,0.9); }
+#toast.success { background:rgba(0,200,83,0.92); }
+
+/* CONFIG BANNER */
+.config-banner {
+  background:#FFF3CD; border-bottom:2px solid var(--amber);
+  padding:7px 20px; font-size:12px; font-weight:500; color:#664D03;
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
+}
+.config-banner i { color:var(--amber); font-size:15px; }
+
+/* SKELETON */
+.skel {
+  border-radius:var(--r); background:linear-gradient(90deg,#f0f0f5 25%,#e4e4f0 50%,#f0f0f5 75%);
+  background-size:200% 100%; animation:shim 1.4s infinite;
+  margin-bottom:8px;
+}
+@keyframes shim{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+</style>
+</head>
+<body>
+
+<div class="status-bar"></div>
+
+<div class="config-banner" id="config-banner">
+  <i class="ph ph-warning-circle"></i>
+  <span>กรุณาตั้งค่า Supabase — ตอนนี้ใช้ข้อมูล Demo</span>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="app-logo">
+      <div class="logo-mark"><i class="ph ph-recycle"></i></div>
+      <span class="app-name">ScrapPOS</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="loadItems()" title="รีเฟรช">
+        <i class="ph ph-arrows-clockwise" id="refresh-icon"></i>
+      </button>
+      <button class="add-btn-header" onclick="openAdd()">
+        <i class="ph ph-plus"></i>เพิ่มสินค้า
+      </button>
+      <button class="icon-btn" onclick="window.AUTH && window.AUTH.logout()" title="ออกจากระบบ"><i class="ph ph-sign-out"></i></button>
+    </div>
+  </div>
+  <div class="page-title">จัดการสินค้า <span class="page-sub">Items</span></div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="search-field">
+    <i class="ph ph-magnifying-glass"></i>
+    <input type="text" id="search-input" placeholder="ค้นหาชื่อสินค้า...">
+  </div>
+</div>
+
+<!-- CAT BAR -->
+<div class="cat-bar" id="cat-bar">
+  <button class="cat-btn on" data-cat="all">ทั้งหมด</button>
+</div>
+
+<!-- LIST -->
+<div class="list-wrap" id="list-wrap">
+  <!-- skeleton -->
+  <div class="skel" style="height:74px;"></div>
+  <div class="skel" style="height:74px;opacity:.8;"></div>
+  <div class="skel" style="height:74px;opacity:.6;"></div>
+  <div class="skel" style="height:74px;opacity:.4;"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav>
+  <div class="nav-row">
+    <a href="buy.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-download-simple"></i><span>รับซื้อ</span>
+    </a>
+    <a href="sell.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-upload-simple"></i><span>ขายออก</span>
+    </a>
+    <a href="sort.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-recycle"></i><span>คัดแยก</span>
+    </a>
+    <a href="items.html" class="nav-tab on">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph-fill ph-pencil-simple"></i><span>สินค้า</span>
+    </a>
+    <a href="dashboard.html" class="nav-tab ">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-package"></i><span>สต๊อก</span>
+    </a>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal-sheet" id="edit-sheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-head">
+      <span class="sheet-title" id="sheet-title">เพิ่มสินค้าใหม่</span>
+      <button class="close-btn" onclick="closeModal('edit-modal')">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+
+    <div class="sheet-body">
+
+      <!-- ICON PICKER -->
+      <div class="form-section">
+        <span class="icon-picker-label">ไอคอนสินค้า</span>
+        <div class="icon-grid" id="icon-grid"></div>
+      </div>
+
+      <!-- NAME -->
+      <div class="form-section">
+        <span class="input-label">ชื่อสินค้า *</span>
+        <input class="form-input" type="text" id="f-name" placeholder="เช่น เหล็กหนัก, ทองแดง...">
+      </div>
+
+      <!-- CATEGORY -->
+      <div class="form-section">
+        <span class="input-label">หมวดหมู่ *</span>
+        <div class="cat-select-grid" id="cat-select-grid"></div>
+      </div>
+
+      <!-- PRICES -->
+      <div class="form-section">
+        <span class="input-label">ราคา (บาท/กก.)</span>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="input-label" style="font-size:11px;">💙 ราคารับซื้อ</label>
+            <input class="form-input" type="number" id="f-buy" placeholder="0.00" step="0.01" min="0" oninput="updatePreview()">
+          </div>
+          <div class="form-group">
+            <label class="input-label" style="font-size:11px;">🟠 ราคาขายออก</label>
+            <input class="form-input" type="number" id="f-sell" placeholder="0.00" step="0.01" min="0" oninput="updatePreview()">
+          </div>
+        </div>
+
+        <div class="price-preview" id="price-preview">
+          <div class="preview-block">
+            <div class="preview-label">รับซื้อ</div>
+            <div class="preview-val" style="color:#6EA8FF;" id="prev-buy">–</div>
+          </div>
+          <div class="preview-divider"></div>
+          <div class="preview-block">
+            <div class="preview-label">ขายออก</div>
+            <div class="preview-val" style="color:#FF9A60;" id="prev-sell">–</div>
+          </div>
+          <div class="preview-divider"></div>
+          <div class="preview-block">
+            <div class="preview-label">กำไร/กก.</div>
+            <div class="preview-val" style="color:#4ADE80;" id="prev-spread">–</div>
+            <div class="preview-spread" style="color:rgba(255,255,255,0.3);" id="prev-margin">–</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOCK -->
+      <div class="form-section">
+        <span class="input-label">สต๊อกเริ่มต้น (กก.)</span>
+        <input class="form-input" type="number" id="f-stock" placeholder="0" step="1" min="0">
+      </div>
+
+      <!-- UNIT -->
+      <div class="form-section">
+        <span class="input-label">หน่วย</span>
+        <input class="form-input" type="text" id="f-unit" placeholder="กก." value="กก.">
+      </div>
+
+    </div><!-- /sheet-body -->
+
+    <div class="sheet-footer">
+      <div class="btn-row">
+        <button class="btn-cancel" onclick="closeModal('edit-modal')">ยกเลิก</button>
+        <button class="btn-save" id="btn-save" onclick="saveItem()">
+          <i class="ph ph-floppy-disk"></i>
+          <span id="save-label">บันทึกสินค้า</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DELETE CONFIRM MODAL
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="del-modal">
+  <div class="modal-sheet" style="max-height:auto;">
+    <div class="sheet-handle"></div>
+    <div class="confirm-body">
+      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-title">ลบสินค้า?</div>
+      <div class="confirm-sub">
+        ยืนยันการลบ <span class="confirm-item-name" id="del-item-name"></span><br>
+        การดำเนินการนี้ไม่สามารถย้อนกลับได้
+      </div>
+    </div>
+    <div class="sheet-footer" style="padding-top:16px;">
+      <div class="btn-row">
+        <button class="btn-cancel" onclick="closeModal('del-modal')">ยกเลิก</button>
+        <button class="btn-save" style="background:var(--red);" id="btn-del-confirm" onclick="confirmDelete()">
+          <i class="ph ph-trash"></i>
+          <span>ลบสินค้า</span>
+        </button>
+      </div>
+    </div>
+    <div style="height:8px;"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  SUPABASE CONFIG — แก้ไขตรงนี้
+// ══════════════════════════════════════════════
+const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
+const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
+
+// ══════════════════════════════════════════════
+//  DEMO DATA
+// ══════════════════════════════════════════════
+const DEMO_ITEMS = [
+  {id:1,  name:'เหล็กหนัก',          icon:'🔩', buy_price:4.50,  sell_price:5.80,  stock_qty:4200, unit:'กก.', cat:'metal'},
+  {id:2,  name:'เหล็กบาง',           icon:'🔧', buy_price:2.80,  sell_price:3.50,  stock_qty:1800, unit:'กก.', cat:'metal'},
+  {id:3,  name:'ทองแดง',             icon:'🪙', buy_price:195,   sell_price:215,   stock_qty:320,  unit:'กก.', cat:'metal'},
+  {id:4,  name:'อลูมิเนียม',         icon:'🫗', buy_price:42,    sell_price:50,    stock_qty:960,  unit:'กก.', cat:'metal'},
+  {id:5,  name:'สแตนเลส',            icon:'⚙️', buy_price:18,    sell_price:22,    stock_qty:550,  unit:'กก.', cat:'metal'},
+  {id:6,  name:'กระดาษหนังสือพิมพ์', icon:'📰', buy_price:2.20,  sell_price:2.80,  stock_qty:3000, unit:'กก.', cat:'paper'},
+  {id:7,  name:'กระดาษลัง',          icon:'📦', buy_price:2.50,  sell_price:3.20,  stock_qty:5200, unit:'กก.', cat:'paper'},
+  {id:8,  name:'กระดาษขาว',          icon:'📄', buy_price:3.00,  sell_price:3.80,  stock_qty:1100, unit:'กก.', cat:'paper'},
+  {id:9,  name:'พลาสติกขาว',         icon:'🥛', buy_price:8.50,  sell_price:11,    stock_qty:780,  unit:'กก.', cat:'plastic'},
+  {id:10, name:'ขวด PET',            icon:'🍶', buy_price:6.00,  sell_price:8.00,  stock_qty:620,  unit:'กก.', cat:'plastic'},
+  {id:11, name:'แก้วใส',             icon:'🪟', buy_price:1.20,  sell_price:1.60,  stock_qty:2100, unit:'กก.', cat:'glass'},
+  {id:12, name:'สายไฟทองแดง',        icon:'🔌', buy_price:85,    sell_price:100,   stock_qty:180,  unit:'กก.', cat:'electric'},
+  {id:13, name:'มอเตอร์เก่า',        icon:'⚡', buy_price:25,    sell_price:32,    stock_qty:95,   unit:'กก.', cat:'electric'},
+];
+
+const ICONS = [
+  'ph-package','ph-wrench','ph-pipe','ph-coins','ph-gear-six',
+  'ph-newspaper','ph-file-text','ph-cube','ph-flask','ph-coffee',
+  'ph-plug-charging','ph-lightning','ph-recycle','ph-steps',
+  'ph-hammer','ph-axe','ph-screwdriver','ph-battery-full',
+  'ph-broadcast','ph-cpu','ph-magnet','ph-key','ph-hook',
+  'ph-truck','ph-warehouse','ph-barcode','ph-tag','ph-box-arrow-down',
+];
+
+// หมวดหมู่ dynamic (โหลดจาก Supabase)
+let CATS = [
+  {slug:'metal',   label:'โลหะ',    icon:'🔩'},
+  {slug:'paper',   label:'กระดาษ',  icon:'📰'},
+  {slug:'plastic', label:'พลาสติก', icon:'♻️'},
+  {slug:'glass',   label:'แก้ว',    icon:'🪟'},
+  {slug:'electric',label:'ไฟฟ้า',   icon:'⚡'},
+];
+// ══════════════════════════════════════════════
+//  ICON / COLOR HELPERS (เหมือน sort.html)
+// ══════════════════════════════════════════════
+const CAT_COLOR = {
+  metal:    {bg:'#E8EDF8', fg:'#3A6CC8'},
+  paper:    {bg:'#FFF3E0', fg:'#E07A20'},
+  plastic:  {bg:'#E8F5E9', fg:'#2E7D32'},
+  glass:    {bg:'#E3F2FD', fg:'#1565C0'},
+  electric: {bg:'#FFF9C4', fg:'#F57F17'},
+  default:  {bg:'#F3F0FF', fg:'#5E35B1'},
+};
+const EMOJI_TO_PH = {
+  '🔩':'ph-wrench','🔧':'ph-pipe','🪙':'ph-coins','🫗':'ph-steps',
+  '⚙️':'ph-gear-six','⚙':'ph-gear-six','📰':'ph-newspaper',
+  '📦':'ph-package','📄':'ph-file-text','🥛':'ph-cube','🍶':'ph-flask',
+  '🪟':'ph-coffee','🔌':'ph-plug-charging','⚡':'ph-lightning',
+  '♻️':'ph-recycle','♻':'ph-recycle',
+};
+function resolveIcon(icon){
+  if(!icon) return 'ph-cube';
+  if(icon.startsWith('ph-')) return icon;
+  return EMOJI_TO_PH[icon] || null;
+}
+function itemColor(cat){ return CAT_COLOR[cat]||CAT_COLOR.default; }
+function renderIcon(icon, cat, size=26){
+  const ph = resolveIcon(icon);
+  const c  = itemColor(cat);
+  if(ph) return `<span class="ph-icon-wrap" style="background:${c.bg};color:${c.fg};width:${size+16}px;height:${size+16}px;font-size:${size}px;"><i class="ph-fill ${ph}"></i></span>`;
+  return `<span class="ph-icon-wrap" style="background:${c.bg};width:${size+16}px;height:${size+16}px;font-size:${size}px;">${icon}</span>`;
+}
+
+function catLabel(slug){ return CATS.find(c=>c.slug===slug)?.label || slug; }
+function catIcon(slug){  return CATS.find(c=>c.slug===slug)?.icon  || '📦'; }
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let ALL_ITEMS = [];
+let activeCat = 'all';
+let query = '';
+let editingId = null;   // null = add new
+let deleteId  = null;
+let selectedIcon = ICONS[0];
+let selectedCat  = '';
+
+// ══════════════════════════════════════════════
+//  SUPABASE HELPER
+// ══════════════════════════════════════════════
+async function sb(path, opts = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': `Bearer ${(window.AUTH && window.AUTH.token) ? window.AUTH.token : SUPABASE_ANON}`,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation',
+      ...opts.headers,
+    },
+    method: opts.method || 'GET',
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.message || e.details || `HTTP ${res.status}`);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ══════════════════════════════════════════════
+//  LOAD
+// ══════════════════════════════════════════════
+async function loadItems() {
+  const icon = document.getElementById('refresh-icon');
+  icon.classList.add('spin');
+
+  if (!SUPABASE_READY) {
+    document.getElementById('config-banner').style.display = 'flex';
+    await new Promise(r => setTimeout(r, 500));
+    ALL_ITEMS = structuredClone(DEMO_ITEMS);
+    icon.classList.remove('spin');
+    renderCatBar();
+    renderList();
+    return;
+  }
+
+  document.getElementById('config-banner').style.display = 'none';
+
+  try {
+    const [items, cats] = await Promise.all([
+      sb('items?select=id,name,icon,buy_price,sell_price,stock_qty,unit,cat&order=cat,name'),
+      sb('categories?select=slug,label,icon&order=id'),
+    ]);
+    ALL_ITEMS = items || [];
+    if (cats && cats.length) CATS = cats;
+    renderCatBar();
+    renderList();
+  } catch (err) {
+    toast('❌ โหลดไม่สำเร็จ: ' + err.message, 'error');
+    ALL_ITEMS = [];
+    renderList();
+  } finally {
+    icon.classList.remove('spin');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  RENDER LIST
+// ══════════════════════════════════════════════
+function renderList() {
+  const wrap = document.getElementById('list-wrap');
+  let list = ALL_ITEMS;
+  if (activeCat !== 'all') list = list.filter(x => x.cat === activeCat);
+  if (query) list = list.filter(x => x.name.includes(query));
+
+  if (!list.length) {
+    wrap.innerHTML = `
+      <div class="list-empty">
+        <i class="ph ph-package"></i>
+        <p>${query ? 'ไม่พบสินค้าที่ค้นหา' : 'ยังไม่มีสินค้า กดเพิ่มสินค้าเพื่อเริ่มต้น'}</p>
+      </div>`;
+    return;
+  }
+
+  const countLabel = `${list.length} รายการ`;
+
+  wrap.innerHTML = `<div class="items-count">${countLabel}</div>` + list.map(item => {
+    const stock = Number(item.stock_qty);
+    const stockCls = stock <= 0 ? 'empty' : stock < 100 ? 'low' : '';
+    const stockLabel = stock <= 0 ? 'หมดสต๊อก' : `${stock.toLocaleString('th-TH')} ${item.unit||'กก.'}`;
+    const buy = Number(item.buy_price);
+    const sell = Number(item.sell_price);
+    const spread = sell - buy;
+    return `
+    <div class="item-row" onclick="openEdit(${item.id})">
+      <div class="item-icon">${renderIcon(item.icon, item.cat, 24)}</div>
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-meta">
+          <span class="meta-chip buy"><i class="ph ph-download-simple"></i>฿${buy.toFixed(2)}</span>
+          <span class="meta-chip sell"><i class="ph ph-upload-simple"></i>฿${sell.toFixed(2)}</span>
+          <span class="meta-chip stock ${stockCls}"><i class="ph ph-package"></i>${stockLabel}</span>
+          <span class="meta-chip cat">${catIcon(item.cat)} ${catLabel(item.cat)}</span>
+        </div>
+      </div>
+      <div class="item-actions" onclick="event.stopPropagation()">
+        <button class="action-btn edit" onclick="openEdit(${item.id})" title="แก้ไข">
+          <i class="ph ph-pencil-simple"></i>
+        </button>
+        <button class="action-btn del" onclick="openDelete(${item.id})" title="ลบ">
+          <i class="ph ph-trash"></i>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  ICON GRID
+// ══════════════════════════════════════════════
+function buildIconGrid() {
+  document.getElementById('icon-grid').innerHTML = ICONS.map(ic => `
+    <div class="icon-opt ${ic===selectedIcon?'selected':''}" data-ic="${ic}" onclick="pickIcon('${ic}')"><i class="ph-fill ${ic}"></i></div>
+  `).join('');
+}
+
+function pickIcon(ic) {
+  selectedIcon = ic;
+  document.querySelectorAll('.icon-opt').forEach(el => {
+    el.classList.toggle('selected', el.dataset.ic === ic);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  RENDER CAT BAR (dynamic)
+// ══════════════════════════════════════════════
+function renderCatBar() {
+  const bar = document.getElementById('cat-bar');
+  bar.innerHTML = `<button class="cat-btn ${activeCat==='all'?'on':''}" data-cat="all">ทั้งหมด</button>`
+    + CATS.map(c => `<button class="cat-btn ${activeCat===c.slug?'on':''}" data-cat="${c.slug}">${c.icon} ${c.label}</button>`).join('')
+    + `<button class="cat-btn" onclick="openCatManager()" style="background:var(--primary-l);color:var(--primary);border-color:var(--primary);"><i class="ph ph-gear"></i></button>`;
+
+  bar.querySelectorAll('.cat-btn[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCat = btn.dataset.cat;
+      bar.querySelectorAll('.cat-btn[data-cat]').forEach(b => b.classList.toggle('on', b.dataset.cat === activeCat));
+      renderList();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+//  CATEGORY SELECT (in add/edit modal)
+// ══════════════════════════════════════════════
+function renderCatSelectGrid(selected = '') {
+  document.getElementById('cat-select-grid').innerHTML = CATS.map(c => `
+    <button class="cat-opt ${selected===c.slug?'selected':''}" data-val="${c.slug}" onclick="selectCat(this)">${c.icon} ${c.label}</button>
+  `).join('');
+}
+
+function selectCat(el) {
+  selectedCat = el.dataset.val;
+  document.querySelectorAll('.cat-opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function setCatSelection(val) {
+  selectedCat = val;
+  document.querySelectorAll('.cat-opt').forEach(b => {
+    b.classList.toggle('selected', b.dataset.val === val);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  PRICE PREVIEW
+// ══════════════════════════════════════════════
+function updatePreview() {
+  const buy  = parseFloat(document.getElementById('f-buy').value)  || 0;
+  const sell = parseFloat(document.getElementById('f-sell').value) || 0;
+  const spread = sell - buy;
+  const margin = sell > 0 ? (spread / sell * 100) : 0;
+
+  document.getElementById('prev-buy').textContent  = buy  > 0 ? '฿'+buy.toFixed(2)  : '–';
+  document.getElementById('prev-sell').textContent = sell > 0 ? '฿'+sell.toFixed(2) : '–';
+  document.getElementById('prev-spread').textContent = spread > 0 ? '+฿'+spread.toFixed(2) : spread < 0 ? '฿'+spread.toFixed(2) : '–';
+  document.getElementById('prev-margin').textContent = spread > 0 ? margin.toFixed(1)+'%' : '';
+}
+
+// ══════════════════════════════════════════════
+//  OPEN ADD
+// ══════════════════════════════════════════════
+function openAdd() {
+  editingId = null;
+  selectedIcon = ICONS[0];
+  selectedCat  = '';
+  document.getElementById('sheet-title').textContent = 'เพิ่มสินค้าใหม่';
+  document.getElementById('save-label').textContent  = 'บันทึกสินค้า';
+  document.getElementById('f-name').value  = '';
+  document.getElementById('f-buy').value   = '';
+  document.getElementById('f-sell').value  = '';
+  document.getElementById('f-stock').value = '';
+  document.getElementById('f-unit').value  = 'กก.';
+  updatePreview();
+  buildIconGrid();
+  renderCatSelectGrid('');
+  openModal('edit-modal');
+  setTimeout(() => document.getElementById('f-name').focus(), 350);
+}
+
+// ══════════════════════════════════════════════
+//  OPEN EDIT
+// ══════════════════════════════════════════════
+function openEdit(id) {
+  const item = ALL_ITEMS.find(x => x.id === id);
+  if (!item) return;
+  editingId    = id;
+  selectedIcon = resolveIcon(item.icon) || ICONS[0];
+  selectedCat  = item.cat  || '';
+
+  document.getElementById('sheet-title').textContent = 'แก้ไขสินค้า';
+  document.getElementById('save-label').textContent  = 'บันทึกการเปลี่ยนแปลง';
+  document.getElementById('f-name').value  = item.name || '';
+  document.getElementById('f-buy').value   = item.buy_price  || '';
+  document.getElementById('f-sell').value  = item.sell_price || '';
+  document.getElementById('f-stock').value = item.stock_qty  || 0;
+  document.getElementById('f-unit').value  = item.unit || 'กก.';
+  updatePreview();
+  buildIconGrid();
+  renderCatSelectGrid(selectedCat);
+  openModal('edit-modal');
+}
+
+// ══════════════════════════════════════════════
+//  SAVE (CREATE / UPDATE)
+// ══════════════════════════════════════════════
+async function saveItem() {
+  const name  = document.getElementById('f-name').value.trim();
+  const buy   = parseFloat(document.getElementById('f-buy').value);
+  const sell  = parseFloat(document.getElementById('f-sell').value);
+  const stock = parseFloat(document.getElementById('f-stock').value) || 0;
+  const unit  = document.getElementById('f-unit').value.trim() || 'กก.';
+
+  // VALIDATE
+  if (!name) return shakeField('f-name', 'กรุณาระบุชื่อสินค้า');
+  if (!selectedCat) return toast('⚠️ กรุณาเลือกหมวดหมู่', 'error');
+  if (isNaN(buy) || buy <= 0) return shakeField('f-buy', 'กรุณาระบุราคารับซื้อ');
+  if (isNaN(sell) || sell <= 0) return shakeField('f-sell', 'กรุณาระบุราคาขายออก');
+
+  const payload = {
+    name,
+    icon: selectedIcon,
+    cat: selectedCat,
+    buy_price: buy,
+    sell_price: sell,
+    stock_qty: stock,
+    unit,
+    updated_at: new Date().toISOString(),
+  };
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i><span>กำลังบันทึก...</span>';
+
+  if (!SUPABASE_READY) {
+    // Demo mode
+    await new Promise(r => setTimeout(r, 600));
+    if (editingId !== null) {
+      const idx = ALL_ITEMS.findIndex(x => x.id === editingId);
+      if (idx >= 0) ALL_ITEMS[idx] = { ...ALL_ITEMS[idx], ...payload };
+      toast('✅ อัปเดตสินค้าแล้ว (Demo)', 'success');
+    } else {
+      const newId = Math.max(0, ...ALL_ITEMS.map(x=>x.id)) + 1;
+      ALL_ITEMS.push({ id: newId, ...payload });
+      toast('✅ เพิ่มสินค้าแล้ว (Demo)', 'success');
+    }
+    closeModal('edit-modal');
+    renderList();
+    resetSaveBtn();
+    return;
+  }
+
+  try {
+    if (editingId !== null) {
+      // UPDATE
+      await sb(`items?id=eq.${editingId}`, {
+        method: 'PATCH',
+        prefer: 'return=minimal',
+        body: payload,
+      });
+      const idx = ALL_ITEMS.findIndex(x => x.id === editingId);
+      if (idx >= 0) ALL_ITEMS[idx] = { ...ALL_ITEMS[idx], ...payload };
+      toast('✅ อัปเดตสินค้าแล้ว', 'success');
+    } else {
+      // INSERT
+      const [created] = await sb('items', {
+        method: 'POST',
+        body: { ...payload, created_at: new Date().toISOString() },
+      });
+      ALL_ITEMS.push(created);
+      toast('✅ เพิ่มสินค้าใหม่แล้ว', 'success');
+    }
+    closeModal('edit-modal');
+    renderList();
+  } catch (err) {
+    toast('❌ ' + err.message, 'error');
+  } finally {
+    resetSaveBtn();
+  }
+}
+
+function resetSaveBtn() {
+  const btn = document.getElementById('btn-save');
+  btn.disabled = false;
+  btn.innerHTML = `<i class="ph ph-floppy-disk"></i><span id="save-label">${editingId ? 'บันทึกการเปลี่ยนแปลง' : 'บันทึกสินค้า'}</span>`;
+}
+
+// ══════════════════════════════════════════════
+//  DELETE
+// ══════════════════════════════════════════════
+function openDelete(id) {
+  const item = ALL_ITEMS.find(x => x.id === id);
+  if (!item) return;
+  deleteId = id;
+  document.getElementById('del-item-name').textContent = `"${item.name}"`;
+  openModal('del-modal');
+}
+
+async function confirmDelete() {
+  const btn = document.getElementById('btn-del-confirm');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i><span>กำลังลบ...</span>';
+
+  if (!SUPABASE_READY) {
+    await new Promise(r => setTimeout(r, 500));
+    ALL_ITEMS = ALL_ITEMS.filter(x => x.id !== deleteId);
+    toast('🗑️ ลบสินค้าแล้ว (Demo)');
+    closeModal('del-modal');
+    renderList();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-trash"></i><span>ลบสินค้า</span>';
+    return;
+  }
+
+  try {
+    await sb(`items?id=eq.${deleteId}`, {
+      method: 'DELETE',
+      prefer: 'return=minimal',
+    });
+    ALL_ITEMS = ALL_ITEMS.filter(x => x.id !== deleteId);
+    toast('🗑️ ลบสินค้าแล้ว');
+    closeModal('del-modal');
+    renderList();
+  } catch (err) {
+    toast('❌ ลบไม่สำเร็จ: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-trash"></i><span>ลบสินค้า</span>';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => {
+    if (e.target === bd) closeModal(bd.id);
+  });
+});
+
+// ══════════════════════════════════════════════
+//  FIELD SHAKE VALIDATION
+// ══════════════════════════════════════════════
+function shakeField(id, msg) {
+  const el = document.getElementById(id);
+  el.style.borderColor = 'var(--red)';
+  el.style.animation = 'shake .35s ease';
+  el.addEventListener('animationend', () => { el.style.animation = ''; }, {once:true});
+  el.focus();
+  toast('⚠️ ' + msg, 'error');
+}
+
+// Add shake keyframes
+const style = document.createElement('style');
+style.textContent = `
+@keyframes shake {
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-6px);}
+  40%{transform:translateX(6px);}
+  60%{transform:translateX(-4px);}
+  80%{transform:translateX(4px);}
+}`;
+document.head.appendChild(style);
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.className = ''; }, 2400);
+}
+
+// ══════════════════════════════════════════════
+//  FILTERS
+// ══════════════════════════════════════════════
+document.getElementById('search-input').addEventListener('input', e => {
+  query = e.target.value.trim();
+  renderList();
+});
+
+// ══════════════════════════════════════════════
+//  CAT MANAGER
+// ══════════════════════════════════════════════
+let editingCatSlug = null;
+
+function openCatManager() {
+  editingCatSlug = null;
+  resetCatForm();
+  renderCatList();
+  openModal('cat-modal');
+}
+
+function renderCatList() {
+  const wrap = document.getElementById('cat-list');
+  if (!CATS.length) {
+    wrap.innerHTML = `<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">ยังไม่มีหมวดหมู่</div>`;
+    return;
+  }
+  wrap.innerHTML = CATS.map(c => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:14px;margin-bottom:8px;box-shadow:var(--card-sh);">
+      <span style="font-size:22px;width:32px;text-align:center;">${c.icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;">${c.label}</div>
+        <div style="font-size:11px;color:var(--ink3);">${c.slug}</div>
+      </div>
+      <button onclick="editCat('${c.slug}')" style="width:32px;height:32px;border-radius:50%;background:var(--primary-l);border:none;color:var(--primary);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <i class="ph ph-pencil-simple"></i>
+      </button>
+      <button onclick="deleteCat('${c.slug}')" style="width:32px;height:32px;border-radius:50%;background:var(--red-l);border:none;color:var(--red);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <i class="ph ph-trash"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+function editCat(slug) {
+  const c = CATS.find(x => x.slug === slug);
+  if (!c) return;
+  editingCatSlug = slug;
+  document.getElementById('cat-f-icon').value  = c.icon;
+  document.getElementById('cat-f-icon-btn').innerHTML = `<i class="ph-fill ${c.icon}"></i>`;
+  document.getElementById('cat-f-label').value = c.label;
+  document.getElementById('cat-f-slug').value  = c.slug;
+  document.getElementById('cat-f-slug').disabled = true;
+  document.getElementById('cat-form-title').textContent = 'แก้ไขหมวดหมู่';
+  document.getElementById('cat-save-btn').textContent   = 'บันทึก';
+}
+
+function resetCatForm() {
+  editingCatSlug = null;
+  document.getElementById('cat-f-icon').value  = 'ph-wrench';
+  document.getElementById('cat-f-icon-btn').innerHTML = `<i class="ph-fill ph-wrench"></i>`;
+  document.getElementById('cat-f-label').value = '';
+  document.getElementById('cat-f-slug').value  = '';
+  document.getElementById('cat-f-slug').disabled = false;
+  document.getElementById('cat-form-title').textContent = 'เพิ่มหมวดหมู่ใหม่';
+  document.getElementById('cat-save-btn').textContent   = 'เพิ่ม';
+}
+
+async function saveCat() {
+  const icon  = document.getElementById('cat-f-icon').value.trim();
+  const label = document.getElementById('cat-f-label').value.trim();
+  const slug  = document.getElementById('cat-f-slug').value.trim().toLowerCase().replace(/\s+/g,'-');
+
+  if (!icon || !label || !slug) { toast('กรุณากรอกข้อมูลให้ครบ', 'error'); return; }
+
+  const btn = document.getElementById('cat-save-btn');
+  btn.disabled = true;
+
+  try {
+    if (editingCatSlug) {
+      // แก้ไข
+      await sb(`categories?slug=eq.${editingCatSlug}`, {
+        method:'PATCH', prefer:'return=minimal',
+        body: { icon, label },
+      });
+      const idx = CATS.findIndex(c => c.slug === editingCatSlug);
+      if (idx >= 0) CATS[idx] = { slug: editingCatSlug, label, icon };
+      toast(`✅ แก้ไข "${label}" แล้ว`);
+    } else {
+      // เพิ่มใหม่
+      await sb('categories', {
+        method:'POST', prefer:'return=minimal',
+        body: { slug, label, icon },
+      });
+      CATS.push({ slug, label, icon });
+      toast(`✅ เพิ่มหมวด "${label}" แล้ว`);
+    }
+    resetCatForm();
+    renderCatList();
+    renderCatBar();
+    renderList();
+  } catch(err) {
+    toast('❌ ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  PHOSPHOR ICON PICKER — โหลดครบทุก icon จาก catalog
+// ══════════════════════════════════════════════
+let ALL_PH_ICONS = [];   // เก็บทุก icon name
+let filteredIcons = [];  // icon ที่กรองแล้ว
+
+async function loadPhosphorIcons() {
+  if (ALL_PH_ICONS.length) return; // โหลดแล้ว
+  try {
+    const res = await fetch('https://unpkg.com/@phosphor-icons/core/src/index.ts');
+    const text = await res.text();
+    // parse: export const icons = [...] แล้วดึง name fields
+    const matches = [...text.matchAll(/name:\s*"([^"]+)"/g)];
+    ALL_PH_ICONS = matches.map(m => 'ph-' + m[1]);
+  } catch(_) {
+    // fallback: รายการพื้นฐานถ้าโหลดไม่ได้
+    ALL_PH_ICONS = [
+      'ph-address-book','ph-airplane','ph-airplane-in-flight','ph-airplane-landing',
+      'ph-airplane-takeoff','ph-alarm','ph-anchor','ph-android-logo','ph-aperture',
+      'ph-archive','ph-archive-box','ph-armchair','ph-arrow-arc-left','ph-arrow-arc-right',
+      'ph-arrow-bend-double-up-left','ph-arrow-bend-left-down','ph-arrow-bend-left-up',
+      'ph-arrow-bend-right-down','ph-arrow-bend-right-up','ph-arrow-bend-up-left',
+      'ph-arrow-bend-up-right','ph-arrow-circle-down','ph-arrow-circle-left',
+      'ph-arrow-circle-right','ph-arrow-circle-up','ph-arrow-clockwise',
+      'ph-arrow-counter-clockwise','ph-arrow-down','ph-arrow-down-left',
+      'ph-arrow-down-right','ph-arrow-elbow-down-left','ph-arrow-elbow-down-right',
+      'ph-arrow-elbow-left','ph-arrow-elbow-left-down','ph-arrow-elbow-left-up',
+      'ph-arrow-elbow-right','ph-arrow-elbow-right-down','ph-arrow-elbow-right-up',
+      'ph-arrow-elbow-up-left','ph-arrow-elbow-up-right','ph-arrow-fat-down',
+      'ph-arrow-fat-left','ph-arrow-fat-line-down','ph-arrow-fat-line-left',
+      'ph-arrow-fat-line-right','ph-arrow-fat-line-up','ph-arrow-fat-lines-down',
+      'ph-arrow-fat-lines-left','ph-arrow-fat-lines-right','ph-arrow-fat-lines-up',
+      'ph-arrow-fat-right','ph-arrow-fat-up','ph-arrow-left','ph-arrow-line-down',
+      'ph-arrow-line-down-left','ph-arrow-line-down-right','ph-arrow-line-left',
+      'ph-arrow-line-right','ph-arrow-line-up','ph-arrow-line-up-left',
+      'ph-arrow-line-up-right','ph-arrow-right','ph-arrow-square-down',
+      'ph-arrow-square-in','ph-arrow-square-left','ph-arrow-square-out',
+      'ph-arrow-square-right','ph-arrow-square-up','ph-arrow-u-down-left',
+      'ph-arrow-u-down-right','ph-arrow-u-left-down','ph-arrow-u-left-up',
+      'ph-arrow-u-right-down','ph-arrow-u-right-up','ph-arrow-u-up-left',
+      'ph-arrow-u-up-right','ph-arrow-up','ph-arrow-up-left','ph-arrow-up-right',
+      'ph-arrows-clockwise','ph-arrows-counter-clockwise','ph-arrows-down-up',
+      'ph-arrows-horizontal','ph-arrows-in','ph-arrows-in-cardinal',
+      'ph-arrows-in-line-horizontal','ph-arrows-in-line-vertical',
+      'ph-arrows-in-simple','ph-arrows-left-right','ph-arrows-merge',
+      'ph-arrows-out','ph-arrows-out-cardinal','ph-arrows-out-line-horizontal',
+      'ph-arrows-out-line-vertical','ph-arrows-out-simple','ph-arrows-split',
+      'ph-arrows-vertical','ph-article','ph-article-medium','ph-article-ny-times',
+      'ph-asterisk','ph-asterisk-simple','ph-at','ph-atom','ph-axe',
+      'ph-baby','ph-backpack','ph-backspace','ph-bag','ph-bag-simple',
+      'ph-balloon','ph-bandaids','ph-bank','ph-barbell','ph-barcode',
+      'ph-barn','ph-battery-charging','ph-battery-charging-vertical',
+      'ph-battery-empty','ph-battery-full','ph-battery-high','ph-battery-low',
+      'ph-battery-medium','ph-battery-plus','ph-battery-plus-vertical',
+      'ph-battery-vertical-empty','ph-battery-vertical-full',
+      'ph-battery-vertical-high','ph-battery-vertical-low',
+      'ph-battery-vertical-medium','ph-battery-warning',
+      'ph-battery-warning-vertical','ph-bed','ph-beer-bottle',
+      'ph-beer-stein','ph-bell','ph-bell-ringing','ph-bell-simple',
+      'ph-bell-simple-ringing','ph-bell-simple-slash','ph-bell-simple-z',
+      'ph-bell-slash','ph-bell-z','ph-bezier-curve','ph-bicycle',
+      'ph-binoculars','ph-bird','ph-bluetooth','ph-bluetooth-connected',
+      'ph-bluetooth-slash','ph-bluetooth-x','ph-boat','ph-book',
+      'ph-book-bookmark','ph-book-open','ph-book-open-text','ph-bookmark',
+      'ph-bookmark-simple','ph-bookmarks','ph-bookmarks-simple','ph-books',
+      'ph-bounding-box','ph-brain','ph-brandy','ph-bridge',
+      'ph-briefcase','ph-briefcase-metal','ph-broadcast','ph-browser',
+      'ph-browsers','ph-bug','ph-bug-beetle','ph-bug-droid',
+      'ph-buildings','ph-bus','ph-butterfly','ph-cable-car',
+      'ph-cactus','ph-cake','ph-calculator','ph-calendar',
+      'ph-calendar-blank','ph-calendar-check','ph-calendar-dot',
+      'ph-calendar-dots','ph-calendar-minus','ph-calendar-plus',
+      'ph-calendar-slash','ph-calendar-star','ph-calendar-x',
+      'ph-camera','ph-camera-plus','ph-camera-rotate','ph-camera-slash',
+      'ph-camera-viewfinder','ph-campfire','ph-car','ph-car-battery',
+      'ph-car-profile','ph-car-simple','ph-cardholder','ph-cards',
+      'ph-caret-circle-double-down','ph-caret-circle-double-left',
+      'ph-caret-circle-double-right','ph-caret-circle-double-up',
+      'ph-caret-circle-down','ph-caret-circle-left','ph-caret-circle-right',
+      'ph-caret-circle-up','ph-caret-double-down','ph-caret-double-left',
+      'ph-caret-double-right','ph-caret-double-up','ph-caret-down',
+      'ph-caret-left','ph-caret-right','ph-caret-up',
+      'ph-cell-signal-full','ph-cell-signal-high','ph-cell-signal-low',
+      'ph-cell-signal-medium','ph-cell-signal-none','ph-cell-signal-slash',
+      'ph-cell-signal-x','ph-certificate','ph-chair','ph-chalkboard',
+      'ph-chalkboard-simple','ph-chalkboard-teacher','ph-champagne',
+      'ph-charging-station','ph-chart-bar','ph-chart-bar-horizontal',
+      'ph-chart-donut','ph-chart-line','ph-chart-line-down',
+      'ph-chart-line-up','ph-chart-pie','ph-chart-pie-slice',
+      'ph-chart-polar','ph-chart-scatter','ph-chat','ph-chat-centered',
+      'ph-chat-centered-dots','ph-chat-centered-text','ph-chat-circle',
+      'ph-chat-circle-dots','ph-chat-circle-text','ph-chat-dots',
+      'ph-chat-slash','ph-chat-teardrop','ph-chat-teardrop-dots',
+      'ph-chat-teardrop-text','ph-chat-text','ph-chats','ph-chats-circle',
+      'ph-chats-teardrop','ph-check','ph-check-circle','ph-check-fat',
+      'ph-check-square','ph-check-square-offset','ph-checks','ph-church',
+      'ph-circle','ph-circle-dashed','ph-circle-half','ph-circle-half-tilt',
+      'ph-circle-notch','ph-circles-four','ph-circles-three',
+      'ph-circles-three-plus','ph-circuitry','ph-clipboard',
+      'ph-clipboard-text','ph-clock','ph-clock-afternoon',
+      'ph-clock-clockwise','ph-clock-counter-clockwise','ph-clock-countdown',
+      'ph-clock-user','ph-closed-captioning','ph-cloud',
+      'ph-cloud-arrow-down','ph-cloud-arrow-up','ph-cloud-check',
+      'ph-cloud-fog','ph-cloud-lightning','ph-cloud-moon',
+      'ph-cloud-rain','ph-cloud-slash','ph-cloud-snow','ph-cloud-sun',
+      'ph-cloud-warning','ph-cloud-x','ph-club','ph-coat-hanger',
+      'ph-coffee','ph-coffee-bean','ph-coin','ph-coins',
+      'ph-columns','ph-columns-plus-left','ph-columns-plus-right',
+      'ph-command','ph-compass','ph-compass-rose','ph-computer-tower',
+      'ph-confetti','ph-contactless-payment','ph-control',
+      'ph-cookie','ph-cooking-pot','ph-copy','ph-copy-simple',
+      'ph-copyleft','ph-copyright','ph-corners-in','ph-corners-out',
+      'ph-couch','ph-court-basketball','ph-cpu','ph-credit-card',
+      'ph-crop','ph-cross','ph-crosshair','ph-crosshair-simple',
+      'ph-crown','ph-crown-simple','ph-cube','ph-cube-focus',
+      'ph-cube-transparent','ph-currency-btc','ph-currency-circle-dollar',
+      'ph-currency-cny','ph-currency-dollar','ph-currency-dollar-simple',
+      'ph-currency-eth','ph-currency-eur','ph-currency-gbp',
+      'ph-currency-inr','ph-currency-jpy','ph-currency-krw',
+      'ph-currency-kzt','ph-currency-ngn','ph-currency-rub',
+      'ph-cursor','ph-cursor-click','ph-cursor-text','ph-cylinder',
+      'ph-database','ph-desktop','ph-desktop-tower','ph-detective',
+      'ph-device-mobile','ph-device-mobile-camera','ph-device-mobile-slash',
+      'ph-device-mobile-speaker','ph-device-tablet','ph-device-tablet-camera',
+      'ph-device-tablet-speaker','ph-devices','ph-diamond','ph-diamond-four',
+      'ph-dice-five','ph-dice-four','ph-dice-one','ph-dice-six',
+      'ph-dice-three','ph-dice-two','ph-disc','ph-disco-ball',
+      'ph-discord-logo','ph-divide','ph-dna','ph-dog',
+      'ph-door','ph-door-open','ph-dot','ph-dot-outline',
+      'ph-dots-nine','ph-dots-six','ph-dots-six-vertical',
+      'ph-dots-three','ph-dots-three-circle','ph-dots-three-circle-vertical',
+      'ph-dots-three-outline','ph-dots-three-outline-vertical',
+      'ph-dots-three-vertical','ph-download','ph-download-simple',
+      'ph-dress','ph-dribbble-logo','ph-drop','ph-drop-half',
+      'ph-drop-half-bottom','ph-dropbox-logo','ph-ear','ph-ear-slash',
+      'ph-egg','ph-egg-crack','ph-eject','ph-eject-simple',
+      'ph-elevator','ph-engine','ph-envelope','ph-envelope-open',
+      'ph-envelope-simple','ph-envelope-simple-open','ph-equalizer',
+      'ph-equals','ph-eraser','ph-escalator-down','ph-escalator-up',
+      'ph-exam','ph-exclude','ph-exclude-square','ph-export',
+      'ph-eye','ph-eye-closed','ph-eye-slash','ph-eyedropper',
+      'ph-eyedropper-sample','ph-eyeglasses','ph-face-mask',
+      'ph-factory','ph-faders','ph-faders-horizontal','ph-fan',
+      'ph-fast-forward','ph-fast-forward-circle','ph-feather',
+      'ph-fediverse-logo','ph-figma-logo','ph-file','ph-file-archive',
+      'ph-file-arrow-down','ph-file-arrow-up','ph-file-audio',
+      'ph-file-cloud','ph-file-code','ph-file-css','ph-file-csv',
+      'ph-file-doc','ph-file-dotted','ph-file-html','ph-file-image',
+      'ph-file-jpg','ph-file-js','ph-file-jsx','ph-file-lock',
+      'ph-file-magnifying-glass','ph-file-minus','ph-file-pdf',
+      'ph-file-plus','ph-file-png','ph-file-ppt','ph-file-py',
+      'ph-file-rs','ph-file-sql','ph-file-svg','ph-file-text',
+      'ph-file-ts','ph-file-tsx','ph-file-txt','ph-file-video',
+      'ph-file-vue','ph-file-x','ph-file-xls','ph-file-zip',
+      'ph-files','ph-film-reel','ph-film-script','ph-film-slate',
+      'ph-film-strip','ph-fingerprint','ph-fire','ph-fire-extinguisher',
+      'ph-fire-simple','ph-first-aid','ph-first-aid-kit','ph-fish',
+      'ph-fish-simple','ph-flag','ph-flag-banner','ph-flag-banner-fold',
+      'ph-flag-checkered','ph-flag-pennant','ph-flame','ph-flashlight',
+      'ph-flask','ph-flip-horizontal','ph-flip-vertical',
+      'ph-floppy-disk','ph-floppy-disk-back','ph-flow-arrow',
+      'ph-flower','ph-flower-lotus','ph-flower-tulip','ph-flying-saucer',
+      'ph-folder','ph-folder-dashed','ph-folder-lock','ph-folder-minus',
+      'ph-folder-notch','ph-folder-notch-minus','ph-folder-notch-open',
+      'ph-folder-notch-plus','ph-folder-open','ph-folder-plus',
+      'ph-folder-simple','ph-folder-simple-dashed','ph-folder-simple-lock',
+      'ph-folder-simple-minus','ph-folder-simple-plus','ph-folder-simple-star',
+      'ph-folder-simple-user','ph-folder-star','ph-folder-user',
+      'ph-folders','ph-football','ph-footprints','ph-fork-knife',
+      'ph-frame-corners','ph-framer-logo','ph-function','ph-funnel',
+      'ph-funnel-simple','ph-funnel-simple-x','ph-funnel-x',
+      'ph-game-controller','ph-garage','ph-gas-can','ph-gas-pump',
+      'ph-gauge','ph-gavel','ph-gear','ph-gear-fine','ph-gear-six',
+      'ph-gender-female','ph-gender-intersex','ph-gender-male',
+      'ph-gender-neuter','ph-gender-nonbinary','ph-gender-transgender',
+      'ph-ghost','ph-gif','ph-gift','ph-git-branch',
+      'ph-git-commit','ph-git-diff','ph-git-fork','ph-git-merge',
+      'ph-git-pull-request','ph-github-logo','ph-gitlab-logo',
+      'ph-gitlab-logo-simple','ph-globe','ph-globe-hemisphere-east',
+      'ph-globe-hemisphere-west','ph-globe-simple','ph-globe-stand',
+      'ph-golf','ph-goodreads-logo','ph-google-cardboard-logo',
+      'ph-google-chrome-logo','ph-google-drive-logo','ph-google-logo',
+      'ph-google-photos-logo','ph-google-play-logo','ph-google-podcasts-logo',
+      'ph-gradient','ph-graduation-cap','ph-grains','ph-grains-slash',
+      'ph-graph','ph-grid-four','ph-grid-nine','ph-guitar',
+      'ph-hair-dryer','ph-hamburger','ph-hammer','ph-hand',
+      'ph-hand-arrow-down','ph-hand-arrow-up','ph-hand-coins',
+      'ph-hand-deposit','ph-hand-eye','ph-hand-fist','ph-hand-grabbing',
+      'ph-hand-heart','ph-hand-palm','ph-hand-peace','ph-hand-pointing',
+      'ph-hand-scissors','ph-hand-soap','ph-hand-swipe-left',
+      'ph-hand-swipe-right','ph-hand-tap','ph-hand-waving','ph-hand-withdraw',
+      'ph-handbag','ph-handbag-simple','ph-hands-clapping',
+      'ph-hands-praying','ph-handshake','ph-hard-drive',
+      'ph-hard-drives','ph-hard-hat','ph-hash','ph-hash-straight',
+      'ph-headlights','ph-headphones','ph-headset','ph-heart',
+      'ph-heart-break','ph-heart-half','ph-heart-straight',
+      'ph-heart-straight-break','ph-heartbeat','ph-hexagon',
+      'ph-high-definition','ph-highlighter','ph-highlighter-circle',
+      'ph-hockey','ph-hoodie','ph-horse','ph-hospital',
+      'ph-hourglass','ph-hourglass-high','ph-hourglass-low',
+      'ph-hourglass-medium','ph-house','ph-house-line','ph-house-simple',
+      'ph-hurricane','ph-ice-cream','ph-identification-badge',
+      'ph-identification-card','ph-image','ph-image-broken',
+      'ph-image-square','ph-images','ph-images-square',
+      'ph-infinity','ph-info','ph-instagram-logo','ph-intersect',
+      'ph-intersect-square','ph-intersect-three','ph-jeep',
+      'ph-joystick','ph-kanban','ph-key','ph-key-return',
+      'ph-keyboard','ph-keyhole','ph-knife','ph-ladder',
+      'ph-ladder-simple','ph-lamp','ph-lamp-pendant','ph-laptop',
+      'ph-lasso','ph-lastfm-logo','ph-layout','ph-leaf',
+      'ph-lego','ph-lego-smiley','ph-less-than','ph-less-than-or-equal',
+      'ph-life-preserver','ph-lightbulb','ph-lightbulb-filament',
+      'ph-lighter','ph-lightning','ph-lightning-slash','ph-line-segment',
+      'ph-line-segments','ph-link','ph-link-break','ph-link-simple',
+      'ph-link-simple-break','ph-link-simple-horizontal',
+      'ph-link-simple-horizontal-break','ph-linkedin-logo',
+      'ph-linux-logo','ph-list','ph-list-bullets','ph-list-checks',
+      'ph-list-dashes','ph-list-heart','ph-list-magnifying-glass',
+      'ph-list-numbers','ph-list-plus','ph-list-star','ph-lock',
+      'ph-lock-key','ph-lock-key-open','ph-lock-laminated',
+      'ph-lock-laminated-open','ph-lock-open','ph-lock-simple',
+      'ph-lock-simple-open','ph-lockers','ph-log','ph-magic-wand',
+      'ph-magnet','ph-magnet-straight','ph-magnifying-glass',
+      'ph-magnifying-glass-minus','ph-magnifying-glass-plus',
+      'ph-map-pin','ph-map-pin-area','ph-map-pin-line','ph-map-pin-plus',
+      'ph-map-pin-simple','ph-map-pin-simple-area','ph-map-pin-simple-line',
+      'ph-map-trifold','ph-markdown-logo','ph-marker-circle',
+      'ph-martini','ph-mask-happy','ph-mask-sad','ph-math-operations',
+      'ph-matrix-logo','ph-medal','ph-medal-military','ph-megaphone',
+      'ph-megaphone-simple','ph-messenger-logo','ph-meta-logo',
+      'ph-meteor','ph-metronome','ph-microphone','ph-microphone-slash',
+      'ph-microphone-stage','ph-microsoft-excel-logo',
+      'ph-microsoft-outlook-logo','ph-microsoft-powerpoint-logo',
+      'ph-microsoft-teams-logo','ph-microsoft-word-logo',
+      'ph-minus','ph-minus-circle','ph-minus-square','ph-money',
+      'ph-monitor','ph-monitor-arrow-up','ph-monitor-play',
+      'ph-moon','ph-moon-stars','ph-moped','ph-moped-front',
+      'ph-mosque','ph-motorcycle','ph-mountains','ph-mouse',
+      'ph-mouse-left-click','ph-mouse-middle-click','ph-mouse-right-click',
+      'ph-mouse-scroll','ph-mouse-simple','ph-music-note',
+      'ph-music-note-simple','ph-music-notes','ph-music-notes-minus',
+      'ph-music-notes-plus','ph-music-notes-simple','ph-navigation-arrow',
+      'ph-needle','ph-network','ph-network-slash','ph-newspaper',
+      'ph-newspaper-clipping','ph-note','ph-note-blank','ph-note-pencil',
+      'ph-notebook','ph-notepad','ph-notification','ph-notion-logo',
+      'ph-number-circle-eight','ph-number-circle-five',
+      'ph-number-circle-four','ph-number-circle-nine',
+      'ph-number-circle-one','ph-number-circle-seven',
+      'ph-number-circle-six','ph-number-circle-three',
+      'ph-number-circle-two','ph-number-circle-zero',
+      'ph-number-eight','ph-number-five','ph-number-four',
+      'ph-number-nine','ph-number-one','ph-number-seven',
+      'ph-number-six','ph-number-square-eight','ph-number-square-five',
+      'ph-number-square-four','ph-number-square-nine',
+      'ph-number-square-one','ph-number-square-seven',
+      'ph-number-square-six','ph-number-square-three',
+      'ph-number-square-two','ph-number-square-zero',
+      'ph-number-three','ph-number-two','ph-number-zero',
+      'ph-nut','ph-ny-times-logo','ph-octagon','ph-office-chair',
+      'ph-onigiri','ph-option','ph-orange','ph-orange-slice',
+      'ph-oven','ph-package','ph-paint-brush','ph-paint-brush-broad',
+      'ph-paint-brush-household','ph-paint-bucket','ph-paint-roller',
+      'ph-palette','ph-pants','ph-paper-plane','ph-paper-plane-right',
+      'ph-paper-plane-tilt','ph-paperclip','ph-paperclip-horizontal',
+      'ph-parachute','ph-paragraph','ph-parallelogram','ph-park',
+      'ph-password','ph-path','ph-pause','ph-pause-circle',
+      'ph-paw-print','ph-paypal-logo','ph-peace','ph-pen',
+      'ph-pen-nib','ph-pen-nib-straight','ph-pencil','ph-pencil-circle',
+      'ph-pencil-line','ph-pencil-ruler','ph-pencil-simple',
+      'ph-pencil-simple-line','ph-pencil-simple-slash','ph-pencil-slash',
+      'ph-pentagon','ph-pepper','ph-percent','ph-person',
+      'ph-person-arms-spread','ph-person-simple','ph-person-simple-bike',
+      'ph-person-simple-circle','ph-person-simple-hike',
+      'ph-person-simple-run','ph-person-simple-ski',
+      'ph-person-simple-snowboard','ph-person-simple-swim',
+      'ph-person-simple-tai-chi','ph-person-simple-throw',
+      'ph-person-simple-walk','ph-perspective','ph-phone',
+      'ph-phone-call','ph-phone-disconnect','ph-phone-incoming',
+      'ph-phone-outgoing','ph-phone-pause','ph-phone-plus',
+      'ph-phone-slash','ph-phone-transfer','ph-phone-x',
+      'ph-phosphor-logo','ph-pi','ph-piano-keys','ph-picnic-table',
+      'ph-picture-in-picture','ph-piggy-bank','ph-pill',
+      'ph-ping-pong','ph-pinterest-logo','ph-pipe','ph-pipe-wrench',
+      'ph-pizza','ph-placeholder','ph-planet','ph-plant',
+      'ph-play','ph-play-circle','ph-play-pause','ph-playlist',
+      'ph-plug','ph-plug-charging','ph-plus','ph-plus-circle',
+      'ph-plus-minus','ph-plus-square','ph-poker-chip','ph-police-car',
+      'ph-polygon','ph-popcorn','ph-popsicle','ph-potted-plant',
+      'ph-power','ph-prescription','ph-presentation',
+      'ph-presentation-chart','ph-printer','ph-prohibit',
+      'ph-prohibit-inset','ph-projector-screen','ph-projector-screen-chart',
+      'ph-pulse','ph-push-pin','ph-push-pin-simple','ph-push-pin-simple-slash',
+      'ph-push-pin-slash','ph-puzzle-piece','ph-qr-code','ph-question',
+      'ph-question-mark','ph-queue','ph-quotes','ph-radical',
+      'ph-radio','ph-radio-button','ph-rainbow','ph-rainbow-cloud',
+      'ph-ranking','ph-read-cv-logo','ph-receipt','ph-receipt-x',
+      'ph-record','ph-rectangle','ph-rectangle-dashed',
+      'ph-recycle','ph-reddit-logo','ph-repeat','ph-repeat-once',
+      'ph-rewind','ph-rewind-circle','ph-road-horizon','ph-robot',
+      'ph-rocket','ph-rocket-launch','ph-rows','ph-rows-plus-bottom',
+      'ph-rows-plus-top','ph-rss','ph-rss-simple','ph-rug',
+      'ph-ruler','ph-scales','ph-scan','ph-scan-smiley',
+      'ph-scissors','ph-scooter','ph-screencast','ph-screwdriver',
+      'ph-scribble','ph-scribble-loop','ph-scroll','ph-seal',
+      'ph-seal-check','ph-seal-percent','ph-seal-question',
+      'ph-seal-warning','ph-selection','ph-selection-all',
+      'ph-selection-background','ph-selection-foreground',
+      'ph-selection-inverse','ph-selection-plus','ph-selection-slash',
+      'ph-shapes','ph-share','ph-share-fat','ph-share-network',
+      'ph-shield','ph-shield-check','ph-shield-checkered',
+      'ph-shield-chevron','ph-shield-plus','ph-shield-slash',
+      'ph-shield-star','ph-shield-warning','ph-shopping-bag',
+      'ph-shopping-bag-open','ph-shopping-cart','ph-shopping-cart-simple',
+      'ph-shovel','ph-shower','ph-shrimp','ph-shuffle',
+      'ph-shuffle-angular','ph-shuffle-simple','ph-sidebar',
+      'ph-sidebar-simple','ph-sigma','ph-sign-in','ph-sign-out',
+      'ph-signature','ph-signpost','ph-sim-card','ph-siren',
+      'ph-sketch-logo','ph-skip-back','ph-skip-back-circle',
+      'ph-skip-forward','ph-skip-forward-circle','ph-skull',
+      'ph-slack-logo','ph-sliders','ph-sliders-horizontal',
+      'ph-smiley','ph-smiley-angry','ph-smiley-blank','ph-smiley-meh',
+      'ph-smiley-melting','ph-smiley-nervous','ph-smiley-sad',
+      'ph-smiley-sticker','ph-smiley-wink','ph-smiley-x-eyes',
+      'ph-snapchat-logo','ph-sneaker','ph-sneaker-move',
+      'ph-snowflake','ph-soccer-ball','ph-sort-ascending',
+      'ph-sort-descending','ph-soundcloud-logo','ph-spade',
+      'ph-sparkle','ph-speaker-hifi','ph-speaker-high',
+      'ph-speaker-low','ph-speaker-none','ph-speaker-simple-high',
+      'ph-speaker-simple-low','ph-speaker-simple-none',
+      'ph-speaker-simple-slash','ph-speaker-simple-x',
+      'ph-speaker-slash','ph-speaker-x','ph-spinner','ph-spinner-gap',
+      'ph-spiral','ph-split-horizontal','ph-split-vertical',
+      'ph-spotify-logo','ph-square','ph-square-half',
+      'ph-square-half-bottom','ph-square-logo','ph-squares-four',
+      'ph-stack','ph-stack-overflow-logo','ph-stack-simple',
+      'ph-stairs','ph-stamp','ph-standard-definition',
+      'ph-star','ph-star-and-crescent','ph-star-four','ph-star-half',
+      'ph-star-of-david','ph-steps','ph-stethoscope','ph-sticker',
+      'ph-stool','ph-stop','ph-stop-circle','ph-storefront',
+      'ph-strategy','ph-stripe-logo','ph-student','ph-subtitles',
+      'ph-subtitles-slash','ph-subtract','ph-subtract-square',
+      'ph-subway','ph-suitcase','ph-suitcase-rolling','ph-suitcase-simple',
+      'ph-sun','ph-sun-dim','ph-sun-horizon','ph-sunglasses',
+      'ph-swap','ph-swatches','ph-sword','ph-synagogue',
+      'ph-syringe','ph-table','ph-tabs','ph-tag','ph-tag-chevron',
+      'ph-tag-simple','ph-target','ph-taxi','ph-telegram-logo',
+      'ph-television','ph-television-simple','ph-tent','ph-terminal',
+      'ph-terminal-window','ph-test-tube','ph-text-aa','ph-text-align-center',
+      'ph-text-align-justify','ph-text-align-left','ph-text-align-right',
+      'ph-text-b','ph-text-bolder','ph-text-columns','ph-text-h',
+      'ph-text-h-five','ph-text-h-four','ph-text-h-one','ph-text-h-six',
+      'ph-text-h-three','ph-text-h-two','ph-text-indent','ph-text-italic',
+      'ph-text-outdent','ph-text-strikethrough','ph-text-subscript',
+      'ph-text-superscript','ph-text-t','ph-text-underline',
+      'ph-textbox','ph-thermometer','ph-thermometer-cold',
+      'ph-thermometer-hot','ph-thermometer-simple','ph-threads-logo',
+      'ph-thumbs-down','ph-thumbs-up','ph-ticket','ph-tidal-logo',
+      'ph-tiktok-logo','ph-timer','ph-tipi','ph-toggle-left',
+      'ph-toggle-right','ph-toilet','ph-toilet-paper',
+      'ph-toolbox','ph-tooth','ph-tote','ph-tote-simple',
+      'ph-towel','ph-tractor','ph-trademark','ph-traffic-cone',
+      'ph-traffic-sign','ph-traffic-signal','ph-train','ph-train-regional',
+      'ph-train-simple','ph-tram','ph-translate','ph-trash',
+      'ph-trash-simple','ph-tray','ph-tray-arrow-down',
+      'ph-tray-arrow-up','ph-treasure-chest','ph-tree','ph-tree-evergreen',
+      'ph-tree-palm','ph-tree-structure','ph-trend-down','ph-trend-up',
+      'ph-triangle','ph-triangle-dashed','ph-trolley','ph-trolley-suitcase',
+      'ph-truck','ph-truck-trailer','ph-tumblr-logo','ph-twitch-logo',
+      'ph-twitter-logo','ph-umbrella','ph-umbrella-simple','ph-union',
+      'ph-unite','ph-unite-square','ph-upload','ph-upload-simple',
+      'ph-usb','ph-user','ph-user-check','ph-user-circle',
+      'ph-user-circle-check','ph-user-circle-dashed','ph-user-circle-gear',
+      'ph-user-circle-minus','ph-user-circle-plus','ph-user-focus',
+      'ph-user-gear','ph-user-list','ph-user-minus','ph-user-plus',
+      'ph-user-rectangle','ph-user-sound','ph-user-square',
+      'ph-user-switch','ph-users','ph-users-four','ph-users-three',
+      'ph-van','ph-vault','ph-vector-three','ph-vector-two',
+      'ph-vibrate','ph-video','ph-video-camera','ph-video-camera-slash',
+      'ph-video-conference','ph-vignette','ph-vinyl-record',
+      'ph-virtual-reality','ph-virus','ph-voicemail','ph-volleyball',
+      'ph-wall','ph-wallet','ph-warehouse','ph-warning',
+      'ph-warning-circle','ph-warning-diamond','ph-warning-octagon',
+      'ph-watch','ph-wave-sawtooth','ph-wave-sine','ph-wave-square',
+      'ph-wave-triangle','ph-waveform','ph-waveform-slash',
+      'ph-waves','ph-webcam','ph-webcam-slash','ph-whatsapp-logo',
+      'ph-wheelchair','ph-wheelchair-motion','ph-wifi-high',
+      'ph-wifi-low','ph-wifi-medium','ph-wifi-none','ph-wifi-slash',
+      'ph-wifi-x','ph-wind','ph-windows-logo','ph-wine',
+      'ph-wrench','ph-x','ph-x-circle','ph-x-square',
+      'ph-yin-yang','ph-youtube-logo',
+    ];
+  }
+  filteredIcons = [...ALL_PH_ICONS];
+}
+
+function filterIcons(q) {
+  const term = q.toLowerCase().replace(/^ph-/, '');
+  filteredIcons = term
+    ? ALL_PH_ICONS.filter(ic => ic.replace('ph-', '').includes(term))
+    : [...ALL_PH_ICONS];
+  renderIconGrid();
+  document.getElementById('icon-count').textContent = `${filteredIcons.length} ไอคอน`;
+}
+
+function renderIconGrid() {
+  const grid = document.getElementById('emoji-grid');
+  const current = document.getElementById('cat-f-icon').value;
+  // render แค่ 200 ตัวแรก (virtualize อย่างง่าย)
+  const show = filteredIcons.slice(0, 200);
+  if (!show.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--ink3);font-size:12px;">ไม่พบไอคอน</div>`;
+    return;
+  }
+  grid.innerHTML = show.map(ic => {
+    const sel = ic === current;
+    return `<button type="button" onclick="pickCatEmoji('${ic}')" data-ph="${ic}" title="${ic.replace('ph-','')}"
+      style="width:36px;height:36px;border-radius:8px;border:${sel?'2px solid var(--primary)':'none'};
+             background:${sel?'var(--primary-l)':'transparent'};
+             cursor:pointer;display:flex;align-items:center;justify-content:center;
+             color:var(--ink2);font-size:18px;transition:background .1s;"
+      onmouseenter="this.style.background='var(--surface)';this.style.color='var(--primary)'"
+      onmouseleave="this.style.background='${sel?'var(--primary-l)':'transparent'}';this.style.color='${sel?'var(--primary)':'var(--ink2)'}'">
+      <i class="ph-fill ${ic}"></i>
+    </button>`;
+  }).join('');
+  // ถ้ากรองแล้วยังเกิน 200 บอกผู้ใช้
+  if (filteredIcons.length > 200) {
+    grid.innerHTML += `<div style="grid-column:1/-1;text-align:center;padding:8px;color:var(--ink3);font-size:11px;">
+      แสดง 200 จาก ${filteredIcons.length} — ค้นหาเพื่อแสดงเพิ่ม</div>`;
+  }
+}
+
+function buildEmojiGrid() {
+  // โหลดแล้ว skip
+}
+
+async function toggleEmojiPicker(e) {
+  e.stopPropagation();
+  const popup = document.getElementById('emoji-picker-popup');
+  const isOpen = popup.style.display === 'block';
+  if (isOpen) {
+    popup.style.display = 'none';
+    resetIconBtnStyle();
+    return;
+  }
+  // position popup ใต้ปุ่ม
+  const btn = document.getElementById('cat-f-icon-btn');
+  const rect = btn.getBoundingClientRect();
+  popup.style.left = Math.min(rect.left, window.innerWidth - 310) + 'px';
+  popup.style.top = (rect.bottom + 6) + 'px';
+  popup.style.display = 'block';
+  btn.style.borderColor = 'var(--primary)';
+  btn.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.12)';
+  // โหลด icons ถ้ายังไม่มี
+  if (!ALL_PH_ICONS.length) {
+    await loadPhosphorIcons();
+    filteredIcons = [...ALL_PH_ICONS];
+    document.getElementById('icon-search').value = '';
+  }
+  renderIconGrid();
+  document.getElementById('icon-count').textContent = `${filteredIcons.length} ไอคอน`;
+}
+
+function resetIconBtnStyle() {
+  const btn = document.getElementById('cat-f-icon-btn');
+  if (btn) { btn.style.borderColor = ''; btn.style.boxShadow = ''; }
+}
+
+function pickCatEmoji(ic) {
+  document.getElementById('cat-f-icon').value = ic;
+  document.getElementById('cat-f-icon-btn').innerHTML = `<i class="ph-fill ${ic}"></i>`;
+  document.getElementById('emoji-picker-popup').style.display = 'none';
+  resetIconBtnStyle();
+}
+
+document.addEventListener('click', e => {
+  const popup = document.getElementById('emoji-picker-popup');
+  if (popup && popup.style.display === 'block') {
+    const btn = document.getElementById('cat-f-icon-btn');
+    if (!popup.contains(e.target) && !btn.contains(e.target)) {
+      popup.style.display = 'none';
+      resetIconBtnStyle();
+    }
+  }
+});
+
+async function deleteCat(slug) {
+  const c = CATS.find(x => x.slug === slug);
+  const hasItems = ALL_ITEMS.some(x => x.cat === slug);
+  if (hasItems) {
+    toast(`❌ มีสินค้าในหมวด "${c.label}" อยู่ ย้ายสินค้าออกก่อน`, 'error');
+    return;
+  }
+  if (!confirm(`ลบหมวด "${c.label}" ใช่มั้ย?`)) return;
+
+  try {
+    await sb(`categories?slug=eq.${slug}`, { method:'DELETE', prefer:'return=minimal' });
+    CATS = CATS.filter(x => x.slug !== slug);
+    toast(`✅ ลบ "${c.label}" แล้ว`);
+    if (activeCat === slug) { activeCat = 'all'; }
+    renderCatList();
+    renderCatBar();
+    renderList();
+  } catch(err) {
+    toast('❌ ' + err.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+// ── INIT — Supabase SDK auth check ──
+(async () => {
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) {
+    window.location.replace('login.html');
+    return;
+  }
+  window.AUTH = {
+    token: session.access_token,
+    user:  session.user,
+    logout: async () => { await _sb.auth.signOut(); window.location.replace('login.html'); }
+  };
+  loadItems();
+})();
+</script>
+<!-- CAT MANAGER MODAL -->
+<div class="modal-backdrop" id="cat-modal">
+  <div class="modal-sheet" id="cat-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <span class="sheet-title">จัดการหมวดหมู่</span>
+      <button class="close-btn" onclick="closeModal('cat-modal')"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="sheet-body">
+      <!-- รายการหมวดหมู่ -->
+      <div id="cat-list"></div>
+      <!-- ฟอร์มเพิ่ม/แก้ไข -->
+      <div style="background:var(--surface);border-radius:16px;padding:14px;margin-top:8px;">
+        <div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:10px;letter-spacing:.5px;" id="cat-form-title">เพิ่มหมวดหมู่ใหม่</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-start;">
+          <!-- PHOSPHOR ICON PICKER TRIGGER -->
+          <div style="position:relative;flex-shrink:0;">
+            <button type="button" id="cat-f-icon-btn" onclick="toggleEmojiPicker(event)"
+              style="width:56px;height:50px;border-radius:14px;background:var(--white);border:1.5px solid rgba(10,10,30,0.08);
+                     cursor:pointer;display:flex;align-items:center;justify-content:center;
+                     transition:border-color .15s,box-shadow .15s;color:var(--primary);font-size:22px;"
+              title="เลือกไอคอน">
+              <i class="ph-fill ph-wrench"></i>
+            </button>
+            <input type="hidden" id="cat-f-icon" value="ph-wrench">
+            <!-- ICON POPUP (full phosphor picker) -->
+            <div id="emoji-picker-popup" style="display:none;position:fixed;
+                 background:var(--white);border-radius:18px;padding:0;z-index:9999;
+                 box-shadow:0 12px 48px rgba(10,10,30,0.18),0 0 0 1px rgba(10,10,30,0.07);
+                 width:300px;overflow:hidden;">
+              <!-- Header + Search -->
+              <div style="padding:10px 10px 8px;border-bottom:1px solid rgba(10,10,30,0.06);">
+                <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:1px;margin-bottom:8px;">เลือกไอคอน</div>
+                <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:10px;padding:7px 10px;">
+                  <i class="ph ph-magnifying-glass" style="color:var(--ink3);font-size:14px;flex-shrink:0;"></i>
+                  <input id="icon-search" type="text" placeholder="ค้นหาไอคอน..." oninput="filterIcons(this.value)"
+                    style="border:none;outline:none;background:transparent;font-family:'Prompt',sans-serif;font-size:13px;color:var(--ink);width:100%;">
+                </div>
+              </div>
+              <!-- Grid -->
+              <div id="emoji-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;
+                   padding:8px;max-height:260px;overflow-y:auto;scrollbar-width:none;">
+                <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--ink3);font-size:12px;">
+                  <i class="ph ph-spinner-gap" style="font-size:20px;animation:spin .8s linear infinite;display:block;margin-bottom:6px;"></i>
+                  กำลังโหลดไอคอน...
+                </div>
+              </div>
+              <div id="icon-count" style="font-size:10px;color:var(--ink3);text-align:center;padding:4px 0 8px;border-top:1px solid rgba(10,10,30,0.05);"></div>
+            </div>
+          </div>
+          <input class="form-input" type="text" id="cat-f-label" placeholder="ชื่อหมวดหมู่ เช่น โลหะ" style="flex:1;">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" type="text" id="cat-f-slug" placeholder="slug (อักษรพิมพ์เล็ก-ขีด) เช่น metal" style="flex:1;">
+          <button onclick="saveCat()" style="padding:10px 16px;border-radius:12px;background:var(--primary);color:white;border:none;font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;" id="cat-save-btn">เพิ่ม</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:6px;">slug ใช้สำหรับอ้างอิงในระบบ ตัวเล็กและขีดกลางเท่านั้น</div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

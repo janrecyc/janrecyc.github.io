@@ -647,16 +647,14 @@ const DEMO_ITEMS = [
   {id:13, name:'มอเตอร์เก่า',        icon:'⚡', buy_price:25,    sell_price:32,    stock_qty:95,   unit:'กก.', cat:'electric'},
 ];
 
-// Fallback icons ถ้าโหลดจาก DB ไม่ได้
-const ICONS_FALLBACK = [
+const ICONS = [
   'ph-package','ph-wrench','ph-pipe','ph-coins','ph-gear-six',
   'ph-newspaper','ph-file-text','ph-cube','ph-flask','ph-coffee',
   'ph-plug-charging','ph-lightning','ph-recycle','ph-steps',
   'ph-hammer','ph-axe','ph-screwdriver','ph-battery-full',
-  'ph-broadcast','ph-cpu','ph-magnet','ph-key',
-  'ph-truck','ph-warehouse','ph-barcode','ph-tag',
+  'ph-broadcast','ph-cpu','ph-magnet','ph-key','ph-hook',
+  'ph-truck','ph-warehouse','ph-barcode','ph-tag','ph-box-arrow-down',
 ];
-let ALL_ICONS = [...ICONS_FALLBACK]; // จะถูก replace ตอนโหลดจาก DB
 
 // หมวดหมู่ dynamic (โหลดจาก Supabase)
 let CATS = [
@@ -754,14 +752,12 @@ async function loadItems() {
   document.getElementById('config-banner').style.display = 'none';
 
   try {
-    const [items, cats, icons] = await Promise.all([
+    const [items, cats] = await Promise.all([
       sb('items?select=id,name,icon,buy_price,sell_price,stock_qty,unit,cat&order=cat,name'),
       sb('categories?select=slug,label,icon&order=id'),
-      sb('icons?select=name&order=name'),
     ]);
     ALL_ITEMS = items || [];
     if (cats && cats.length) CATS = cats;
-    if (icons && icons.length) ALL_ICONS = icons.map(r => r.name);
     renderCatBar();
     renderList();
   } catch (err) {
@@ -825,10 +821,10 @@ function renderList() {
 }
 
 // ══════════════════════════════════════════════
-//  ICON GRID (สินค้า) — ดึงจาก ALL_ICONS (DB)
+//  ICON GRID
 // ══════════════════════════════════════════════
 function buildIconGrid() {
-  document.getElementById('icon-grid').innerHTML = ALL_ICONS.map(ic => `
+  document.getElementById('icon-grid').innerHTML = ICONS.map(ic => `
     <div class="icon-opt ${ic===selectedIcon?'selected':''}" data-ic="${ic}" onclick="pickIcon('${ic}')"><i class="ph-fill ${ic}"></i></div>
   `).join('');
 }
@@ -841,45 +837,6 @@ function pickIcon(ic) {
 }
 
 // ══════════════════════════════════════════════
-//  CAT ICON PICKER (inline) — ดึงจาก ALL_ICONS (DB)
-// ══════════════════════════════════════════════
-function filterCatIcons(q) {
-  const term = q.toLowerCase().replace(/^ph-/,'');
-  const list = term ? ALL_ICONS.filter(ic => ic.replace('ph-','').includes(term)) : ALL_ICONS;
-  renderCatIconGrid(list);
-}
-
-function renderCatIconGrid(list) {
-  const cur = document.getElementById('cat-f-icon').value || 'ph-cube';
-  const grid = document.getElementById('cat-icon-grid');
-  if (!grid) return;
-  if (!list.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--ink3);font-size:12px;">ไม่พบไอคอน</div>`;
-  } else {
-    grid.innerHTML = list.map(ic => {
-      const sel = ic === cur;
-      return `<button type="button" onclick="pickCatIcon('${ic}')" title="${ic.replace('ph-','')}"
-        style="width:36px;height:36px;border-radius:10px;font-size:20px;cursor:pointer;
-               border:${sel ? '2px solid var(--primary)' : '1.5px solid transparent'};
-               background:${sel ? 'var(--primary-l)' : 'var(--white)'};
-               display:flex;align-items:center;justify-content:center;
-               color:${sel ? 'var(--primary)' : 'var(--ink2)'};
-               transition:background .1s,border-color .1s;">
-        <i class="ph-fill ${ic}"></i>
-      </button>`;
-    }).join('');
-  }
-  const countEl = document.getElementById('cat-icon-count');
-  if (countEl) countEl.textContent = `${list.length} ไอคอน`;
-}
-
-function pickCatIcon(ic) {
-  document.getElementById('cat-f-icon').value = ic;
-  const q = document.getElementById('cat-icon-search')?.value || '';
-  filterCatIcons(q);
-}
-
-
 //  RENDER CAT BAR (dynamic)
 // ══════════════════════════════════════════════
 function renderCatBar() {
@@ -1215,10 +1172,8 @@ function editCat(slug) {
   document.getElementById('cat-f-slug').disabled = true;
   document.getElementById('cat-form-title').textContent = 'แก้ไขหมวดหมู่';
   document.getElementById('cat-save-btn').textContent   = 'บันทึก';
-  if (document.getElementById('cat-icon-search')) {
-    document.getElementById('cat-icon-search').value = '';
-    filterCatIcons('');
-  }
+  document.getElementById('cat-icon-search').value = '';
+  filterCatIcons('');
 }
 
 function resetCatForm() {
@@ -1229,10 +1184,8 @@ function resetCatForm() {
   document.getElementById('cat-f-slug').disabled = false;
   document.getElementById('cat-form-title').textContent = 'เพิ่มหมวดหมู่ใหม่';
   document.getElementById('cat-save-btn').textContent   = 'เพิ่ม';
-  if (document.getElementById('cat-icon-search')) {
-    document.getElementById('cat-icon-search').value = '';
-    filterCatIcons('');
-  }
+  document.getElementById('cat-icon-search').value = '';
+  filterCatIcons('');
 }
 
 async function saveCat() {
@@ -1273,6 +1226,70 @@ async function saveCat() {
   } finally {
     btn.disabled = false;
   }
+}
+
+// ══════════════════════════════════════════════
+//  CAT ICON PICKER (inline)
+// ══════════════════════════════════════════════
+const CAT_ICONS_BASE = [
+  'ph-package','ph-wrench','ph-pipe','ph-coins','ph-gear-six','ph-newspaper',
+  'ph-file-text','ph-cube','ph-flask','ph-coffee','ph-plug-charging',
+  'ph-lightning','ph-recycle','ph-steps','ph-hammer','ph-axe',
+  'ph-screwdriver','ph-battery-full','ph-broadcast','ph-cpu','ph-magnet',
+  'ph-key','ph-truck','ph-warehouse','ph-barcode','ph-tag',
+  'ph-leaf','ph-tree','ph-sun','ph-star','ph-drop','ph-flame',
+  'ph-basket','ph-shopping-cart','ph-tote','ph-trash','ph-archive',
+  'ph-stack','ph-chart-bar','ph-chart-pie','ph-coin','ph-money',
+  'ph-wallet','ph-credit-card','ph-receipt','ph-car','ph-bicycle',
+  'ph-motorcycle','ph-airplane','ph-boat','ph-train','ph-house',
+  'ph-buildings','ph-factory','ph-storefront','ph-scissors',
+  'ph-phone','ph-laptop','ph-desktop-tower','ph-device-mobile',
+  'ph-camera','ph-music-note','ph-headphones','ph-book','ph-books',
+  'ph-note','ph-clipboard-text','ph-shield','ph-lock','ph-medal',
+  'ph-heart','ph-crown','ph-trophy','ph-fish','ph-flower',
+];
+
+function buildCatIconGrid() {
+  const fromDB = (ALL_ITEMS || []).map(it => resolveIcon(it.icon)).filter(Boolean);
+  const all = [...new Set([...fromDB, ...CAT_ICONS_BASE])];
+  filterCatIcons('');
+}
+
+function filterCatIcons(q) {
+  const fromDB = (ALL_ITEMS || []).map(it => resolveIcon(it.icon)).filter(Boolean);
+  const all = [...new Set([...fromDB, ...CAT_ICONS_BASE])];
+  const term = q.toLowerCase().replace(/^ph-/,'');
+  const list = term ? all.filter(ic => ic.replace('ph-','').includes(term)) : all;
+  renderCatIconGrid(list);
+}
+
+function renderCatIconGrid(list) {
+  const cur = document.getElementById('cat-f-icon').value || 'ph-cube';
+  const grid = document.getElementById('cat-icon-grid');
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--ink3);font-size:12px;">ไม่พบไอคอน</div>`;
+  } else {
+    grid.innerHTML = list.map(ic => {
+      const sel = ic === cur;
+      return `<button type="button" onclick="pickCatIcon('${ic}')" title="${ic.replace('ph-','')}"
+        style="width:36px;height:36px;border-radius:10px;font-size:20px;cursor:pointer;
+               border:${sel ? '2px solid var(--primary)' : '1.5px solid transparent'};
+               background:${sel ? 'var(--primary-l)' : 'var(--white)'};
+               display:flex;align-items:center;justify-content:center;
+               color:${sel ? 'var(--primary)' : 'var(--ink2)'};
+               transition:background .1s,border-color .1s;">
+        <i class="ph-fill ${ic}"></i>
+      </button>`;
+    }).join('');
+  }
+  document.getElementById('cat-icon-count').textContent = `${list.length} ไอคอน`;
+}
+
+function pickCatIcon(ic) {
+  document.getElementById('cat-f-icon').value = ic;
+  // re-render grid เพื่ออัปเดต selected state
+  const q = document.getElementById('cat-icon-search').value;
+  filterCatIcons(q);
 }
 
 async function deleteCat(slug) {
@@ -1331,6 +1348,7 @@ async function deleteCat(slug) {
       <div style="background:var(--surface);border-radius:16px;padding:14px;margin-top:8px;">
         <div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:10px;letter-spacing:.5px;" id="cat-form-title">เพิ่มหมวดหมู่ใหม่</div>
 
+        <!-- ชื่อ + slug + save -->
         <div style="display:flex;gap:8px;margin-bottom:10px;">
           <input class="form-input" type="text" id="cat-f-label" placeholder="ชื่อหมวดหมู่ เช่น โลหะ" style="flex:1;">
         </div>
@@ -1349,7 +1367,8 @@ async function deleteCat(slug) {
         </div>
         <div id="cat-icon-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
         <div id="cat-icon-count" style="font-size:10px;color:var(--ink3);margin-top:6px;text-align:right;"></div>
-        <div style="font-size:10px;color:var(--ink3);margin-top:4px;">slug ใช้สำหรับอ้างอิงในระบบ ตัวเล็กและขีดกลางเท่านั้น</div>
+
+        <div style="font-size:10px;color:var(--ink3);margin-top:8px;">slug ใช้สำหรับอ้างอิงในระบบ ตัวเล็กและขีดกลางเท่านั้น</div>
       </div>
       <div style="height:16px;"></div>
     </div>

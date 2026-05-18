@@ -451,7 +451,7 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
     <a href="sell.html" class="nav-tab"><div class="nav-tab-indicator"></div><i class="ph ph-upload-simple"></i><span>ขายออก</span></a>
     <a href="sort.html" class="nav-tab on"><div class="nav-tab-indicator"></div><i class="ph-fill ph-recycle"></i><span>คัดแยก</span></a>
     <a href="items.html" class="nav-tab"><div class="nav-tab-indicator"></div><i class="ph ph-pencil-simple"></i><span>สินค้า</span></a>
-    <a href="dashboard.html" class="nav-tab"><div class="nav-tab-indicator"></div><i class="ph ph-package"></i><span>สต๊อก</span></a>
+    <a href="dashboard.html" class="nav-tab"><div class="nav-tab-indicator"></div><i class="ph ph-chart-pie-slice"></i><span>Dashboard</span></a>
   </div>
 </nav>
 
@@ -535,7 +535,7 @@ const DEMO_ITEMS = [
   {id:8,  name:'กระดาษขาว',          icon:'ph-file-text',     buy_price:3.00, sell_price:3.80, stock_qty:1100, cat:'paper'},
   {id:9,  name:'พลาสติกขาว',         icon:'ph-cube',          buy_price:8.50, sell_price:11,   stock_qty:780,  cat:'plastic'},
   {id:10, name:'ขวด PET',            icon:'ph-flask',         buy_price:6.00, sell_price:8.00, stock_qty:620,  cat:'plastic'},
-  {id:11, name:'แก้วใส',             icon:'ph-coffee',        buy_price:1.20, sell_price:1.60, stock_qty:2100, cat:'glass'},
+  {id:11, name:'แก้วใส',             icon:'ph-square',        buy_price:1.20, sell_price:1.60, stock_qty:2100, cat:'glass'},
   {id:12, name:'สายไฟทองแดง',        icon:'ph-plug-charging', buy_price:85,   sell_price:100,  stock_qty:180,  cat:'electric'},
   {id:13, name:'มอเตอร์เก่า',        icon:'ph-lightning',     buy_price:25,   sell_price:32,   stock_qty:95,   cat:'electric'},
 ];
@@ -552,10 +552,10 @@ const CAT_COLOR = {
   default:  {bg:'#F3F0FF', fg:'#5E35B1'},
 };
 const EMOJI_TO_PH = {
-  '🔩':'ph-wrench','🔧':'ph-pipe','🪙':'ph-coins','🫗':'ph-steps',
+  '🔩':'ph-nut','🔧':'ph-wrench','🪙':'ph-coins','🫗':'ph-steps',
   '⚙️':'ph-gear-six','⚙':'ph-gear-six','📰':'ph-newspaper',
   '📦':'ph-package','📄':'ph-file-text','🥛':'ph-cube','🍶':'ph-flask',
-  '🪟':'ph-coffee','🔌':'ph-plug-charging','⚡':'ph-lightning',
+  '🪟':'ph-square','🔌':'ph-plug-charging','⚡':'ph-lightning',
   '♻️':'ph-recycle','♻':'ph-recycle',
 };
 function resolveIcon(icon){
@@ -596,8 +596,7 @@ function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||''; }
 // ══════════════════════════════════════════
 let _sb = null;
 async function sbFetch(path, opts={}){
-  let token = SUPABASE_ANON;
-  if(_sb){ const {data:{session}} = await _sb.auth.getSession(); if(session) token = session.access_token; }
+  const token=window.AUTH?.token||SUPABASE_ANON;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{
     headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':opts.prefer||'return=representation',...opts.headers},
     method:opts.method||'GET', body:opts.body?JSON.stringify(opts.body):undefined,
@@ -677,6 +676,7 @@ function selectFrom(id){
   if(!item) return;
   if(Number(item.stock_qty||0)<=0){ toast('สต๊อกหมด','error'); return; }
   selectedFrom=item;
+  selectedTos={};  // ← reset ผลลัพธ์เก่าทุกครั้งที่เปลี่ยนวัตถุดิบ
   fromKg=0;
   renderGrid1();
   // show bottom bar selected
@@ -780,7 +780,7 @@ function updateKgDisplay(){
 // numpad
 function kpNum(n,e){
   if(kgBuffer.length>=8) return;
-  kgBuffer=kgBuffer==='0'?n:kgBuffer+n;
+  kgBuffer=(kgBuffer===''||kgBuffer==='0')?n:kgBuffer+n;
   rippleKey(e); updateKgDisplay();
 }
 function kpDot(e){
@@ -886,12 +886,12 @@ function updateStep2Footer(){
 //  STEP 3 — ใส่น้ำหนักผลลัพธ์ (iOS modal)
 // ══════════════════════════════════════════
 function renderStep3(){
+  const totalCard=document.getElementById('total-card'); // ← capture ก่อน innerHTML ล้าง
   document.getElementById('s3-icon').innerHTML=renderIcon(selectedFrom.icon,selectedFrom.cat,20);
   document.getElementById('s3-name').textContent=selectedFrom.name;
   document.getElementById('s3-kg').textContent=`${fromKg} กก.`;
 
   const wrap=document.getElementById('weight-wrap');
-  const totalCard=document.getElementById('total-card');
 
   const rowsHtml=Object.values(selectedTos).map(t=>{
     const nid=Number(t.item.id);
@@ -923,7 +923,7 @@ function removeTo(id){
   const el=document.getElementById(`wi-${id}`);
   if(el) el.remove();
   updateTotalYield();
-  if(!Object.keys(selectedTos).length){ toast('กรุณาเลือกผลลัพธ์อย่างน้อย 1 ชนิด','error'); goStep(2); }
+  if(!Object.keys(selectedTos).length){ closeKgModal(); toast('กรุณาเลือกผลลัพธ์อย่างน้อย 1 ชนิด','error'); goStep(2); }
 }
 
 function updateTotalYield(){
@@ -970,6 +970,8 @@ async function saveSort(){
     results.forEach(t=>{ const ti=ALL_ITEMS.find(x=>Number(x.id)===Number(t.item.id)); if(ti) ti.stock_qty=Number(ti.stock_qty||0)+t.kg; });
     const summary=results.map(t=>`${t.item.name} +${t.kg}กก.`).join(', ');
     toast(`✅ ${selectedFrom.name} −${fromKg}กก. → ${summary}`,'success');
+    btn.disabled=false;
+    btn.innerHTML='<i class="ph ph-check-circle"></i> บันทึก';
     setTimeout(resetAll,1800);
     return;
   }

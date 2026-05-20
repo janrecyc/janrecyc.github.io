@@ -494,6 +494,167 @@ nav {
   color:var(--primary);
   box-shadow:0 1px 6px rgba(10,10,30,0.10);
 }
+
+/* ══════════════════════════════
+   CONFIRM DIALOG
+══════════════════════════════ */
+.dialog-backdrop {
+  position:fixed; inset:0; z-index:400;
+  background:rgba(10,10,30,0.45);
+  backdrop-filter:blur(4px);
+  opacity:0; pointer-events:none;
+  transition:opacity .22s;
+}
+.dialog-backdrop.show { opacity:1; pointer-events:all; }
+
+.dialog-box {
+  position:fixed; bottom:0; left:0; right:0; z-index:401;
+  background:var(--white);
+  border-radius:24px 24px 0 0;
+  padding:0 20px env(safe-area-inset-bottom,20px);
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.22,1,.36,1);
+}
+.dialog-box.show { transform:translateY(0); }
+
+.dialog-handle-row { display:flex; justify-content:center; padding:12px 0 0; }
+.dialog-handle { width:36px; height:4px; background:rgba(10,10,30,0.10); border-radius:2px; }
+
+.dialog-icon {
+  width:64px; height:64px; border-radius:20px;
+  background:rgba(0,200,83,0.10);
+  display:flex; align-items:center; justify-content:center;
+  font-size:30px; color:var(--green);
+  margin:18px auto 0;
+}
+.dialog-title {
+  text-align:center; font-size:20px; font-weight:800;
+  color:var(--ink); margin:12px 0 6px; letter-spacing:-0.3px;
+}
+.dialog-sub {
+  text-align:center; font-size:13px; color:var(--ink3);
+  line-height:1.5; margin-bottom:22px;
+}
+.dialog-summary {
+  background:var(--surface); border-radius:14px;
+  padding:12px 16px; margin-bottom:20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.dialog-summary-label { font-size:13px; color:var(--ink3); }
+.dialog-summary-amount { font-size:20px; font-weight:800; color:var(--green); }
+.dialog-summary-items { font-size:12px; color:var(--ink3); text-align:right; }
+
+.dialog-btn-row { display:flex; gap:10px; margin-bottom:6px; }
+.dialog-btn {
+  flex:1; padding:15px 0; border-radius:16px; border:none;
+  font-family:'Prompt',sans-serif; font-size:15px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  gap:7px; transition:all .14s;
+}
+.dialog-btn:active { transform:scale(0.97); }
+.dialog-btn.no  { background:var(--surface); color:var(--ink2); }
+.dialog-btn.yes { background:var(--green); color:#fff;
+  box-shadow:0 4px 16px rgba(0,200,83,0.30); }
+
+/* ══════════════════════════════
+   RECEIPT SHEET
+══════════════════════════════ */
+.receipt-backdrop {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(10,10,30,0.50);
+  backdrop-filter:blur(6px);
+  opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.receipt-backdrop.show { opacity:1; pointer-events:all; }
+
+.receipt-sheet {
+  position:fixed; bottom:0; left:0; right:0; z-index:501;
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+  padding-bottom:env(safe-area-inset-bottom,16px);
+  max-height:94dvh; overflow-y:auto; scrollbar-width:none;
+}
+.receipt-sheet::-webkit-scrollbar { display:none; }
+.receipt-sheet.show { transform:translateY(0); }
+
+.receipt-handle-row { display:flex; justify-content:center; padding:12px 0 0; flex-shrink:0; }
+.receipt-handle { width:36px; height:4px; background:rgba(10,10,30,0.10); border-radius:2px; }
+
+/* paper card */
+.receipt-paper {
+  margin:12px 16px 0;
+  background:#FFFEF5;
+  border-radius:20px;
+  border:1.5px dashed rgba(10,10,30,0.10);
+  padding:22px 20px 20px;
+  box-shadow:0 2px 16px rgba(10,10,30,0.06);
+}
+.rp-shop { text-align:center; margin-bottom:16px; }
+.rp-shop-name { font-size:21px; font-weight:800; color:var(--ink); letter-spacing:-0.3px; }
+.rp-shop-sub   { font-size:11px; color:var(--ink3); margin-top:3px; }
+.rp-shop-tel   { font-size:12px; color:var(--ink2); margin-top:2px; font-weight:500; }
+
+.rp-divider { border:none; border-top:1.5px dashed rgba(10,10,30,0.12); margin:13px 0; }
+
+.rp-type-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 14px; border-radius:100px;
+  font-size:13px; font-weight:700; margin-bottom:10px;
+  background:rgba(0,200,83,0.10); color:var(--green);
+}
+.rp-meta-row { display:flex; justify-content:space-between; margin-bottom:4px; }
+.rp-meta-label { font-size:12px; color:var(--ink3); }
+.rp-meta-val   { font-size:12px; color:var(--ink2); font-weight:600; }
+
+/* line items */
+.rp-line {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:8px 0; border-bottom:1px solid rgba(10,10,30,0.05);
+}
+.rp-line-left  { flex:1; }
+.rp-line-name  { font-size:14px; color:var(--ink2); font-weight:500; }
+.rp-line-detail { font-size:11px; color:var(--ink3); margin-top:2px; }
+.rp-line-amt   { font-size:14px; font-weight:700; color:var(--ink); margin-left:10px; flex-shrink:0; }
+
+/* total */
+.rp-total-block {
+  margin-top:14px; padding-top:14px;
+  border-top:2px dashed rgba(10,10,30,0.12);
+}
+.rp-total-row { display:flex; justify-content:space-between; align-items:flex-end; }
+.rp-total-label { font-size:14px; font-weight:700; color:var(--ink3); }
+.rp-total-amt   { font-size:30px; font-weight:800; color:var(--green); letter-spacing:-0.5px; }
+.rp-total-kg    { font-size:12px; color:var(--ink3); text-align:right; margin-top:3px; }
+
+.rp-footer { text-align:center; font-size:11px; color:var(--ink3); margin-top:14px; line-height:1.6; }
+.rp-bill-no { font-family:monospace; font-size:10px; color:var(--ink3); text-align:center; margin-top:10px; letter-spacing:0.5px; }
+
+/* action buttons */
+.receipt-actions {
+  display:flex; gap:10px; padding:14px 16px 0;
+}
+.ra-btn {
+  flex:1; padding:14px; border-radius:16px; border:none;
+  font-family:'Prompt',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  gap:6px; transition:all .14s;
+}
+.ra-btn:active { transform:scale(0.97); }
+.ra-btn.close  { background:var(--white); color:var(--ink2); box-shadow:var(--card-sh); }
+.ra-btn.print  { background:var(--ink); color:#fff; }
+
+/* print — hide everything except receipt paper */
+@media print {
+  body > *:not(.receipt-sheet) { display:none !important; }
+  .receipt-sheet { position:static !important; transform:none !important;
+    max-height:none !important; background:white !important; }
+  .receipt-handle-row, .receipt-actions { display:none !important; }
+  .receipt-backdrop { display:none !important; }
+  .receipt-paper { border:none !important; box-shadow:none !important;
+    margin:0 !important; padding:10mm !important; }
+}
 </style>
 </head>
 <body>
@@ -590,6 +751,47 @@ nav {
 
 <div id="toast"></div>
 
+<!-- ══ CONFIRM DIALOG (ต้องการใบเสร็จ?) ══ -->
+<div class="dialog-backdrop" id="dlg-backdrop"></div>
+<div class="dialog-box" id="dlg-box">
+  <div class="dialog-handle-row"><div class="dialog-handle"></div></div>
+  <div class="dialog-icon"><i class="ph-fill ph-check-circle"></i></div>
+  <div class="dialog-title">บันทึกสำเร็จ! 🎉</div>
+  <div class="dialog-sub">ต้องการพิมพ์ใบเสร็จให้ลูกค้าไหม?</div>
+  <div class="dialog-summary">
+    <div>
+      <div class="dialog-summary-label">ยอดที่จ่าย</div>
+      <div class="dialog-summary-amount" id="dlg-amount">฿0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="dialog-summary-items" id="dlg-items">0 รายการ</div>
+    </div>
+  </div>
+  <div class="dialog-btn-row">
+    <button class="dialog-btn no" onclick="skipReceipt()">
+      <i class="ph ph-x"></i> ไม่ต้องการ
+    </button>
+    <button class="dialog-btn yes" onclick="openReceipt()">
+      <i class="ph ph-receipt"></i> ต้องการใบเสร็จ
+    </button>
+  </div>
+</div>
+
+<!-- ══ RECEIPT SHEET ══ -->
+<div class="receipt-backdrop" id="rcp-backdrop" onclick="closeReceipt()"></div>
+<div class="receipt-sheet" id="rcp-sheet">
+  <div class="receipt-handle-row"><div class="receipt-handle"></div></div>
+  <div class="receipt-paper" id="rcp-paper"><!-- filled by JS --></div>
+  <div class="receipt-actions">
+    <button class="ra-btn close" onclick="closeReceipt()">
+      <i class="ph ph-arrow-left"></i> ปิด
+    </button>
+    <button class="ra-btn print" onclick="window.print()">
+      <i class="ph ph-printer"></i> พิมพ์ใบเสร็จ
+    </button>
+  </div>
+</div>
+
 <!-- ══ iOS WEIGHT MODAL ══ -->
 <div class="kg-modal-backdrop" id="kg-backdrop" onclick="closeKgModal()"></div>
 <div class="kg-modal" id="kg-modal">
@@ -685,6 +887,11 @@ nav {
 const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
 const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
+
+// ══ ตั้งค่าร้าน — แก้ตรงนี้ ══
+const SHOP_NAME    = 'ScrapPOS';        // ชื่อร้าน
+const SHOP_TAGLINE = 'ร้านรับซื้อของเก่า / รีไซเคิล';
+const SHOP_TEL     = '';                // เบอร์โทร เช่น '081-234-5678'
 
 const DEMO_ITEMS = [
   {id:1,  name:'เหล็กหนัก',          icon:'ph-nut',               buy_price:4.50,  unit:'กก.',  sell_mode:'kg',    cat:'metal'},
@@ -956,10 +1163,12 @@ async function confirmCart() {
 
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 700));
-    toast(`✓ บันทึก ${lines.length} รายการ | ฿${totalAmt.toFixed(2)}`);
+    // บันทึกสำเร็จ → ถามใบเสร็จ
+    _pendingReceipt = { lines, totalAmt };
     cart = {};
     renderGrid();
     renderCartPanel();
+    showDialog(lines, totalAmt);
     return;
   }
 
@@ -969,17 +1178,129 @@ async function confirmCart() {
       body: { p_lines: lines },
       prefer: 'return=representation',
     });
-    toast(`✅ บันทึก ${lines.length} รายการ | ฿${totalAmt.toFixed(2)}`);
+    // บันทึกสำเร็จ → ถามใบเสร็จ
+    _pendingReceipt = { lines, totalAmt };
     cart = {};
     renderGrid();
     renderCartPanel();
     loadItems();
+    showDialog(lines, totalAmt);
   } catch (err) {
     toast('❌ บันทึกไม่สำเร็จ: ' + err.message, 'error');
     btnEl.disabled = false;
     const count = entries.length;
     lblEl.textContent = `บันทึก ${count} รายการ — ฿${totalAmt.toFixed(2)}`;
   }
+}
+
+// ══════════════════════════════════════════
+//  RECEIPT SYSTEM
+// ══════════════════════════════════════════
+let _pendingReceipt = null;
+
+function fmtB(n) {
+  const v = Number(n || 0);
+  return v === Math.floor(v)
+    ? v.toLocaleString('th-TH')
+    : v.toLocaleString('th-TH', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtQtyStr(qty, mode, unit) {
+  return `${fmtB(qty)} ${unit || (mode==='kg' ? 'กก.' : 'ชิ้น')}`;
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showDialog(lines, totalAmt) {
+  document.getElementById('dlg-amount').textContent = '฿' + fmtB(totalAmt);
+  document.getElementById('dlg-items').textContent  = lines.length + ' รายการ';
+  document.getElementById('dlg-backdrop').classList.add('show');
+  document.getElementById('dlg-box').classList.add('show');
+}
+
+function hideDialog() {
+  document.getElementById('dlg-backdrop').classList.remove('show');
+  document.getElementById('dlg-box').classList.remove('show');
+}
+
+function skipReceipt() {
+  hideDialog();
+  toast(`✅ บันทึกแล้ว`);
+  _pendingReceipt = null;
+}
+
+function openReceipt() {
+  hideDialog();
+  if (!_pendingReceipt) return;
+  const { lines, totalAmt } = _pendingReceipt;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  const timeStr = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
+  const billNo  = 'B' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') +
+                  String(now.getDate()).padStart(2,'0') + '-' +
+                  String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') +
+                  String(now.getSeconds()).padStart(2,'0');
+  const totalKg = lines.filter(l=>l.mode==='kg').reduce((s,l)=>s+l.qty,0);
+
+  const linesHtml = lines.map(l => `
+    <div class="rp-line">
+      <div class="rp-line-left">
+        <div class="rp-line-name">${esc(l.item_name)}</div>
+        <div class="rp-line-detail">
+          ${fmtQtyStr(l.qty, l.mode, l.unit_label)} × ฿${fmtB(l.price)}/${l.unit_label||'กก.'}
+        </div>
+      </div>
+      <div class="rp-line-amt">฿${fmtB(l.subtotal)}</div>
+    </div>`).join('');
+
+  const telHtml = SHOP_TEL
+    ? `<div class="rp-shop-tel"><i class="ph ph-phone"></i> ${esc(SHOP_TEL)}</div>` : '';
+
+  document.getElementById('rcp-paper').innerHTML = `
+    <div class="rp-shop">
+      <div class="rp-shop-name">🔄 ${esc(SHOP_NAME)}</div>
+      <div class="rp-shop-sub">${esc(SHOP_TAGLINE)}</div>
+      ${telHtml}
+    </div>
+    <hr class="rp-divider">
+    <div class="rp-type-badge">
+      <i class="ph-fill ph-download-simple"></i> ใบรับซื้อ
+    </div>
+    <div class="rp-meta-row">
+      <span class="rp-meta-label">วันที่</span>
+      <span class="rp-meta-val">${dateStr}</span>
+    </div>
+    <div class="rp-meta-row">
+      <span class="rp-meta-label">เวลา</span>
+      <span class="rp-meta-val">${timeStr} น.</span>
+    </div>
+    <div class="rp-meta-row">
+      <span class="rp-meta-label">เลขบิล</span>
+      <span class="rp-meta-val">${billNo}</span>
+    </div>
+    <hr class="rp-divider">
+    ${linesHtml}
+    <div class="rp-total-block">
+      <div class="rp-total-row">
+        <span class="rp-total-label">ยอดรวม</span>
+        <span class="rp-total-amt">฿${fmtB(totalAmt)}</span>
+      </div>
+      ${totalKg > 0 ? `<div class="rp-total-kg">น้ำหนักรวม ${fmtB(totalKg)} กก.</div>` : ''}
+    </div>
+    <hr class="rp-divider">
+    <div class="rp-footer">ขอบคุณที่ใช้บริการ 🙏<br>${esc(SHOP_NAME)}</div>
+    <div class="rp-bill-no">${billNo}</div>
+  `;
+
+  document.getElementById('rcp-backdrop').classList.add('show');
+  document.getElementById('rcp-sheet').classList.add('show');
+  _pendingReceipt = null;
+}
+
+function closeReceipt() {
+  document.getElementById('rcp-backdrop').classList.remove('show');
+  document.getElementById('rcp-sheet').classList.remove('show');
 }
 
 // ══════════════════════════════════════════

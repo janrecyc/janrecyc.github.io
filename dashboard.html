@@ -262,7 +262,7 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 
 <div class="status-bar"></div>
 
-<div class="config-banner" id="config-banner">
+<div class="config-banner" id="config-banner" style="display:none;">
   <i class="ph ph-warning-circle"></i>
   <span>กรุณาตั้งค่า Supabase — ตอนนี้ใช้ข้อมูล Demo</span>
 </div>
@@ -564,7 +564,7 @@ const CAT_COLOR = {
 function resolveIcon(icon){
   if(!icon) return 'ph-cube';
   if(icon.startsWith('ph-')) return icon;
-  const map={'🔩':'ph-wrench','🔧':'ph-pipe','🪙':'ph-coins','🫗':'ph-steps','⚙️':'ph-gear-six','⚙':'ph-gear-six','📰':'ph-newspaper','📦':'ph-package','📄':'ph-file-text','🥛':'ph-cube','🍶':'ph-flask','🪟':'ph-coffee','🔌':'ph-plug-charging','⚡':'ph-lightning','♻️':'ph-recycle','♻':'ph-recycle'};
+  const map={'🔩':'ph-nut','🔧':'ph-wrench','🪙':'ph-coins','🫗':'ph-steps','⚙️':'ph-gear-six','⚙':'ph-gear-six','📰':'ph-newspaper','📦':'ph-package','📄':'ph-file-text','🥛':'ph-cube','🍶':'ph-flask','🪟':'ph-square','🔌':'ph-plug-charging','⚡':'ph-lightning','♻️':'ph-recycle','♻':'ph-recycle'};
   return map[icon]||null;
 }
 function itemColor(cat){ return CAT_COLOR[cat]||CAT_COLOR.default; }
@@ -603,7 +603,7 @@ async function loadDashboard() {
   try {
     // 1. ดึง items สำหรับแสดงสต๊อก
     STOCK_DATA = await sbFetch(
-      'items?select=name,icon,buy_price,sell_price,stock_qty&order=name'
+      'items?select=name,icon,buy_price,sell_price,stock_qty,unit,cat,sell_mode&order=name'
     ) || [];
 
     // 2. ดึง transactions ทั้งหมด — type, total_amount, created_at
@@ -812,17 +812,18 @@ async function saveCash() {
   }
 
   try {
-    // ใช้ RPC — validate type + insert transaction แบบ atomic
-    const result = await sbFetch('rpc/record_cash', {
+    // INSERT ตรงเข้า transactions (ไม่มี RPC record_cash ใน DB)
+    await sbFetch('transactions', {
       method: 'POST',
+      prefer: 'return=minimal',
       body: {
-        p_type:   cashType,
-        p_amount: amt,
-        p_note:   note || null,
+        type:         cashType,
+        total_amount: amt,
+        factory_name: note || (cashType === 'deposit' ? 'เติมเงิน' : 'ถอนเงิน'),
+        lines:        null,
+        total_kg:     null,
       },
     });
-
-    if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
 
     // โหลด transactions ใหม่
     ALL_TXNS = await sbFetch(
@@ -893,7 +894,7 @@ function render(mult) {
   animateNum(document.getElementById('h-net-profit'), fmt(D.netProfit));
   animateNum(document.getElementById('h-buy-total'),  '฿'+fmt(D.totalBuy));
   animateNum(document.getElementById('h-sell-total'), '฿'+fmt(D.totalSell));
-  animateNum(document.getElementById('h-cash-val'),   fmt(D.cash));
+  animateNum(document.getElementById('h-cash-val'),   '฿'+fmt(D.cash));
 
   animateNum(document.getElementById('s-buy'),    fmt(D.totalBuy));
   animateNum(document.getElementById('s-sell'),   fmt(D.totalSell));
@@ -1078,7 +1079,7 @@ function renderStock() {
       <div class="stock-icon">${renderIcon(s.icon, s.cat, 22)}</div>
       <div class="stock-info">
         <div class="stock-name">${s.name}</div>
-        <div class="stock-qty">${Number(s.stock_qty).toLocaleString('th-TH')} กก.</div>
+        <div class="stock-qty">${Number(s.stock_qty).toLocaleString('th-TH')} ${s.unit || (s.sell_mode === 'piece' ? 'ชิ้น' : 'กก.')}</div>
         <div class="stock-bar-wrap"><div class="stock-bar-fill" style="width:${pct}%;"></div></div>
       </div>
       <div class="stock-values">

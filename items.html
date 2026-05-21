@@ -720,32 +720,33 @@ let CATS = [];
 // ══════════════════════════════════════════════
 //  ICON / COLOR HELPERS (เหมือน sort.html)
 // ══════════════════════════════════════════════
+// slug ตรงกับ DB: glass, beer-crate, steel, plastic, paper, copper, electronics
 const CAT_COLOR = {
-  metal:    {bg:'#E8EDF8', fg:'#3A6CC8'},
-  paper:    {bg:'#FFF3E0', fg:'#E07A20'},
-  plastic:  {bg:'#E8F5E9', fg:'#2E7D32'},
-  glass:    {bg:'#E3F2FD', fg:'#1565C0'},
-  electric: {bg:'#FFF9C4', fg:'#F57F17'},
-  default:  {bg:'#F3F0FF', fg:'#5E35B1'},
-};
-const EMOJI_TO_PH = {
-  '🔩':'ph-nut','🔧':'ph-wrench','🪙':'ph-coins','🫗':'ph-steps',
-  '⚙️':'ph-gear-six','⚙':'ph-gear-six','📰':'ph-newspaper',
-  '📦':'ph-package','📄':'ph-file-text','🥛':'ph-cube','🍶':'ph-flask',
-  '🪟':'ph-square','🔌':'ph-plug-charging','⚡':'ph-lightning',
-  '♻️':'ph-recycle','♻':'ph-recycle',
+  glass:        {bg:'#E3F2FD', fg:'#1565C0'},
+  'beer-crate': {bg:'#FDE8C8', fg:'#C06000'},
+  steel:        {bg:'#E8EDF8', fg:'#3A6CC8'},
+  plastic:      {bg:'#E8F5E9', fg:'#2E7D32'},
+  paper:        {bg:'#FFF3E0', fg:'#E07A20'},
+  copper:       {bg:'#FFF3E0', fg:'#B45309'},
+  electronics:  {bg:'#FFF9C4', fg:'#F57F17'},
+  metal:        {bg:'#E8EDF8', fg:'#3A6CC8'},
+  electric:     {bg:'#FFF9C4', fg:'#F57F17'},
+  default:      {bg:'#F3F0FF', fg:'#5E35B1'},
 };
 function resolveIcon(icon){
-  if(!icon) return 'ph-cube';
-  if(icon.startsWith('ph-')) return icon;
-  return EMOJI_TO_PH[icon] || null;
+  if(!icon) return null;
+  if(icon.startsWith('ph-fill ')) return icon.replace('ph-fill ','');
+  if(icon.startsWith('ph ph-'))   return icon.slice(3);
+  if(icon.startsWith('ph-'))      return icon;
+  return null;
 }
 function itemColor(cat){ return CAT_COLOR[cat]||CAT_COLOR.default; }
 function renderIcon(icon, cat, size=26){
   const ph = resolveIcon(icon);
   const c  = itemColor(cat);
   if(ph) return `<span class="ph-icon-wrap" style="background:${c.bg};color:${c.fg};width:${size+16}px;height:${size+16}px;font-size:${size}px;"><i class="ph-fill ${ph}"></i></span>`;
-  return `<span class="ph-icon-wrap" style="background:${c.bg};width:${size+16}px;height:${size+16}px;font-size:${size}px;">${icon}</span>`;
+  if(icon) return `<span class="ph-icon-wrap" style="background:${c.bg};width:${size+16}px;height:${size+16}px;font-size:${size}px;">${icon}</span>`;
+  return '';
 }
 
 function catLabel(slug){ return CATS.find(c=>c.slug===slug)?.label || slug; }
@@ -946,9 +947,11 @@ function pickCatIcon(ic) {
 function renderCatBar() {
   const bar = document.getElementById('cat-bar');
   const catChipIcon = (icon) => {
-    if(!icon) return '📦';
-    if(icon.startsWith('ph-')) return `<i class="ph-fill ${icon}"></i>`;
-    return icon; // emoji
+    if(!icon) return '';
+    if(icon.startsWith('ph-fill ')) return `<i class="${icon}"></i>`;
+    if(icon.startsWith('ph ph-'))   return `<i class="ph-fill ${icon.slice(3)}"></i>`;
+    if(icon.startsWith('ph-'))      return `<i class="ph-fill ${icon}"></i>`;
+    return icon;
   };
   bar.innerHTML = `<button class="cat-btn ${activeCat==='all'?'on':''}" data-cat="all">ทั้งหมด</button>`
     + CATS.map(c => `<button class="cat-btn ${activeCat===c.slug?'on':''}" data-cat="${c.slug}">${catChipIcon(c.icon)} ${c.label}</button>`).join('')
@@ -968,8 +971,10 @@ function renderCatBar() {
 // ══════════════════════════════════════════════
 function renderCatSelectGrid(selected = '') {
   const catChipIcon = (icon) => {
-    if(!icon) return '📦';
-    if(icon.startsWith('ph-')) return `<i class="ph-fill ${icon}"></i>`;
+    if(!icon) return '';
+    if(icon.startsWith('ph-fill ')) return `<i class="${icon}"></i>`;
+    if(icon.startsWith('ph ph-'))   return `<i class="ph-fill ${icon.slice(3)}"></i>`;
+    if(icon.startsWith('ph-'))      return `<i class="ph-fill ${icon}"></i>`;
     return icon;
   };
   document.getElementById('cat-select-grid').innerHTML = CATS.map(c => `

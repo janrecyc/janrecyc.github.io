@@ -295,34 +295,8 @@ nav {
 .config-banner a { color:var(--primary); text-decoration:underline; }
 
 /* ══════════════════════════════════════════
-   iOS WEIGHT INPUT MODAL — PREMIUM DARK CALCULATOR
+   iOS WEIGHT INPUT MODAL
 ══════════════════════════════════════════ */
-
-/* Calculator color palette */
-:root {
-  --calc-bg:       #1C1C1E;       /* ฐาน sheet สีเข้ม */
-  --calc-display:  #111113;       /* area แสดงตัวเลข */
-  --calc-num:      #2C2C2E;       /* ปุ่มตัวเลข */
-  --calc-num-h:    #3A3A3C;       /* hover/active ปุ่มตัวเลข */
-  --calc-func:     #3A3A3C;       /* ปุ่ม function (C, ⌫) */
-  --calc-func-h:   #4A4A4C;
-  --calc-op:       #F5A623;       /* ปุ่ม operator (+) — amber warm */
-  --calc-op-h:     #FFBF47;
-  --calc-confirm:  #30D158;       /* ปุ่ม confirm — green */
-  --calc-confirm-h:#28B84E;
-  --calc-text:     #FFFFFF;       /* ตัวเลขบนปุ่ม */
-  --calc-text-dim: rgba(255,255,255,0.45);
-  --calc-tape-bg:  rgba(255,255,255,0.05);
-  --calc-handle:   rgba(255,255,255,0.2);
-  --calc-divider:  rgba(255,255,255,0.06);
-  --calc-val-color:#FFFFFF;
-  --calc-sub-color:rgba(255,255,255,0.5);
-  --calc-accent:   #F5A623;       /* ตัวเลขยอดรวม */
-  --calc-preset-bg:rgba(245,166,35,0.12);
-  --calc-preset-bd:rgba(245,166,35,0.3);
-  --calc-preset-cl:#F5A623;
-}
-
 .kg-modal-backdrop {
   position:fixed; inset:0; z-index:800;
   background:rgba(0,0,0,0);
@@ -331,8 +305,8 @@ nav {
   pointer-events:none;
 }
 .kg-modal-backdrop.open {
-  background:rgba(0,0,0,0.60);
-  backdrop-filter:blur(8px);
+  background:rgba(0,0,0,0.40);
+  backdrop-filter:blur(6px);
   pointer-events:all;
 }
 
@@ -350,173 +324,99 @@ nav {
 }
 
 .kg-sheet {
-  background: var(--calc-bg);
-  border-radius: 28px 28px 0 0;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: saturate(180%) blur(30px);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+  border-radius: 24px 24px 0 0;
   overflow: hidden;
-  box-shadow: 0 -8px 60px rgba(0,0,0,0.55), 0 -1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 -4px 40px rgba(0,0,0,0.18);
 }
 
 .kg-handle {
-  width:40px; height:4px;
-  background: var(--calc-handle);
+  width:36px; height:4px;
+  background: rgba(60,60,67,0.3);
   border-radius:100px;
-  margin: 12px auto 0;
+  margin: 10px auto 0;
 }
 
 .kg-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding: 14px 20px 10px;
+  padding: 14px 20px 8px;
 }
-.kg-item-info { display:flex; align-items:center; gap:12px; }
-.kg-item-icon { font-size:30px; line-height:1; }
-.kg-item-name { font-size:16px; font-weight:700; color:#FFFFFF; }
-.kg-item-price { font-size:12px; color:rgba(255,255,255,0.45); margin-top:2px; }
+.kg-item-info { display:flex; align-items:center; gap:10px; }
+.kg-item-icon { font-size:28px; line-height:1; }
+.kg-item-name { font-size:16px; font-weight:700; color:var(--ink); }
+.kg-item-price { font-size:12px; color:var(--ink3); margin-top:1px; }
 .kg-close-btn {
   width:32px; height:32px; border-radius:50%;
-  background: rgba(255,255,255,0.10);
+  background: rgba(60,60,67,0.12);
   border:none; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  font-size:16px; color:rgba(255,255,255,0.6);
+  font-size:16px; color:var(--ink2);
   transition:background .12s;
 }
-.kg-close-btn:active { background:rgba(255,255,255,0.2); }
+.kg-close-btn:active { background:rgba(60,60,67,0.22); }
 
-/* Display area — dark tape style */
+/* Display area */
 .kg-display {
-  margin: 0 16px 0;
-  background: var(--calc-display);
+  margin: 4px 20px 12px;
+  background: var(--surface);
   border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 18px;
+  display:flex; align-items:flex-end; justify-content:space-between;
 }
-
-/* Tape: scrollable list of committed entries */
-.kg-tape {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  max-height: 110px;
-  overflow-y: auto;
-  scrollbar-width: none;
-  padding: 0;
-}
-.kg-tape::-webkit-scrollbar { display: none; }
-.kg-tape:empty { display: none; }
-
-.kg-tape-entry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 14px 6px 16px;
-  border-bottom: 1px solid var(--calc-divider);
-  animation: tape-in .18s ease;
-}
-@keyframes tape-in {
-  from { opacity:0; transform: translateY(-6px); }
-  to   { opacity:1; transform: translateY(0); }
-}
-.kg-tape-entry:last-child { border-bottom: none; }
-.kg-tape-num {
-  font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.85);
-}
-.kg-tape-unit { font-size: 12px; color: rgba(255,255,255,0.35); margin-left: 3px; }
-.kg-tape-plus { font-size: 13px; color: var(--calc-op); margin: 0 8px; font-weight:700; }
-.kg-tape-del {
-  width: 24px; height: 24px; border-radius: 50%;
-  background: rgba(255,59,48,0.15); border: none;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: #FF6B6B; cursor: pointer;
-  flex-shrink: 0; margin-left: 4px;
-  transition: background .12s;
-}
-.kg-tape-del:active { background: rgba(255,59,48,0.35); }
-
-/* Divider between tape and input */
-.kg-tape-divider {
-  height: 1px;
-  background: var(--calc-op);
-  opacity: 0.25;
-  margin: 0;
-  display: none;
-}
-.kg-tape:not(:empty) ~ .kg-tape-divider { display: block; }
-
-/* Current input row */
-.kg-input-row {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  padding: 12px 18px 14px;
-}
-.kg-input-left {}
+.kg-display-left {}
 .kg-display-label {
-  font-size:10px; font-weight:600; color:rgba(255,255,255,0.35);
-  text-transform:uppercase; letter-spacing:1.2px;
+  font-size:11px; font-weight:500; color:var(--ink3);
+  text-transform:uppercase; letter-spacing:.8px; margin-bottom:2px;
 }
 .kg-display-val {
-  font-size:46px; font-weight:800; color:var(--calc-val-color);
+  font-size:44px; font-weight:800; color:var(--ink);
   line-height:1; letter-spacing:-2px;
   min-height:52px;
   display:flex; align-items:center; gap:4px;
 }
 .kg-display-val .unit {
-  font-size:18px; font-weight:500; color:rgba(255,255,255,0.4);
+  font-size:18px; font-weight:500; color:var(--ink3);
   letter-spacing:0; margin-bottom:4px;
 }
 .kg-display-val .cursor {
-  width:3px; height:42px; background:var(--calc-op);
+  width:3px; height:40px; background:var(--primary);
   border-radius:2px; margin-left:2px;
   animation: blink .9s step-end infinite;
-  box-shadow: 0 0 8px rgba(245,166,35,0.6);
 }
 @keyframes blink { 50%{opacity:0;} }
 .kg-display-right {}
-.kg-subtotal-label { font-size:10px; color:rgba(255,255,255,0.35); text-align:right; letter-spacing:.5px; text-transform:uppercase; }
-.kg-subtotal-val { font-size:22px; font-weight:800; color:var(--calc-accent); text-align:right; margin-top:2px; text-shadow: 0 0 16px rgba(245,166,35,0.4); }
-
-/* Numpad — 3-col grid */
-.kg-numpad {
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:1.5px;
-  background:rgba(0,0,0,0.4);
-  border-top:1px solid var(--calc-divider);
-  margin:0;
-}
-.kg-key.plus-key {
-  background: rgba(245,166,35,0.12);
-  grid-column: span 2;
-}
-.kg-key.plus-key:active { background: rgba(245,166,35,0.28); }
-.kg-key.plus-key .kg-key-op { color: var(--calc-op) !important; font-size:26px; font-weight:700; }
-.kg-key.confirm-inline-key {
-  background: var(--calc-confirm) !important;
-}
-.kg-key.confirm-inline-key:active { background: var(--calc-confirm-h) !important; }
+.kg-subtotal-label { font-size:11px; color:var(--ink3); text-align:right; }
+.kg-subtotal-val { font-size:20px; font-weight:800; color:var(--primary); text-align:right; margin-top:2px; }
 
 /* Quick presets */
 .kg-presets {
   display:flex; gap:6px;
-  padding: 0 16px 10px;
+  padding: 0 20px 10px;
   overflow-x:auto; scrollbar-width:none;
 }
 .kg-presets::-webkit-scrollbar{display:none;}
 .kg-preset-btn {
   flex-shrink:0;
-  font-family:'Prompt',sans-serif; font-size:12px; font-weight:700;
-  padding:7px 16px; border-radius:100px;
-  border:1.5px solid var(--calc-preset-bd);
-  background:var(--calc-preset-bg);
-  color:var(--calc-preset-cl); cursor:pointer;
+  font-family:'Prompt',sans-serif; font-size:12px; font-weight:600;
+  padding:6px 14px; border-radius:100px;
+  border:1.5px solid rgba(26,107,255,0.2);
+  background:rgba(26,107,255,0.06);
+  color:var(--primary); cursor:pointer;
   transition:all .12s;
-  letter-spacing:.3px;
 }
-.kg-preset-btn:active { background:rgba(245,166,35,0.28); transform:scale(0.93); }
+.kg-preset-btn:active { background:rgba(26,107,255,0.18); transform:scale(0.93); }
 
-/* numpad keys base */
-.kg-key-op {
-  font-size:26px; font-weight:600; color:var(--calc-op); line-height:1;
+/* Numpad */
+.kg-numpad {
+  display:grid; grid-template-columns: repeat(3,1fr);
+  gap:1px; background:rgba(60,60,67,0.1);
+  border-top:1px solid rgba(60,60,67,0.08);
+  margin:0;
 }
 .kg-key {
-  background: var(--calc-num);
+  background: rgba(255,255,255,0.95);
   border:none; padding:0;
   height:68px; display:flex; align-items:center; justify-content:center;
   cursor:pointer;
@@ -526,31 +426,30 @@ nav {
   -webkit-tap-highlight-color:transparent;
   user-select:none; -webkit-user-select:none;
 }
-.kg-key:active { background:var(--calc-num-h); }
+.kg-key:active { background:rgba(209,209,214,0.8); }
 .kg-key.dark {
-  background:var(--calc-func);
+  background:rgba(174,174,178,0.35);
 }
-.kg-key.dark:active { background:var(--calc-func-h); }
+.kg-key.dark:active { background:rgba(174,174,178,0.65); }
 .kg-key-num {
-  font-size:26px; font-weight:500; color:var(--calc-text); letter-spacing:-0.5px;
+  font-size:26px; font-weight:400; color:var(--ink); letter-spacing:-0.5px;
 }
 .kg-key-sub {
-  font-size:9px; color:var(--calc-text-dim); position:absolute; bottom:10px;
+  font-size:9px; color:var(--ink3); position:absolute; bottom:10px;
   letter-spacing:.5px;
 }
-.kg-key-icon { font-size:22px; color:var(--calc-text); }
-.kg-key.dark .kg-key-icon { color:rgba(255,255,255,0.75); }
+.kg-key-icon { font-size:22px; color:var(--ink); }
 .kg-key.primary-key {
-  background:var(--calc-op);
+  background:var(--primary);
 }
-.kg-key.primary-key:active { background:var(--calc-op-h); }
+.kg-key.primary-key:active { background:var(--primary-d); }
 .kg-key.primary-key .kg-key-num,
-.kg-key.primary-key .kg-key-icon { color:#1C1000; }
+.kg-key.primary-key .kg-key-icon { color:white; }
 
 /* Ripple on key press */
 .ripple {
   position:absolute; border-radius:50%;
-  background:rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.4);
   transform:scale(0); animation:ripple-anim .4s linear;
   pointer-events:none;
 }
@@ -558,206 +457,42 @@ nav {
 
 /* Confirm button inside numpad area */
 .kg-confirm-row {
-  padding:12px 16px 14px;
-  background:var(--calc-bg);
+  padding:10px 20px;
+  background:rgba(255,255,255,0.95);
 }
 .kg-confirm-btn {
-  width:100%; padding:16px;
-  border-radius:18px;
-  background:linear-gradient(135deg,#30D158 0%,#25A847 100%);
+  width:100%; padding:15px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#1A6BFF 0%,#0040CC 100%);
   color:white; border:none;
   font-family:'Prompt',sans-serif; font-size:16px; font-weight:700;
   display:flex; align-items:center; justify-content:center; gap:8px;
   cursor:pointer;
-  box-shadow:0 4px 20px rgba(48,209,88,0.35);
+  box-shadow:0 4px 16px rgba(26,107,255,0.35);
   transition:opacity .15s, transform .1s;
-  letter-spacing:.2px;
 }
 .kg-confirm-btn:active { opacity:0.85; transform:scale(0.98); }
-.kg-confirm-btn:disabled { opacity:0.25; pointer-events:none; box-shadow:none; }
+.kg-confirm-btn:disabled { opacity:0.35; pointer-events:none; box-shadow:none; }
 
 /* Mode toggle (kg / ชิ้น) */
 .kg-mode-toggle {
   display:flex; gap:0;
-  margin: 10px 16px 8px;
-  background: rgba(0,0,0,0.3);
+  margin: 8px 20px 4px;
+  background: var(--surface);
   border-radius: 12px;
   padding: 3px;
-  border: 1px solid rgba(255,255,255,0.06);
 }
 .kg-mode-btn {
-  flex:1; padding:8px 0;
+  flex:1; padding:7px 0;
   border:none; border-radius:9px;
   font-family:'Prompt',sans-serif; font-size:13px; font-weight:600;
   cursor:pointer; transition:all .18s;
-  background:transparent; color:rgba(255,255,255,0.4);
+  background:transparent; color:var(--ink3);
 }
 .kg-mode-btn.active {
-  background:rgba(245,166,35,0.15);
-  color:var(--calc-op);
-  box-shadow:0 1px 6px rgba(0,0,0,0.25);
-  border: 1px solid rgba(245,166,35,0.25);
-}
-
-/* ══════════════════════════════
-   CONFIRM DIALOG
-══════════════════════════════ */
-.dialog-backdrop {
-  position:fixed; inset:0; z-index:400;
-  background:rgba(10,10,30,0.45);
-  backdrop-filter:blur(4px);
-  opacity:0; pointer-events:none;
-  transition:opacity .22s;
-}
-.dialog-backdrop.show { opacity:1; pointer-events:all; }
-
-.dialog-box {
-  position:fixed; bottom:0; left:0; right:0; z-index:401;
   background:var(--white);
-  border-radius:24px 24px 0 0;
-  padding:0 20px env(safe-area-inset-bottom,20px);
-  transform:translateY(100%);
-  transition:transform .3s cubic-bezier(.22,1,.36,1);
-}
-.dialog-box.show { transform:translateY(0); }
-
-.dialog-handle-row { display:flex; justify-content:center; padding:12px 0 0; }
-.dialog-handle { width:36px; height:4px; background:rgba(10,10,30,0.10); border-radius:2px; }
-
-.dialog-icon {
-  width:64px; height:64px; border-radius:20px;
-  background:rgba(0,200,83,0.10);
-  display:flex; align-items:center; justify-content:center;
-  font-size:30px; color:var(--green);
-  margin:18px auto 0;
-}
-.dialog-title {
-  text-align:center; font-size:20px; font-weight:800;
-  color:var(--ink); margin:12px 0 6px; letter-spacing:-0.3px;
-}
-.dialog-sub {
-  text-align:center; font-size:13px; color:var(--ink3);
-  line-height:1.5; margin-bottom:22px;
-}
-.dialog-summary {
-  background:var(--surface); border-radius:14px;
-  padding:12px 16px; margin-bottom:20px;
-  display:flex; align-items:center; justify-content:space-between;
-}
-.dialog-summary-label { font-size:13px; color:var(--ink3); }
-.dialog-summary-amount { font-size:20px; font-weight:800; color:var(--green); }
-.dialog-summary-items { font-size:12px; color:var(--ink3); text-align:right; }
-
-.dialog-btn-row { display:flex; gap:10px; margin-bottom:6px; }
-.dialog-btn {
-  flex:1; padding:15px 0; border-radius:16px; border:none;
-  font-family:'Prompt',sans-serif; font-size:15px; font-weight:700;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  gap:7px; transition:all .14s;
-}
-.dialog-btn:active { transform:scale(0.97); }
-.dialog-btn.no  { background:var(--surface); color:var(--ink2); }
-.dialog-btn.yes { background:var(--green); color:#fff;
-  box-shadow:0 4px 16px rgba(0,200,83,0.30); }
-
-/* ══════════════════════════════
-   RECEIPT SHEET
-══════════════════════════════ */
-.receipt-backdrop {
-  position:fixed; inset:0; z-index:500;
-  background:rgba(10,10,30,0.50);
-  backdrop-filter:blur(6px);
-  opacity:0; pointer-events:none; transition:opacity .25s;
-}
-.receipt-backdrop.show { opacity:1; pointer-events:all; }
-
-.receipt-sheet {
-  position:fixed; bottom:0; left:0; right:0; z-index:501;
-  background:var(--surface);
-  border-radius:24px 24px 0 0;
-  transform:translateY(100%);
-  transition:transform .32s cubic-bezier(.22,1,.36,1);
-  padding-bottom:env(safe-area-inset-bottom,16px);
-  max-height:94dvh; overflow-y:auto; scrollbar-width:none;
-}
-.receipt-sheet::-webkit-scrollbar { display:none; }
-.receipt-sheet.show { transform:translateY(0); }
-
-.receipt-handle-row { display:flex; justify-content:center; padding:12px 0 0; flex-shrink:0; }
-.receipt-handle { width:36px; height:4px; background:rgba(10,10,30,0.10); border-radius:2px; }
-
-/* paper card */
-.receipt-paper {
-  margin:12px 16px 0;
-  background:#FFFEF5;
-  border-radius:20px;
-  border:1.5px dashed rgba(10,10,30,0.10);
-  padding:22px 20px 20px;
-  box-shadow:0 2px 16px rgba(10,10,30,0.06);
-}
-.rp-shop { text-align:center; margin-bottom:16px; }
-.rp-shop-name { font-size:21px; font-weight:800; color:var(--ink); letter-spacing:-0.3px; }
-.rp-shop-sub   { font-size:11px; color:var(--ink3); margin-top:3px; }
-.rp-shop-tel   { font-size:12px; color:var(--ink2); margin-top:2px; font-weight:500; }
-
-.rp-divider { border:none; border-top:1.5px dashed rgba(10,10,30,0.12); margin:13px 0; }
-
-.rp-type-badge {
-  display:inline-flex; align-items:center; gap:5px;
-  padding:5px 14px; border-radius:100px;
-  font-size:13px; font-weight:700; margin-bottom:10px;
-  background:rgba(0,200,83,0.10); color:var(--green);
-}
-.rp-meta-row { display:flex; justify-content:space-between; margin-bottom:4px; }
-.rp-meta-label { font-size:12px; color:var(--ink3); }
-.rp-meta-val   { font-size:12px; color:var(--ink2); font-weight:600; }
-
-/* line items */
-.rp-line {
-  display:flex; align-items:flex-start; justify-content:space-between;
-  padding:8px 0; border-bottom:1px solid rgba(10,10,30,0.05);
-}
-.rp-line-left  { flex:1; }
-.rp-line-name  { font-size:14px; color:var(--ink2); font-weight:500; }
-.rp-line-detail { font-size:11px; color:var(--ink3); margin-top:2px; }
-.rp-line-amt   { font-size:14px; font-weight:700; color:var(--ink); margin-left:10px; flex-shrink:0; }
-
-/* total */
-.rp-total-block {
-  margin-top:14px; padding-top:14px;
-  border-top:2px dashed rgba(10,10,30,0.12);
-}
-.rp-total-row { display:flex; justify-content:space-between; align-items:flex-end; }
-.rp-total-label { font-size:14px; font-weight:700; color:var(--ink3); }
-.rp-total-amt   { font-size:30px; font-weight:800; color:var(--green); letter-spacing:-0.5px; }
-.rp-total-kg    { font-size:12px; color:var(--ink3); text-align:right; margin-top:3px; }
-
-.rp-footer { text-align:center; font-size:11px; color:var(--ink3); margin-top:14px; line-height:1.6; }
-.rp-bill-no { font-family:monospace; font-size:10px; color:var(--ink3); text-align:center; margin-top:10px; letter-spacing:0.5px; }
-
-/* action buttons */
-.receipt-actions {
-  display:flex; gap:10px; padding:14px 16px 0;
-}
-.ra-btn {
-  flex:1; padding:14px; border-radius:16px; border:none;
-  font-family:'Prompt',sans-serif; font-size:14px; font-weight:700;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  gap:6px; transition:all .14s;
-}
-.ra-btn:active { transform:scale(0.97); }
-.ra-btn.close  { background:var(--white); color:var(--ink2); box-shadow:var(--card-sh); }
-.ra-btn.print  { background:var(--ink); color:#fff; }
-
-/* print — hide everything except receipt paper */
-@media print {
-  body > *:not(.receipt-sheet) { display:none !important; }
-  .receipt-sheet { position:static !important; transform:none !important;
-    max-height:none !important; background:white !important; }
-  .receipt-handle-row, .receipt-actions { display:none !important; }
-  .receipt-backdrop { display:none !important; }
-  .receipt-paper { border:none !important; box-shadow:none !important;
-    margin:0 !important; padding:10mm !important; }
+  color:var(--primary);
+  box-shadow:0 1px 6px rgba(10,10,30,0.10);
 }
 </style>
 </head>
@@ -848,53 +583,12 @@ nav {
     </a>
     <a href="dashboard.html" class="nav-tab">
       <div class="nav-tab-indicator"></div>
-      <i class="ph ph-chart-pie-slice"></i><span>Dashboard</span>
+      <i class="ph ph-package"></i><span>สต๊อก</span>
     </a>
   </div>
 </nav>
 
 <div id="toast"></div>
-
-<!-- ══ CONFIRM DIALOG (ต้องการใบเสร็จ?) ══ -->
-<div class="dialog-backdrop" id="dlg-backdrop"></div>
-<div class="dialog-box" id="dlg-box">
-  <div class="dialog-handle-row"><div class="dialog-handle"></div></div>
-  <div class="dialog-icon"><i class="ph-fill ph-check-circle"></i></div>
-  <div class="dialog-title">บันทึกสำเร็จ! 🎉</div>
-  <div class="dialog-sub">ต้องการพิมพ์ใบเสร็จให้ลูกค้าไหม?</div>
-  <div class="dialog-summary">
-    <div>
-      <div class="dialog-summary-label">ยอดที่จ่าย</div>
-      <div class="dialog-summary-amount" id="dlg-amount">฿0</div>
-    </div>
-    <div style="text-align:right;">
-      <div class="dialog-summary-items" id="dlg-items">0 รายการ</div>
-    </div>
-  </div>
-  <div class="dialog-btn-row">
-    <button class="dialog-btn no" onclick="skipReceipt()">
-      <i class="ph ph-x"></i> ไม่ต้องการ
-    </button>
-    <button class="dialog-btn yes" onclick="openReceipt()">
-      <i class="ph ph-receipt"></i> ต้องการใบเสร็จ
-    </button>
-  </div>
-</div>
-
-<!-- ══ RECEIPT SHEET ══ -->
-<div class="receipt-backdrop" id="rcp-backdrop" onclick="closeReceipt()"></div>
-<div class="receipt-sheet" id="rcp-sheet">
-  <div class="receipt-handle-row"><div class="receipt-handle"></div></div>
-  <div class="receipt-paper" id="rcp-paper"><!-- filled by JS --></div>
-  <div class="receipt-actions">
-    <button class="ra-btn close" onclick="closeReceipt()">
-      <i class="ph ph-arrow-left"></i> ปิด
-    </button>
-    <button class="ra-btn print" onclick="window.print()">
-      <i class="ph ph-printer"></i> พิมพ์ใบเสร็จ
-    </button>
-  </div>
-</div>
 
 <!-- ══ iOS WEIGHT MODAL ══ -->
 <div class="kg-modal-backdrop" id="kg-backdrop" onclick="closeKgModal()"></div>
@@ -926,22 +620,17 @@ nav {
     </div>
 
     <div class="kg-display">
-      <!-- Tape: รายการที่บวกไปแล้ว -->
-      <div class="kg-tape" id="kg-tape"></div>
-      <!-- Current input row -->
-      <div class="kg-input-row">
-        <div class="kg-input-left">
-          <div class="kg-display-label" id="kg-display-label">น้ำหนัก</div>
-          <div class="kg-display-val">
-            <span id="kg-display-num">0</span>
-            <span class="unit" id="kg-unit-label">กก.</span>
-            <span class="cursor"></span>
-          </div>
+      <div class="kg-display-left">
+        <div class="kg-display-label" id="kg-display-label">น้ำหนัก</div>
+        <div class="kg-display-val" id="kg-display-val">
+          <span id="kg-display-num">0</span>
+          <span class="unit" id="kg-unit-label">กก.</span>
+          <span class="cursor"></span>
         </div>
-        <div class="kg-display-right">
-          <div class="kg-subtotal-label">รวม</div>
-          <div class="kg-subtotal-val" id="kg-subtotal">฿0</div>
-        </div>
+      </div>
+      <div class="kg-display-right">
+        <div class="kg-subtotal-label">ยอด</div>
+        <div class="kg-subtotal-val" id="kg-subtotal">฿0</div>
       </div>
     </div>
 
@@ -965,30 +654,22 @@ nav {
     </div>
 
     <div class="kg-numpad">
+      <!-- Row 1 -->
       <button class="kg-key" onclick="kpNum('1',event)"><span class="kg-key-num">1</span></button>
-      <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span></button>
-      <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span></button>
-
-      <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span></button>
-      <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span></button>
-      <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span></button>
-
-      <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span></button>
-      <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span></button>
-      <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span></button>
-
+      <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span><span class="kg-key-sub">ABC</span></button>
+      <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span><span class="kg-key-sub">DEF</span></button>
+      <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span><span class="kg-key-sub">GHI</span></button>
+      <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span><span class="kg-key-sub">JKL</span></button>
+      <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span><span class="kg-key-sub">MNO</span></button>
+      <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span><span class="kg-key-sub">PQRS</span></button>
+      <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span><span class="kg-key-sub">TUV</span></button>
+      <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span><span class="kg-key-sub">WXYZ</span></button>
       <button class="kg-key dark" onclick="kpDot(event)"><span class="kg-key-num" style="font-size:20px">.</span></button>
       <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
-
-      <!-- + spans 2 cols, ✓ takes 1 col -->
-      <button class="kg-key plus-key" onclick="kpPlus(event)"><span class="kg-key-op" style="font-size:30px;color:var(--primary)">+</span></button>
-      <button class="kg-key confirm-inline-key" onclick="confirmKg()">
-        <i class="ph ph-check kg-key-icon" style="color:white;font-size:20px;"></i>
-      </button>
     </div>
 
-    <div class="kg-confirm-row" id="kg-confirm-row">
+    <div class="kg-confirm-row">
       <button class="kg-confirm-btn" id="kg-confirm-btn" onclick="confirmKg()" disabled>
         <i class="ph ph-shopping-cart-simple"></i>
         <span id="kg-confirm-label">เพิ่มในตะกร้า</span>
@@ -1004,11 +685,6 @@ nav {
 const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
 const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
-
-// ══ ตั้งค่าร้าน — แก้ตรงนี้ ══
-const SHOP_NAME    = 'ScrapPOS';        // ชื่อร้าน
-const SHOP_TAGLINE = 'ร้านรับซื้อของเก่า / รีไซเคิล';
-const SHOP_TEL     = '';                // เบอร์โทร เช่น '081-234-5678'
 
 const DEMO_ITEMS = [
   {id:1,  name:'เหล็กหนัก',          icon:'ph-nut',               buy_price:4.50,  unit:'กก.',  sell_mode:'kg',    cat:'metal'},
@@ -1056,36 +732,30 @@ function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
 function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
 
 // ══════════════════════════════════════════
-//  KG MODAL STATE  —  tape-add model
+//  KG MODAL STATE
 // ══════════════════════════════════════════
 let kgModalItemId = null;
-let kgBuffer = '';       // ตัวเลขที่กำลังพิมพ์อยู่
-let kgEntries = [];      // [{val: number}]  รายการที่บวกแล้ว
-let currentMode = 'kg';  // 'kg' | 'piece'
-
-function kgTotal() {
-  return kgEntries.reduce((s, e) => s + e.val, 0);
-}
+let kgBuffer = '';   // string เก็บตัวเลขที่กด
+let currentMode = 'kg'; // 'kg' | 'piece'
 
 function openKgModal(id) {
-  id = Number(id);
   const item = ITEMS.find(x => x.id === id);
   if (!item) return;
   kgModalItemId = id;
+
+  // กำหนด mode จาก item.sell_mode (default 'kg')
+  const itemMode = item.sell_mode || 'kg';
+  setMode(itemMode);
+
+  kgBuffer = cart[id] ? String(cart[id].qty) : '';
 
   document.getElementById('kg-item-icon').innerHTML = renderIcon(item.icon, item.cat, 26);
   document.getElementById('kg-item-name').textContent = item.name;
   document.getElementById('kg-item-price').textContent = `฿${Number(item.buy_price).toFixed(2)} / ${item.unit||'กก.'}`;
 
-  // ซ่อน/แสดง mode toggle แล้วตั้ง mode ให้ถูก
-  const itemMode = item.sell_mode || 'kg';
-  document.getElementById('kg-mode-toggle').style.display = item.sell_mode ? 'none' : 'flex';
-  setMode(itemMode); // reset buffer+entries ใน setMode
-
-  // โหลด qty เดิมจาก cart (หลัง setMode เพื่อไม่ให้ถูก reset)
-  if (cart[id]) {
-    kgEntries = [{ val: cart[id].qty }];
-  }
+  // ล็อค mode ตาม sell_mode ของ item ไม่ให้ user เปลี่ยน
+  const toggle = document.getElementById('kg-mode-toggle');
+  toggle.style.display = item.sell_mode ? 'none' : 'flex';
 
   updateKgDisplay();
 
@@ -1100,15 +770,17 @@ function closeKgModal() {
   document.body.style.overflow = '';
   kgModalItemId = null;
   kgBuffer = '';
-  kgEntries = [];
 }
 
 function setMode(mode) {
   currentMode = mode;
+  // อัปเดต toggle buttons
   document.getElementById('mode-btn-kg').classList.toggle('active', mode === 'kg');
   document.getElementById('mode-btn-piece').classList.toggle('active', mode === 'piece');
+  // สลับ presets
   document.getElementById('kg-presets-kg').style.display    = mode === 'kg'    ? 'flex' : 'none';
   document.getElementById('kg-presets-piece').style.display = mode === 'piece' ? 'flex' : 'none';
+  // อัปเดต display label + unit
   if (mode === 'kg') {
     document.getElementById('kg-display-label').textContent = 'น้ำหนัก';
     document.getElementById('kg-unit-label').textContent    = 'กก.';
@@ -1116,117 +788,66 @@ function setMode(mode) {
     document.getElementById('kg-display-label').textContent = 'จำนวน';
     document.getElementById('kg-unit-label').textContent    = 'ชิ้น';
   }
-  kgBuffer = ''; kgEntries = [];
+  // reset buffer เมื่อเปลี่ยน mode
+  kgBuffer = '';
   updateKgDisplay();
 }
 
 function updateKgDisplay() {
-  const unitText = currentMode === 'kg' ? 'กก.' : 'ชิ้น';
-  const cur      = parseFloat(kgBuffer) || 0;
-  const total    = kgTotal() + cur;
+  const numEl   = document.getElementById('kg-display-num');
+  const subEl   = document.getElementById('kg-subtotal');
+  const btnEl   = document.getElementById('kg-confirm-btn');
+  const lblEl   = document.getElementById('kg-confirm-label');
 
-  // ── tape list ──
-  const tapeEl = document.getElementById('kg-tape');
-  tapeEl.innerHTML = kgEntries.map((e, i) => `
-    <div class="kg-tape-entry">
-      <span>
-        ${i > 0 ? '<span class="kg-tape-plus">+</span>' : ''}
-        <span class="kg-tape-num">${formatCalc(e.val)}</span>
-        <span class="kg-tape-unit">${unitText}</span>
-      </span>
-      <button class="kg-tape-del" onclick="tapeDelete(${i})">
-        <i class="ph ph-x"></i>
-      </button>
-    </div>
-  `).join('');
-  // auto-scroll tape to bottom
-  tapeEl.scrollTop = tapeEl.scrollHeight;
+  const val = parseFloat(kgBuffer) || 0;
+  numEl.textContent = kgBuffer || '0';
 
-  // ── current buffer ──
-  document.getElementById('kg-display-num').textContent = kgBuffer || '0';
-
-  // ── subtotal ──
-  const item  = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
+  const item = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
   const price = item ? Number(item.buy_price) : 0;
-  const sub   = total * price;
-  document.getElementById('kg-subtotal').textContent = sub > 0 ? `฿${sub.toFixed(2)}` : '฿0';
+  const sub = val * price;
+  subEl.textContent = sub > 0 ? `฿${sub.toFixed(2)}` : '฿0';
 
-  // ── confirm button ──
-  const btnEl = document.getElementById('kg-confirm-btn');
-  const lblEl = document.getElementById('kg-confirm-label');
-  const valid = total > 0;
+  const unitText = currentMode === 'kg' ? 'กก.' : 'ชิ้น';
+  const valid = val > 0;
   btnEl.disabled = !valid;
   if (valid) {
-    lblEl.textContent = `เพิ่ม ${formatCalc(total)} ${unitText} = ฿${sub.toFixed(2)}`;
+    lblEl.textContent = `เพิ่ม ${val} ${unitText} = ฿${sub.toFixed(2)}`;
   } else {
     lblEl.textContent = 'เพิ่มในตะกร้า';
   }
 }
 
-// ── tape actions ──
-function tapeDelete(i) {
-  kgEntries.splice(i, 1);
-  updateKgDisplay();
-}
-
-// ── numpad ──
 function kpNum(n, e) {
-  rippleKey(e);
-  if (kgBuffer.replace(/[^0-9]/g,'').length >= 8) return;
+  if (kgBuffer.length >= 7) return;
   if (kgBuffer === '0') kgBuffer = n;
   else kgBuffer += n;
+  rippleKey(e);
   updateKgDisplay();
 }
 
 function kpDot(e) {
+  if (currentMode === 'piece') return; // ชิ้นต้องเป็นจำนวนเต็มเท่านั้น
+  if (kgBuffer.includes('.')) return;
+  if (!kgBuffer) kgBuffer = '0';
+  kgBuffer += '.';
   rippleKey(e);
-  if (currentMode === 'piece') return;
-  if (!kgBuffer.includes('.')) {
-    if (!kgBuffer) kgBuffer = '0';
-    kgBuffer += '.';
-  }
   updateKgDisplay();
 }
 
 function kpBack(e) {
+  kgBuffer = kgBuffer.slice(0, -1);
   rippleKey(e);
-  if (kgBuffer.length > 0) {
-    // ลบตัวสุดท้ายใน buffer ปัจจุบัน
-    kgBuffer = kgBuffer.slice(0, -1);
-  } else if (kgEntries.length > 0) {
-    // buffer ว่างแล้ว → ดึง entry สุดท้ายกลับมาแก้
-    const last = kgEntries.pop();
-    kgBuffer = formatCalc(last.val);
-  }
-  updateKgDisplay();
-}
-
-function kpPlus(e) {
-  rippleKey(e);
-  const cur = parseFloat(kgBuffer);
-  if (!cur || cur <= 0) return; // ไม่มีตัวเลข → ไม่ทำอะไร
-  kgEntries.push({ val: cur });
-  kgBuffer = '';
   updateKgDisplay();
 }
 
 function setPreset(val) {
-  // กด preset → เหมือนพิมพ์ตัวเลข แล้วกด +
-  const cur = parseFloat(kgBuffer);
-  if (cur > 0) kgEntries.push({ val: cur });
-  kgEntries.push({ val });
-  kgBuffer = '';
+  kgBuffer = String(val);
   updateKgDisplay();
   // pulse animation
   const el = document.getElementById('kg-display-num');
   el.style.transition = 'transform .12s';
   el.style.transform = 'scale(1.08)';
   setTimeout(() => { el.style.transform = 'scale(1)'; }, 120);
-}
-
-function formatCalc(v) {
-  if (Number.isInteger(v)) return String(v);
-  return parseFloat(v.toFixed(4)).toString();
 }
 
 function rippleKey(e) {
@@ -1241,27 +862,22 @@ function rippleKey(e) {
 }
 
 async function confirmKg() {
-  // commit buffer ถ้ายังมี
-  const cur = parseFloat(kgBuffer);
-  if (cur > 0) kgEntries.push({ val: cur });
-  kgBuffer = '';
-
-  const total = kgTotal();
-  if (!total || total <= 0 || !kgModalItemId) { closeKgModal(); return; }
-
-  const id   = kgModalItemId;
+  const val = parseFloat(kgBuffer);
+  if (!val || val <= 0 || !kgModalItemId) { closeKgModal(); return; }
+  const id = kgModalItemId;
   const item = ITEMS.find(x => x.id === id);
   if (!item) { closeKgModal(); return; }
 
   const mode      = currentMode;
   const unitLabel = mode === 'kg' ? 'กก.' : (item.unit || 'ชิ้น');
 
-  cart[id] = { item, qty: total, mode, unitLabel };
+  // เพิ่ม/อัปเดตใน cart — ไม่ clear cart
+  cart[id] = { item, qty: val, mode, unitLabel };
 
   closeKgModal();
   renderGrid();
   renderCartPanel();
-  toast(`✓ ${item.name} ${formatCalc(total)} ${unitLabel}`);
+  toast(`✓ ${item.name} ${val} ${unitLabel}`);
 }
 
 // ══════════════════════════════════════════
@@ -1340,145 +956,30 @@ async function confirmCart() {
 
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 700));
-    // บันทึกสำเร็จ → ถามใบเสร็จ
-    _pendingReceipt = { lines, totalAmt };
+    toast(`✓ บันทึก ${lines.length} รายการ | ฿${totalAmt.toFixed(2)}`);
     cart = {};
     renderGrid();
     renderCartPanel();
-    showDialog(lines, totalAmt);
     return;
   }
 
   try {
-    const result = await sbFetch('rpc/record_buy_transaction', {
+    await sbFetch('rpc/record_buy_transaction', {
       method: 'POST',
       body: { p_lines: lines },
       prefer: 'return=representation',
     });
-    if (result !== null && result.success === false) throw new Error(result.message || 'RPC ไม่สำเร็จ');
-    // บันทึกสำเร็จ → ถามใบเสร็จ
-    _pendingReceipt = { lines, totalAmt };
+    toast(`✅ บันทึก ${lines.length} รายการ | ฿${totalAmt.toFixed(2)}`);
     cart = {};
     renderGrid();
     renderCartPanel();
     loadItems();
-    showDialog(lines, totalAmt);
   } catch (err) {
     toast('❌ บันทึกไม่สำเร็จ: ' + err.message, 'error');
     btnEl.disabled = false;
     const count = entries.length;
     lblEl.textContent = `บันทึก ${count} รายการ — ฿${totalAmt.toFixed(2)}`;
   }
-}
-
-// ══════════════════════════════════════════
-//  RECEIPT SYSTEM
-// ══════════════════════════════════════════
-let _pendingReceipt = null;
-
-function fmtB(n) {
-  const v = Number(n || 0);
-  return v === Math.floor(v)
-    ? v.toLocaleString('th-TH')
-    : v.toLocaleString('th-TH', { minimumFractionDigits:2, maximumFractionDigits:2 });
-}
-function fmtQtyStr(qty, mode, unit) {
-  return `${fmtB(qty)} ${unit || (mode==='kg' ? 'กก.' : 'ชิ้น')}`;
-}
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function showDialog(lines, totalAmt) {
-  document.getElementById('dlg-amount').textContent = '฿' + fmtB(totalAmt);
-  document.getElementById('dlg-items').textContent  = lines.length + ' รายการ';
-  document.getElementById('dlg-backdrop').classList.add('show');
-  document.getElementById('dlg-box').classList.add('show');
-}
-
-function hideDialog() {
-  document.getElementById('dlg-backdrop').classList.remove('show');
-  document.getElementById('dlg-box').classList.remove('show');
-}
-
-function skipReceipt() {
-  hideDialog();
-  toast(`✅ บันทึกแล้ว`);
-  _pendingReceipt = null;
-}
-
-function openReceipt() {
-  hideDialog();
-  if (!_pendingReceipt) return;
-  const { lines, totalAmt } = _pendingReceipt;
-
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
-  const timeStr = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
-  const billNo  = 'B' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') +
-                  String(now.getDate()).padStart(2,'0') + '-' +
-                  String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') +
-                  String(now.getSeconds()).padStart(2,'0');
-  const totalKg = lines.filter(l=>l.mode==='kg').reduce((s,l)=>s+l.qty,0);
-
-  const linesHtml = lines.map(l => `
-    <div class="rp-line">
-      <div class="rp-line-left">
-        <div class="rp-line-name">${esc(l.item_name)}</div>
-        <div class="rp-line-detail">
-          ${fmtQtyStr(l.qty, l.mode, l.unit_label)} × ฿${fmtB(l.price)}/${l.unit_label||'กก.'}
-        </div>
-      </div>
-      <div class="rp-line-amt">฿${fmtB(l.subtotal)}</div>
-    </div>`).join('');
-
-  const telHtml = SHOP_TEL
-    ? `<div class="rp-shop-tel"><i class="ph ph-phone"></i> ${esc(SHOP_TEL)}</div>` : '';
-
-  document.getElementById('rcp-paper').innerHTML = `
-    <div class="rp-shop">
-      <div class="rp-shop-name">🔄 ${esc(SHOP_NAME)}</div>
-      <div class="rp-shop-sub">${esc(SHOP_TAGLINE)}</div>
-      ${telHtml}
-    </div>
-    <hr class="rp-divider">
-    <div class="rp-type-badge">
-      <i class="ph-fill ph-download-simple"></i> ใบรับซื้อ
-    </div>
-    <div class="rp-meta-row">
-      <span class="rp-meta-label">วันที่</span>
-      <span class="rp-meta-val">${dateStr}</span>
-    </div>
-    <div class="rp-meta-row">
-      <span class="rp-meta-label">เวลา</span>
-      <span class="rp-meta-val">${timeStr} น.</span>
-    </div>
-    <div class="rp-meta-row">
-      <span class="rp-meta-label">เลขบิล</span>
-      <span class="rp-meta-val">${billNo}</span>
-    </div>
-    <hr class="rp-divider">
-    ${linesHtml}
-    <div class="rp-total-block">
-      <div class="rp-total-row">
-        <span class="rp-total-label">ยอดรวม</span>
-        <span class="rp-total-amt">฿${fmtB(totalAmt)}</span>
-      </div>
-      ${totalKg > 0 ? `<div class="rp-total-kg">น้ำหนักรวม ${fmtB(totalKg)} กก.</div>` : ''}
-    </div>
-    <hr class="rp-divider">
-    <div class="rp-footer">ขอบคุณที่ใช้บริการ 🙏<br>${esc(SHOP_NAME)}</div>
-    <div class="rp-bill-no">${billNo}</div>
-  `;
-
-  document.getElementById('rcp-backdrop').classList.add('show');
-  document.getElementById('rcp-sheet').classList.add('show');
-  _pendingReceipt = null;
-}
-
-function closeReceipt() {
-  document.getElementById('rcp-backdrop').classList.remove('show');
-  document.getElementById('rcp-sheet').classList.remove('show');
 }
 
 // ══════════════════════════════════════════
@@ -1524,15 +1025,8 @@ async function loadCats() {
 function renderCatBar() {
   const bar = document.getElementById('cat-bar');
   if (!bar) return;
-  const catIconHtml = (icon) => {
-    if (!icon) return '';
-    if (icon.startsWith('ph-fill ')) return `<i class="${icon}"></i> `;
-    if (icon.startsWith('ph ph-'))   return `<i class="ph-fill ${icon.slice(3)}"></i> `;
-    if (icon.startsWith('ph-'))      return `<i class="ph-fill ${icon}"></i> `;
-    return icon + ' ';
-  };
   bar.innerHTML = '<button class="cat-btn on" data-cat="all">ทั้งหมด</button>'
-    + CATS.map(c=>`<button class="cat-btn" data-cat="${c.slug}">${catIconHtml(c.icon)}${c.label}</button>`).join('');
+    + CATS.map(c=>`<button class="cat-btn" data-cat="${c.slug}">${c.icon} ${c.label}</button>`).join('');
   bar.querySelectorAll('.cat-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       bar.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('on', b===btn));
@@ -1563,7 +1057,7 @@ async function loadItems() {
   try {
     await loadCats();
     renderCatBar();
-    ITEMS = await sbFetch('items?select=id,name,icon,buy_price,unit,cat,stock_qty,sell_mode&order=cat,name') || [];
+    ITEMS = await sbFetch('items?select=id,name,icon,buy_price,unit,cat,sell_mode&order=cat,name') || [];
     renderGrid();
   } catch (err) {
     grid.innerHTML = `<div class="grid-loading"><i class="ph ph-warning-circle" style="font-size:28px;color:var(--red);"></i><span style="font-size:13px;color:var(--red);">โหลดไม่สำเร็จ: ${err.message}</span></div>`;

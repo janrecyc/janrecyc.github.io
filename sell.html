@@ -1353,8 +1353,15 @@ async function loadCats() {
 function renderCatBar() {
   const bar = document.getElementById('cat-bar');
   if (!bar) return;
+  const catIconHtml = (icon) => {
+    if (!icon) return '';
+    if (icon.startsWith('ph-fill ')) return `<i class="${icon}"></i> `;
+    if (icon.startsWith('ph ph-'))   return `<i class="ph-fill ${icon.slice(3)}"></i> `;
+    if (icon.startsWith('ph-'))      return `<i class="ph-fill ${icon}"></i> `;
+    return icon + ' ';
+  };
   bar.innerHTML = '<button class="cat-btn on" data-cat="all">ทั้งหมด</button>'
-    + CATS.map(c => `<button class="cat-btn" data-cat="${c.slug}">${c.icon} ${c.label}</button>`).join('');
+    + CATS.map(c=>`<button class="cat-btn" data-cat="${c.slug}">${catIconHtml(c.icon)}${c.label}</button>`).join('');
   bar.querySelectorAll('.cat-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       bar.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('on', b === btn));

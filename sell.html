@@ -455,24 +455,44 @@ nav{
 }
 .kg-key.confirm-inline-key:active { background: var(--calc-confirm-h) !important; }
 
-/* Quick presets */
-.kg-presets {
-  display:flex; gap:6px;
-  padding: 0 16px 10px;
-  overflow-x:auto; scrollbar-width:none;
+/* Stock info zone — แทนที่ presets */
+.kg-stock-zone {
+  padding: 10px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.kg-presets::-webkit-scrollbar{display:none;}
-.kg-preset-btn {
-  flex-shrink:0;
-  font-family:'Prompt',sans-serif; font-size:12px; font-weight:700;
-  padding:7px 16px; border-radius:100px;
-  border:1.5px solid var(--calc-preset-bd);
-  background:var(--calc-preset-bg);
-  color:var(--calc-preset-cl); cursor:pointer;
-  transition:all .12s;
-  letter-spacing:.3px;
+.kg-stock-zone-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 12px;
+  font-size: 13px; font-weight: 700;
+  background: rgba(0,200,83,0.12); color: #4CD97B;
+  border: 1px solid rgba(0,200,83,0.2);
+  flex-shrink: 0;
+  transition: background .2s, color .2s, border-color .2s;
 }
-.kg-preset-btn:active { background:rgba(245,166,35,0.28); transform:scale(0.93); }
+.kg-stock-zone-pill i { font-size: 14px; }
+.kg-stock-zone-pill.low {
+  background: rgba(255,159,10,0.12); color: #FFB340;
+  border-color: rgba(255,159,10,0.25);
+}
+.kg-stock-zone-pill.empty {
+  background: rgba(255,59,48,0.12); color: #FF6B6B;
+  border-color: rgba(255,59,48,0.25);
+}
+
+.kg-stock-zone-warn {
+  flex: 1;
+  display: none;
+  align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 10px;
+  font-size: 11px; font-weight: 600;
+  background: rgba(255,159,10,0.12); color: #FFB340;
+  border: 1px solid rgba(255,159,10,0.22);
+  line-height: 1.3;
+}
+.kg-stock-zone-warn.show { display: flex; }
+.kg-stock-zone-warn i { font-size: 14px; flex-shrink: 0; }
 
 /* numpad keys base */
 .kg-key-op {
@@ -771,7 +791,6 @@ nav{
         <div>
           <div class="kg-item-name" id="kg-item-name">—</div>
           <div class="kg-item-price" id="kg-item-price">—</div>
-          <div class="kg-item-stock-label" id="kg-stock-pill">— กก.</div>
         </div>
       </div>
       <button class="kg-close-btn" onclick="closeKgModal()"><i class="ph ph-x"></i></button>
@@ -810,21 +829,16 @@ nav{
       </div>
     </div>
 
-    <div class="kg-presets" id="kg-presets-kg">
-      <button class="kg-preset-btn" onclick="setPreset(100)">100 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(200)">200 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(500)">500 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(1000)">1 ตัน</button>
-      <button class="kg-preset-btn" onclick="setPreset(2000)">2 ตัน</button>
-      <button class="kg-preset-btn" onclick="setPreset(5000)">5 ตัน</button>
-    </div>
-    <div class="kg-presets" id="kg-presets-piece" style="display:none;">
-      <button class="kg-preset-btn" onclick="setPreset(1)">1 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(5)">5 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(10)">10 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(20)">20 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(50)">50 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(100)">100 ชิ้น</button>
+    <!-- Stock zone — pill + warning (แทนที่ presets) -->
+    <div class="kg-stock-zone">
+      <div class="kg-stock-zone-pill" id="kg-stock-pill">
+        <i class="ph ph-stack-simple"></i>
+        <span id="kg-stock-pill-text">— กก.</span>
+      </div>
+      <div class="kg-stock-zone-warn" id="kg-stock-warning">
+        <i class="ph ph-warning"></i>
+        <span id="kg-stock-warning-text">น้ำหนักเกินสต๊อก</span>
+      </div>
     </div>
 
     <div class="kg-numpad">
@@ -1000,8 +1014,6 @@ function setMode(mode) {
   document.getElementById('mode-btn-piece').classList.toggle('active', !isKg);
   document.getElementById('kg-display-label').textContent = isKg ? 'น้ำหนัก' : 'จำนวน';
   document.getElementById('kg-display-unit').textContent  = unit;
-  document.getElementById('kg-presets-kg').style.display    = isKg    ? 'flex' : 'none';
-  document.getElementById('kg-presets-piece').style.display = !isKg   ? 'flex' : 'none';
 
   kgBuffer = ''; kgEntries = [];
   updateKgDisplay();
@@ -1024,21 +1036,19 @@ function openKgModal(id) {
   const cls     = stockClass(stock);
   const pill    = document.getElementById('kg-stock-pill');
   const unitLbl = item.unit || (currentMode === 'piece' ? 'ชิ้น' : 'กก.');
-  pill.className = `kg-item-stock-label ${cls}`;
-  pill.innerHTML = `<i class="ph ph-stack-simple"></i> สต๊อก ${stock.toLocaleString('th-TH')} ${unitLbl}`;
+  pill.className = `kg-stock-zone-pill ${cls}`;
+  document.getElementById('kg-stock-pill-text').textContent = `สต๊อก ${stock.toLocaleString('th-TH')} ${unitLbl}`;
 
   // แสดง toggle เฉพาะ item ที่ไม่ได้ fix sell_mode
   const wrap = document.getElementById('kg-mode-toggle-wrap');
   wrap.style.display = item.sell_mode ? 'none' : 'block';
 
-  // sync mode buttons & presets
+  // sync mode buttons
   const isKg = currentMode === 'kg';
   document.getElementById('mode-btn-kg').classList.toggle('active', isKg);
   document.getElementById('mode-btn-piece').classList.toggle('active', !isKg);
   document.getElementById('kg-display-label').textContent = isKg ? 'น้ำหนัก' : 'จำนวน';
   document.getElementById('kg-display-unit').textContent  = isKg ? 'กก.' : (item.unit||'ชิ้น');
-  document.getElementById('kg-presets-kg').style.display    = isKg    ? 'flex' : 'none';
-  document.getElementById('kg-presets-piece').style.display = !isKg   ? 'flex' : 'none';
 
   updateKgDisplay();
   document.getElementById('kg-backdrop').classList.add('open');
@@ -1063,6 +1073,7 @@ function updateKgDisplay() {
   const total = kgTotal() + cur;
   const item  = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
   const price = item ? Number(item.sell_price) : 0;
+  const stock = item ? (item.stock_qty || 0) : Infinity;
 
   // ── tape ──
   const tapeEl = document.getElementById('kg-tape');
@@ -1085,11 +1096,25 @@ function updateKgDisplay() {
   const sub = Math.round(total * price * 100) / 100;
   document.getElementById('kg-subtotal').textContent = sub > 0 ? `฿${sub.toFixed(2)}` : '฿0';
 
+  // ── warnings ──
+  const warnEl = document.getElementById('kg-stock-warning');
+  const warnTx = document.getElementById('kg-stock-warning-text');
+  const isInt  = Number.isInteger(total) || total === 0;
+  const over   = total > stock;
+  if (over && total > 0) {
+    warnTx.textContent = `เกินสต๊อก (มี ${stock.toLocaleString('th-TH')} ${unitText})`;
+    warnEl.classList.add('show');
+  } else if (currentMode === 'piece' && !isInt && total > 0) {
+    warnTx.textContent = 'จำนวนชิ้นต้องเป็นจำนวนเต็ม';
+    warnEl.classList.add('show');
+  } else {
+    warnEl.classList.remove('show');
+  }
+
   // ── confirm button ──
   const btnEl = document.getElementById('kg-confirm-btn');
   const lblEl = document.getElementById('kg-confirm-label');
-  const isInt  = Number.isInteger(total) || total === 0;
-  const valid = total > 0 && (currentMode === 'kg' || isInt);
+  const valid = total > 0 && !over && (currentMode === 'kg' || isInt);
   btnEl.disabled = !valid;
   lblEl.textContent = valid
     ? `${cart[kgModalItemId] ? 'อัปเดต' : 'เพิ่ม'} ${formatCalc(total)} ${unitText} = ฿${sub.toFixed(2)}`
@@ -1133,17 +1158,6 @@ function kpPlus(e) {
   kgEntries.push({ val: cur });
   kgBuffer = '';
   updateKgDisplay();
-}
-function setPreset(val) {
-  const cur = parseFloat(kgBuffer);
-  if (cur > 0) kgEntries.push({ val: cur });
-  kgEntries.push({ val });
-  kgBuffer = '';
-  updateKgDisplay();
-  const el = document.getElementById('kg-display-num');
-  el.style.transition = 'transform .12s';
-  el.style.transform  = 'scale(1.08)';
-  setTimeout(() => { el.style.transform = 'scale(1)'; }, 120);
 }
 function rippleKey(e) {
   if (!e || !e.currentTarget) return;

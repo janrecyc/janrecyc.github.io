@@ -1179,6 +1179,21 @@ function confirmKg() {
   const id   = Number(kgModalItemId);
   const item = ITEMS.find(x => x.id === id);
   if (!item) { closeKgModal(); return; }
+
+  // ── validation guard ──
+  const stock  = item.stock_qty || 0;
+  const isInt  = Number.isInteger(total);
+  if (total > stock) {
+    toast(`❌ เกินสต็อก (มีแค่ ${stock.toLocaleString('th-TH')} ${item.unit||'กก.'})`, 'error');
+    updateKgDisplay();
+    return;
+  }
+  if (currentMode === 'piece' && !isInt) {
+    toast('❌ จำนวนชิ้นต้องเป็นจำนวนเต็ม', 'error');
+    updateKgDisplay();
+    return;
+  }
+
   const mode      = currentMode;
   const unitLabel = mode === 'kg' ? 'กก.' : (item.unit || 'ชิ้น');
   const isNew     = !cart[id];

@@ -415,14 +415,32 @@ nav {
 
 /* Numpad */
 .kg-numpad {
-  display:grid; grid-template-columns: repeat(4,1fr);
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
   gap:1px; background:rgba(60,60,67,0.1);
   border-top:1px solid rgba(60,60,67,0.08);
   margin:0;
 }
-.kg-key.op-key { background:rgba(26,107,255,0.06); }
-.kg-key.op-key:active { background:rgba(26,107,255,0.18); }
-.kg-key.op-key.active-op { background:rgba(26,107,255,0.15); }
+/* digit rows: each digit key spans 4/3 of a column — use a wrapper approach instead */
+/* We'll use a 12-col grid: digits take 4 cols each (3 per row), ops take 3 cols each */
+.kg-numpad {
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+}
+.kg-numpad .kg-key:not(.op-key):not(.eq-key) {
+  grid-column: span 4;
+}
+.kg-numpad .op-key {
+  grid-column: span 3;
+  background:rgba(26,107,255,0.06);
+}
+.kg-numpad .op-key:active { background:rgba(26,107,255,0.18); }
+.kg-numpad .op-key.active-op { background:rgba(26,107,255,0.20); box-shadow: inset 0 0 0 2px rgba(26,107,255,0.4); }
+.kg-key.eq-key {
+  grid-column: span 3;
+  background: var(--primary) !important;
+}
+.kg-key.eq-key:active { background: var(--primary-d) !important; }
 .kg-key-op {
   font-size:24px; font-weight:500; color:#1A6BFF; line-height:1;
 }
@@ -868,25 +886,27 @@ nav {
     </div>
 
     <div class="kg-numpad">
+      <!-- Row 1: 1 2 3 -->
       <button class="kg-key" onclick="kpNum('1',event)"><span class="kg-key-num">1</span></button>
       <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span></button>
       <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span></button>
-      <button class="kg-key op-key" onclick="kpOp('+',event)"><span class="kg-key-op">+</span></button>
-
+      <!-- Row 2: 4 5 6 -->
       <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span></button>
       <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span></button>
       <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span></button>
-      <button class="kg-key op-key" onclick="kpOp('-',event)"><span class="kg-key-op">−</span></button>
-
+      <!-- Row 3: 7 8 9 -->
       <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span></button>
       <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span></button>
       <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span></button>
-      <button class="kg-key op-key" onclick="kpOp('*',event)"><span class="kg-key-op">×</span></button>
-
+      <!-- Row 4: . 0 ⌫ -->
       <button class="kg-key dark" onclick="kpDot(event)"><span class="kg-key-num" style="font-size:20px">.</span></button>
       <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
-      <button class="kg-key op-key" onclick="kpOp('/',event)"><span class="kg-key-op">÷</span></button>
+      <!-- Row 5: + − × = -->
+      <button class="kg-key op-key" id="op-btn-+" onclick="kpOp('+',event)"><span class="kg-key-op">+</span></button>
+      <button class="kg-key op-key" id="op-btn--" onclick="kpOp('-',event)"><span class="kg-key-op">−</span></button>
+      <button class="kg-key op-key" id="op-btn-*" onclick="kpOp('*',event)"><span class="kg-key-op">×</span></button>
+      <button class="kg-key op-key eq-key" onclick="kpEqual(event)"><span class="kg-key-op" style="color:white">=</span></button>
     </div>
 
     <div class="kg-confirm-row">
@@ -1032,7 +1052,7 @@ function updateKgDisplay() {
   const exprEl  = document.getElementById('kg-expr');
 
   // แสดง expression บนบรรทัดเล็ก
-  const opSym = {'+':'+', '-':'−', '*':'×', '/':'÷'};
+  const opSym = {'+':'+', '-':'−', '*':'×'};
   if (exprEl) {
     if (kgOperator && kgPrevVal !== null) {
       exprEl.textContent = `${kgPrevVal} ${opSym[kgOperator]}`;
@@ -1043,16 +1063,18 @@ function updateKgDisplay() {
     }
   }
 
-  // ค่าที่แสดงในจอ — ถ้ากด op แล้วยังไม่กดตัวเลขใหม่ ให้แสดง prevVal
-  let displayNum = kgBuffer || '0';
+  // แสดงตัวเลขปัจจุบัน
+  const displayNum = kgBuffer || '0';
   numEl.textContent = displayNum;
 
-  // คำนวณยอดจาก current buffer
+  // คำนวณยอดสำหรับปุ่ม confirm (preview ผลลัพธ์)
   const cur = parseFloat(kgBuffer) || 0;
   let val = cur;
-  // ถ้ากด op ไปแล้วและมี prevVal → preview ผลลัพธ์ที่จะได้
   if (kgOperator && kgPrevVal !== null && !kgJustCalc && cur > 0) {
     val = calcResult(kgPrevVal, cur, kgOperator);
+  } else if (kgJustCalc && kgBuffer !== '') {
+    // หลังกด = หรือกด op → แสดงค่าใน buffer
+    val = parseFloat(kgBuffer) || 0;
   }
 
   const item = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
@@ -1071,57 +1093,90 @@ function updateKgDisplay() {
 }
 
 function kpNum(n, e) {
-  if (kgJustCalc) { kgBuffer = n; kgJustCalc = false; }
-  else if (kgBuffer.replace(/[^0-9]/g,'').length >= 8) return;
-  else if (kgBuffer === '0') kgBuffer = n;
-  else kgBuffer += n;
   rippleKey(e);
+  if (kgJustCalc) {
+    // หลังกด = แล้วกดตัวเลข → เริ่มใหม่
+    kgBuffer = n;
+    kgJustCalc = false;
+  } else if (kgBuffer.replace(/[^0-9]/g,'').length >= 8) {
+    return;
+  } else if (kgBuffer === '0') {
+    kgBuffer = n;
+  } else {
+    kgBuffer += n;
+  }
   updateKgDisplay();
 }
 
 function kpDot(e) {
+  rippleKey(e);
   if (currentMode === 'piece') return;
   if (kgJustCalc) { kgBuffer = '0.'; kgJustCalc = false; }
   else if (!kgBuffer.includes('.')) {
     if (!kgBuffer) kgBuffer = '0';
     kgBuffer += '.';
   }
-  rippleKey(e);
   updateKgDisplay();
 }
 
 function kpBack(e) {
-  if (kgJustCalc) { kgBuffer = ''; kgPrevVal = null; kgOperator = null; kgJustCalc = false; }
-  else kgBuffer = kgBuffer.slice(0, -1);
   rippleKey(e);
+  if (kgJustCalc) {
+    // ลบหลัง = → clear ทั้งหมด
+    kgBuffer = ''; kgPrevVal = null; kgOperator = null; kgJustCalc = false;
+    document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
+  } else {
+    kgBuffer = kgBuffer.slice(0, -1);
+  }
   updateKgDisplay();
 }
 
 function kpOp(op, e) {
   rippleKey(e);
   const cur = parseFloat(kgBuffer) || 0;
-  // ถ้ามี operator ค้างอยู่ให้คำนวณก่อน
-  if (kgOperator && kgPrevVal !== null && !kgJustCalc) {
+
+  if (kgOperator && kgPrevVal !== null && !kgJustCalc && kgBuffer !== '') {
+    // มี operator ค้างและพิมพ์ตัวเลขแล้ว → คำนวณก่อน
     const result = calcResult(kgPrevVal, cur, kgOperator);
     kgBuffer = formatCalc(result);
-    updateKgDisplay();
     kgPrevVal = result;
+  } else if (kgJustCalc) {
+    // กด op ต่อหลัง = → ใช้ผลลัพธ์เดิมเป็น prevVal
+    kgPrevVal = parseFloat(kgBuffer) || 0;
+    kgJustCalc = false;
   } else {
     kgPrevVal = cur;
   }
+
   kgOperator = op;
-  kgJustCalc = true;
-  // highlight active op button
+  kgJustCalc = true; // รอตัวเลขถัดไป
+
+  // highlight op button
   document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
-  e && e.currentTarget && e.currentTarget.classList.add('active-op');
+  const opBtn = document.getElementById(`op-btn-${op}`);
+  if (opBtn) opBtn.classList.add('active-op');
+
+  updateKgDisplay();
+}
+
+function kpEqual(e) {
+  rippleKey(e);
+  if (!kgOperator || kgPrevVal === null) return; // ไม่มี operator → ไม่ทำอะไร
+  const cur = parseFloat(kgBuffer) || 0;
+  const result = calcResult(kgPrevVal, cur, kgOperator);
+  kgBuffer = formatCalc(result);
+  kgPrevVal = null;
+  kgOperator = null;
+  kgJustCalc = true; // หลัง = กดตัวเลขต่อ = เริ่มใหม่
+  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
+  updateKgDisplay();
 }
 
 function calcResult(a, b, op) {
   switch(op) {
     case '+': return a + b;
-    case '-': return a - b;
+    case '-': return Math.max(0, a - b); // ไม่ให้ติดลบ
     case '*': return a * b;
-    case '/': return b !== 0 ? a / b : a;
   }
   return b;
 }
@@ -1155,7 +1210,7 @@ function rippleKey(e) {
 }
 
 async function confirmKg() {
-  // ถ้ามี operator ค้างอยู่ ให้คำนวณก่อน
+  // ถ้ามี operator ค้างอยู่ ให้คำนวณก่อน (เหมือนกด =)
   if (kgOperator && kgPrevVal !== null) {
     const cur = parseFloat(kgBuffer) || 0;
     const result = calcResult(kgPrevVal, cur, kgOperator);

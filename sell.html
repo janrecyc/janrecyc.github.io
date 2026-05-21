@@ -299,14 +299,7 @@ nav{
 .kg-item-icon { font-size:30px; line-height:1; }
 .kg-item-name { font-size:16px; font-weight:700; color:#FFFFFF; }
 .kg-item-price { font-size:12px; color:rgba(255,255,255,0.45); margin-top:2px; }
-.kg-item-stock-label {
-  display:inline-flex; align-items:center; gap:3px;
-  font-size:11px; font-weight:600; margin-top:3px;
-  padding:2px 8px; border-radius:100px;
-  background:rgba(0,200,83,0.15); color:#4CD97B;
-}
-.kg-item-stock-label.low { background:rgba(255,159,10,0.15); color:#FFB340; }
-.kg-item-stock-label.empty { background:rgba(255,59,48,0.15); color:#FF6B6B; }
+
 .kg-close-btn {
   width:32px; height:32px; border-radius:50%;
   background: rgba(255,255,255,0.10);
@@ -784,7 +777,6 @@ nav{
         <div>
           <div class="kg-item-name" id="kg-item-name">—</div>
           <div class="kg-item-price" id="kg-item-price">—</div>
-          <div class="kg-item-stock-label" id="kg-stock-pill">— กก.</div>
         </div>
       </div>
       <button class="kg-close-btn" onclick="closeKgModal()"><i class="ph ph-x"></i></button>
@@ -1038,13 +1030,6 @@ function openKgModal(id) {
   document.getElementById('kg-item-icon').innerHTML   = renderIcon(item.icon, item.cat, 26);
   document.getElementById('kg-item-name').textContent  = item.name;
   document.getElementById('kg-item-price').textContent = `฿${Number(item.sell_price).toFixed(2)} / ${item.unit||'กก.'}`;
-
-  const stock   = item.stock_qty || 0;
-  const cls     = stockClass(stock);
-  const pill    = document.getElementById('kg-stock-pill');
-  const unitLbl = item.unit || (currentMode === 'piece' ? 'ชิ้น' : 'กก.');
-  pill.className = `kg-item-stock-label ${cls}`;
-  pill.innerHTML = `<i class="ph ph-stack-simple"></i> สต๊อก ${stock.toLocaleString('th-TH')} ${unitLbl}`;
 
   // แสดง toggle เฉพาะ item ที่ไม่ได้ fix sell_mode
   const wrap = document.getElementById('kg-mode-toggle-wrap');

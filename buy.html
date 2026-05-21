@@ -1068,26 +1068,24 @@ function kgTotal() {
 }
 
 function openKgModal(id) {
+  id = Number(id);
   const item = ITEMS.find(x => x.id === id);
   if (!item) return;
   kgModalItemId = id;
-
-  const itemMode = item.sell_mode || 'kg';
-  setMode(itemMode);
-
-  // ถ้า item มีใน cart → โหลด qty เดิมเป็น entry แรก
-  kgBuffer = '';
-  kgEntries = [];
-  if (cart[id]) {
-    kgEntries = [{ val: cart[id].qty }];
-  }
 
   document.getElementById('kg-item-icon').innerHTML = renderIcon(item.icon, item.cat, 26);
   document.getElementById('kg-item-name').textContent = item.name;
   document.getElementById('kg-item-price').textContent = `฿${Number(item.buy_price).toFixed(2)} / ${item.unit||'กก.'}`;
 
-  const toggle = document.getElementById('kg-mode-toggle');
-  toggle.style.display = item.sell_mode ? 'none' : 'flex';
+  // ซ่อน/แสดง mode toggle แล้วตั้ง mode ให้ถูก
+  const itemMode = item.sell_mode || 'kg';
+  document.getElementById('kg-mode-toggle').style.display = item.sell_mode ? 'none' : 'flex';
+  setMode(itemMode); // reset buffer+entries ใน setMode
+
+  // โหลด qty เดิมจาก cart (หลัง setMode เพื่อไม่ให้ถูก reset)
+  if (cart[id]) {
+    kgEntries = [{ val: cart[id].qty }];
+  }
 
   updateKgDisplay();
 
@@ -1352,11 +1350,12 @@ async function confirmCart() {
   }
 
   try {
-    await sbFetch('rpc/record_buy_transaction', {
+    const result = await sbFetch('rpc/record_buy_transaction', {
       method: 'POST',
       body: { p_lines: lines },
       prefer: 'return=representation',
     });
+    if (result !== null && result.success === false) throw new Error(result.message || 'RPC ไม่สำเร็จ');
     // บันทึกสำเร็จ → ถามใบเสร็จ
     _pendingReceipt = { lines, totalAmt };
     cart = {};
@@ -1564,7 +1563,7 @@ async function loadItems() {
   try {
     await loadCats();
     renderCatBar();
-    ITEMS = await sbFetch('items?select=id,name,icon,buy_price,unit,cat,sell_mode&order=cat,name') || [];
+    ITEMS = await sbFetch('items?select=id,name,icon,buy_price,unit,cat,stock_qty,sell_mode&order=cat,name') || [];
     renderGrid();
   } catch (err) {
     grid.innerHTML = `<div class="grid-loading"><i class="ph ph-warning-circle" style="font-size:28px;color:var(--red);"></i><span style="font-size:13px;color:var(--red);">โหลดไม่สำเร็จ: ${err.message}</span></div>`;

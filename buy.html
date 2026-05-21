@@ -368,7 +368,12 @@ nav {
 .kg-display-left {}
 .kg-display-label {
   font-size:11px; font-weight:500; color:var(--ink3);
-  text-transform:uppercase; letter-spacing:.8px; margin-bottom:2px;
+  text-transform:uppercase; letter-spacing:.8px; margin-bottom:0;
+}
+.kg-expr-row { height:16px; }
+.kg-expr {
+  font-size:12px; font-weight:500; color:var(--ink3);
+  opacity:0; transition:opacity .15s;
 }
 .kg-display-val {
   font-size:44px; font-weight:800; color:var(--ink);
@@ -410,10 +415,16 @@ nav {
 
 /* Numpad */
 .kg-numpad {
-  display:grid; grid-template-columns: repeat(3,1fr);
+  display:grid; grid-template-columns: repeat(4,1fr);
   gap:1px; background:rgba(60,60,67,0.1);
   border-top:1px solid rgba(60,60,67,0.08);
   margin:0;
+}
+.kg-key.op-key { background:rgba(26,107,255,0.06); }
+.kg-key.op-key:active { background:rgba(26,107,255,0.18); }
+.kg-key.op-key.active-op { background:rgba(26,107,255,0.15); }
+.kg-key-op {
+  font-size:24px; font-weight:500; color:#1A6BFF; line-height:1;
 }
 .kg-key {
   background: rgba(255,255,255,0.95);
@@ -824,6 +835,7 @@ nav {
     <div class="kg-display">
       <div class="kg-display-left">
         <div class="kg-display-label" id="kg-display-label">น้ำหนัก</div>
+        <div class="kg-expr-row"><span class="kg-expr" id="kg-expr"></span></div>
         <div class="kg-display-val" id="kg-display-val">
           <span id="kg-display-num">0</span>
           <span class="unit" id="kg-unit-label">กก.</span>
@@ -856,19 +868,25 @@ nav {
     </div>
 
     <div class="kg-numpad">
-      <!-- Row 1 -->
       <button class="kg-key" onclick="kpNum('1',event)"><span class="kg-key-num">1</span></button>
-      <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span><span class="kg-key-sub">ABC</span></button>
-      <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span><span class="kg-key-sub">DEF</span></button>
-      <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span><span class="kg-key-sub">GHI</span></button>
-      <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span><span class="kg-key-sub">JKL</span></button>
-      <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span><span class="kg-key-sub">MNO</span></button>
-      <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span><span class="kg-key-sub">PQRS</span></button>
-      <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span><span class="kg-key-sub">TUV</span></button>
-      <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span><span class="kg-key-sub">WXYZ</span></button>
+      <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span></button>
+      <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span></button>
+      <button class="kg-key op-key" onclick="kpOp('+',event)"><span class="kg-key-op">+</span></button>
+
+      <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span></button>
+      <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span></button>
+      <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span></button>
+      <button class="kg-key op-key" onclick="kpOp('-',event)"><span class="kg-key-op">−</span></button>
+
+      <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span></button>
+      <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span></button>
+      <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span></button>
+      <button class="kg-key op-key" onclick="kpOp('*',event)"><span class="kg-key-op">×</span></button>
+
       <button class="kg-key dark" onclick="kpDot(event)"><span class="kg-key-num" style="font-size:20px">.</span></button>
       <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
+      <button class="kg-key op-key" onclick="kpOp('/',event)"><span class="kg-key-op">÷</span></button>
     </div>
 
     <div class="kg-confirm-row">
@@ -942,7 +960,10 @@ function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
 //  KG MODAL STATE
 // ══════════════════════════════════════════
 let kgModalItemId = null;
-let kgBuffer = '';   // string เก็บตัวเลขที่กด
+let kgBuffer = '';      // ตัวเลขปัจจุบัน
+let kgPrevVal = null;   // ค่าก่อนหน้า (เครื่องคิดเลข)
+let kgOperator = null;  // '+' '-' '*' '/'
+let kgJustCalc = false; // หลัง = แล้วกดตัวเลขใหม่
 let currentMode = 'kg'; // 'kg' | 'piece'
 
 function openKgModal(id) {
@@ -955,6 +976,8 @@ function openKgModal(id) {
   setMode(itemMode);
 
   kgBuffer = cart[id] ? String(cart[id].qty) : '';
+  kgPrevVal = null; kgOperator = null; kgJustCalc = false;
+  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
 
   document.getElementById('kg-item-icon').innerHTML = renderIcon(item.icon, item.cat, 26);
   document.getElementById('kg-item-name').textContent = item.name;
@@ -996,7 +1019,8 @@ function setMode(mode) {
     document.getElementById('kg-unit-label').textContent    = 'ชิ้น';
   }
   // reset buffer เมื่อเปลี่ยน mode
-  kgBuffer = '';
+  kgBuffer = ''; kgPrevVal = null; kgOperator = null; kgJustCalc = false;
+  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
   updateKgDisplay();
 }
 
@@ -1005,9 +1029,31 @@ function updateKgDisplay() {
   const subEl   = document.getElementById('kg-subtotal');
   const btnEl   = document.getElementById('kg-confirm-btn');
   const lblEl   = document.getElementById('kg-confirm-label');
+  const exprEl  = document.getElementById('kg-expr');
 
-  const val = parseFloat(kgBuffer) || 0;
-  numEl.textContent = kgBuffer || '0';
+  // แสดง expression บนบรรทัดเล็ก
+  const opSym = {'+':'+', '-':'−', '*':'×', '/':'÷'};
+  if (exprEl) {
+    if (kgOperator && kgPrevVal !== null) {
+      exprEl.textContent = `${kgPrevVal} ${opSym[kgOperator]}`;
+      exprEl.style.opacity = '1';
+    } else {
+      exprEl.textContent = '';
+      exprEl.style.opacity = '0';
+    }
+  }
+
+  // ค่าที่แสดงในจอ — ถ้ากด op แล้วยังไม่กดตัวเลขใหม่ ให้แสดง prevVal
+  let displayNum = kgBuffer || '0';
+  numEl.textContent = displayNum;
+
+  // คำนวณยอดจาก current buffer
+  const cur = parseFloat(kgBuffer) || 0;
+  let val = cur;
+  // ถ้ากด op ไปแล้วและมี prevVal → preview ผลลัพธ์ที่จะได้
+  if (kgOperator && kgPrevVal !== null && !kgJustCalc && cur > 0) {
+    val = calcResult(kgPrevVal, cur, kgOperator);
+  }
 
   const item = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
   const price = item ? Number(item.buy_price) : 0;
@@ -1018,37 +1064,77 @@ function updateKgDisplay() {
   const valid = val > 0;
   btnEl.disabled = !valid;
   if (valid) {
-    lblEl.textContent = `เพิ่ม ${val} ${unitText} = ฿${sub.toFixed(2)}`;
+    lblEl.textContent = `เพิ่ม ${formatCalc(val)} ${unitText} = ฿${sub.toFixed(2)}`;
   } else {
     lblEl.textContent = 'เพิ่มในตะกร้า';
   }
 }
 
 function kpNum(n, e) {
-  if (kgBuffer.length >= 7) return;
-  if (kgBuffer === '0') kgBuffer = n;
+  if (kgJustCalc) { kgBuffer = n; kgJustCalc = false; }
+  else if (kgBuffer.replace(/[^0-9]/g,'').length >= 8) return;
+  else if (kgBuffer === '0') kgBuffer = n;
   else kgBuffer += n;
   rippleKey(e);
   updateKgDisplay();
 }
 
 function kpDot(e) {
-  if (currentMode === 'piece') return; // ชิ้นต้องเป็นจำนวนเต็มเท่านั้น
-  if (kgBuffer.includes('.')) return;
-  if (!kgBuffer) kgBuffer = '0';
-  kgBuffer += '.';
+  if (currentMode === 'piece') return;
+  if (kgJustCalc) { kgBuffer = '0.'; kgJustCalc = false; }
+  else if (!kgBuffer.includes('.')) {
+    if (!kgBuffer) kgBuffer = '0';
+    kgBuffer += '.';
+  }
   rippleKey(e);
   updateKgDisplay();
 }
 
 function kpBack(e) {
-  kgBuffer = kgBuffer.slice(0, -1);
+  if (kgJustCalc) { kgBuffer = ''; kgPrevVal = null; kgOperator = null; kgJustCalc = false; }
+  else kgBuffer = kgBuffer.slice(0, -1);
   rippleKey(e);
   updateKgDisplay();
 }
 
+function kpOp(op, e) {
+  rippleKey(e);
+  const cur = parseFloat(kgBuffer) || 0;
+  // ถ้ามี operator ค้างอยู่ให้คำนวณก่อน
+  if (kgOperator && kgPrevVal !== null && !kgJustCalc) {
+    const result = calcResult(kgPrevVal, cur, kgOperator);
+    kgBuffer = formatCalc(result);
+    updateKgDisplay();
+    kgPrevVal = result;
+  } else {
+    kgPrevVal = cur;
+  }
+  kgOperator = op;
+  kgJustCalc = true;
+  // highlight active op button
+  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
+  e && e.currentTarget && e.currentTarget.classList.add('active-op');
+}
+
+function calcResult(a, b, op) {
+  switch(op) {
+    case '+': return a + b;
+    case '-': return a - b;
+    case '*': return a * b;
+    case '/': return b !== 0 ? a / b : a;
+  }
+  return b;
+}
+
+function formatCalc(v) {
+  if (Number.isInteger(v)) return String(v);
+  return parseFloat(v.toFixed(4)).toString();
+}
+
 function setPreset(val) {
   kgBuffer = String(val);
+  kgPrevVal = null; kgOperator = null; kgJustCalc = false;
+  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
   updateKgDisplay();
   // pulse animation
   const el = document.getElementById('kg-display-num');
@@ -1069,6 +1155,14 @@ function rippleKey(e) {
 }
 
 async function confirmKg() {
+  // ถ้ามี operator ค้างอยู่ ให้คำนวณก่อน
+  if (kgOperator && kgPrevVal !== null) {
+    const cur = parseFloat(kgBuffer) || 0;
+    const result = calcResult(kgPrevVal, cur, kgOperator);
+    kgBuffer = formatCalc(result);
+    kgPrevVal = null; kgOperator = null; kgJustCalc = false;
+    document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
+  }
   const val = parseFloat(kgBuffer);
   if (!val || val <= 0 || !kgModalItemId) { closeKgModal(); return; }
   const id = kgModalItemId;
@@ -1346,15 +1440,8 @@ async function loadCats() {
 function renderCatBar() {
   const bar = document.getElementById('cat-bar');
   if (!bar) return;
-  const catIconHtml = (icon) => {
-    if (!icon) return '';
-    if (icon.startsWith('ph-fill ')) return `<i class="${icon}"></i> `;
-    if (icon.startsWith('ph ph-'))   return `<i class="ph-fill ${icon.slice(3)}"></i> `;
-    if (icon.startsWith('ph-'))      return `<i class="ph-fill ${icon}"></i> `;
-    return icon + ' ';
-  };
   bar.innerHTML = '<button class="cat-btn on" data-cat="all">ทั้งหมด</button>'
-    + CATS.map(c=>`<button class="cat-btn" data-cat="${c.slug}">${catIconHtml(c.icon)}${c.label}</button>`).join('');
+    + CATS.map(c=>`<button class="cat-btn" data-cat="${c.slug}">${c.icon} ${c.label}</button>`).join('');
   bar.querySelectorAll('.cat-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       bar.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('on', b===btn));

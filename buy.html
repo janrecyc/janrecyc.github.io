@@ -910,26 +910,37 @@ const DEMO_ITEMS = [
 ];
 
 // icon bg color per category — iOS-style colored pill
+// slugs ตรงกับ DB: glass, beer-crate, steel, plastic, paper, copper, electronics
 const CAT_COLOR = {
-  metal:      {bg:'#E8EDF8', fg:'#3A6CC8'},
-  paper:      {bg:'#FFF3E0', fg:'#E07A20'},
-  plastic:    {bg:'#E8F5E9', fg:'#2E7D32'},
-  glass:      {bg:'#E3F2FD', fg:'#1565C0'},
-  electric:   {bg:'#FFF9C4', fg:'#F57F17'},
-  'beer-crate':{bg:'#FDE8C8', fg:'#C06000'},
-  default:    {bg:'#F3F0FF', fg:'#5E35B1'},
+  glass:        {bg:'#E3F2FD', fg:'#1565C0'},
+  'beer-crate': {bg:'#FDE8C8', fg:'#C06000'},
+  steel:        {bg:'#E8EDF8', fg:'#3A6CC8'},
+  plastic:      {bg:'#E8F5E9', fg:'#2E7D32'},
+  paper:        {bg:'#FFF3E0', fg:'#E07A20'},
+  copper:       {bg:'#FFF3E0', fg:'#B45309'},
+  electronics:  {bg:'#FFF9C4', fg:'#F57F17'},
+  // legacy aliases (demo items)
+  metal:        {bg:'#E8EDF8', fg:'#3A6CC8'},
+  electric:     {bg:'#FFF9C4', fg:'#F57F17'},
+  default:      {bg:'#F3F0FF', fg:'#5E35B1'},
 };
 function itemColor(cat){ return CAT_COLOR[cat] || CAT_COLOR.default; }
 
-// render icon — if it looks like a ph-* class use Phosphor, else show as emoji text
+// render icon — รองรับทุกรูปแบบที่เก็บใน Supabase:
+//   "ph-flask"       → ph-fill ph-flask
+//   "ph ph-flask"    → ph-fill ph-flask
+//   "ph-fill ph-xxx" → ใช้ตรงๆ
 function renderIcon(icon, cat, size=28) {
-  if (icon && icon.startsWith('ph-')) {
-    const c = itemColor(cat);
-    return `<span class="ph-icon-wrap" style="background:${c.bg};color:${c.fg};width:${size+16}px;height:${size+16}px;font-size:${size}px;">
-      <i class="ph-fill ${icon}"></i></span>`;
-  }
-  // fallback: emoji
-  return `<span style="font-size:${size}px;line-height:1;">${icon}</span>`;
+  const c = itemColor(cat);
+  const pill = (cls) =>
+    `<span class="ph-icon-wrap" style="background:${c.bg};color:${c.fg};width:${size+16}px;height:${size+16}px;font-size:${size}px;"><i class="${cls}"></i></span>`;
+
+  if (!icon || icon.trim() === '') return '';
+  const s = icon.trim();
+  if (s.startsWith('ph-fill ')) return pill(s);
+  if (s.startsWith('ph ph-'))   return pill('ph-fill ' + s.slice(3));
+  if (s.startsWith('ph-'))      return pill('ph-fill ' + s);
+  return `<span style="font-size:${size}px;line-height:1;">${s}</span>`;
 }
 
 let ITEMS = [];

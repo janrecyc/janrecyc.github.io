@@ -431,9 +431,10 @@ nav{
 }
 .kg-key.plus-key {
   background: rgba(245,166,35,0.12);
-  grid-column: span 2;
 }
 .kg-key.plus-key:active { background: rgba(245,166,35,0.28); }
+.kg-key.multiply-key { background: rgba(245,166,35,0.07); }
+.kg-key.multiply-key:active { background: rgba(245,166,35,0.22); }
 .kg-key.plus-key .kg-key-op { color: var(--calc-op) !important; font-size:26px; font-weight:700; }
 .kg-key.clear-inline-key {
   background: var(--calc-func) !important;
@@ -839,7 +840,7 @@ nav{
       <button class="kg-key dark" onclick="kpDot(event)"><span class="kg-key-num" style="font-size:20px">.</span></button>
       <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
-      <!-- + spans 2 cols, ✓ takes 1 col -->
+      <button class="kg-key multiply-key" onclick="kpMultiply(event)"><span class="kg-key-op" style="color:var(--calc-op);font-size:22px;font-weight:700;">×</span></button>
       <button class="kg-key plus-key" onclick="kpPlus(event)"><span class="kg-key-op">+</span></button>
       <button class="kg-key clear-inline-key" onclick="kpClear(event)">
         <span class="kg-key-num" style="font-size:22px;font-weight:700;color:rgba(255,80,60,0.9);">C</span>
@@ -975,10 +976,11 @@ let query     = '';
 // ══════════════════════════════════════════
 //  KG MODAL STATE — tape-add model
 // ══════════════════════════════════════════
-let kgModalItemId = null;
-let kgBuffer      = '';
-let kgEntries     = [];   // [{val: number}]
-let currentMode   = 'kg';
+let kgModalItemId  = null;
+let kgBuffer       = '';
+let kgEntries      = [];   // [{val: number}]
+let currentMode    = 'kg';
+let kgMultiplyBase = null; // ตัวเลขแรกก่อน ×
 
 function kgTotal() {
   return kgEntries.reduce((s, e) => s + e.val, 0);
@@ -1045,9 +1047,10 @@ function closeKgModal() {
   document.getElementById('kg-backdrop').classList.remove('open');
   document.getElementById('kg-modal').classList.remove('open');
   document.body.style.overflow = '';
-  kgModalItemId = null;
-  kgBuffer = '';
-  kgEntries = [];
+  kgModalItemId  = null;
+  kgBuffer       = '';
+  kgEntries      = [];
+  kgMultiplyBase = null;
 }
 
 function updateKgDisplay() {
@@ -1059,6 +1062,16 @@ function updateKgDisplay() {
   const item  = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
   const price = item ? Number(item.sell_price) : 0;
   const stock = item ? (item.stock_qty || 0) : Infinity;
+
+  // ── multiply indicator in label ──
+  const lblEl2 = document.getElementById('kg-display-label');
+  if (kgMultiplyBase !== null) {
+    lblEl2.textContent = `${formatCalc(kgMultiplyBase)} ×`;
+    lblEl2.style.color = 'var(--calc-op)';
+  } else {
+    lblEl2.textContent = currentMode === 'kg' ? 'น้ำหนัก' : 'จำนวน';
+    lblEl2.style.color = '';
+  }
 
   // ── tape ──
   const tapeEl = document.getElementById('kg-tape');
@@ -1140,7 +1153,12 @@ function kpPlus(e) {
   rippleKey(e);
   const cur = parseFloat(kgBuffer);
   if (!cur || cur <= 0) return;
-  kgEntries.push({ val: cur });
+  if (kgMultiplyBase !== null) {
+    kgEntries.push({ val: kgMultiplyBase * cur });
+    kgMultiplyBase = null;
+  } else {
+    kgEntries.push({ val: cur });
+  }
   kgBuffer = '';
   updateKgDisplay();
 }
@@ -1148,6 +1166,16 @@ function kpClear(e) {
   rippleKey(e);
   kgBuffer = '';
   kgEntries = [];
+  kgMultiplyBase = null;
+  updateKgDisplay();
+}
+function kpMultiply(e) {
+  rippleKey(e);
+  const cur = parseFloat(kgBuffer);
+  if (!cur || cur <= 0) return;
+  // ถ้ากำลังคูณอยู่แล้ว → สะสมต่อ, ถ้าเริ่มใหม่ → เก็บตัวแรก
+  kgMultiplyBase = kgMultiplyBase !== null ? kgMultiplyBase * cur : cur;
+  kgBuffer = '';
   updateKgDisplay();
 }
 function rippleKey(e) {
@@ -1163,7 +1191,14 @@ function rippleKey(e) {
 
 function confirmKg() {
   const cur = parseFloat(kgBuffer);
-  if (cur > 0) kgEntries.push({ val: cur });
+  if (cur > 0) {
+    if (kgMultiplyBase !== null) {
+      kgEntries.push({ val: kgMultiplyBase * cur });
+      kgMultiplyBase = null;
+    } else {
+      kgEntries.push({ val: cur });
+    }
+  }
   kgBuffer = '';
   const total = kgTotal();
   if (!total || total <= 0 || !kgModalItemId) { closeKgModal(); return; }

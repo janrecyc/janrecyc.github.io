@@ -357,23 +357,73 @@ nav {
 }
 .kg-close-btn:active { background:rgba(60,60,67,0.22); }
 
-/* Display area */
+/* Display area — tape style */
 .kg-display {
-  margin: 4px 20px 12px;
+  margin: 4px 20px 0;
   background: var(--surface);
   border-radius: 18px;
-  padding: 12px 18px;
-  display:flex; align-items:flex-end; justify-content:space-between;
+  overflow: hidden;
 }
-.kg-display-left {}
+
+/* Tape: scrollable list of committed entries */
+.kg-tape {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 0;
+}
+.kg-tape::-webkit-scrollbar { display: none; }
+.kg-tape:empty { display: none; }
+
+.kg-tape-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px 6px 16px;
+  border-bottom: 1px solid rgba(10,10,30,0.05);
+  animation: tape-in .18s ease;
+}
+@keyframes tape-in {
+  from { opacity:0; transform: translateY(-6px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.kg-tape-entry:last-child { border-bottom: none; }
+.kg-tape-num {
+  font-size: 16px; font-weight: 600; color: var(--ink);
+}
+.kg-tape-unit { font-size: 12px; color: var(--ink3); margin-left: 3px; }
+.kg-tape-plus { font-size: 13px; color: var(--ink3); margin: 0 8px; }
+.kg-tape-del {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(255,59,48,0.10); border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--red); cursor: pointer;
+  flex-shrink: 0; margin-left: 4px;
+  transition: background .12s;
+}
+.kg-tape-del:active { background: rgba(255,59,48,0.22); }
+
+/* Divider between tape and input */
+.kg-tape-divider {
+  height: 1.5px;
+  background: rgba(26,107,255,0.10);
+  margin: 0;
+  display: none;
+}
+.kg-tape:not(:empty) ~ .kg-tape-divider { display: block; }
+
+/* Current input row */
+.kg-input-row {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 10px 18px 12px;
+}
+.kg-input-left {}
 .kg-display-label {
   font-size:11px; font-weight:500; color:var(--ink3);
-  text-transform:uppercase; letter-spacing:.8px; margin-bottom:0;
-}
-.kg-expr-row { height:16px; }
-.kg-expr {
-  font-size:12px; font-weight:500; color:var(--ink3);
-  opacity:0; transition:opacity .15s;
+  text-transform:uppercase; letter-spacing:.8px;
 }
 .kg-display-val {
   font-size:44px; font-weight:800; color:var(--ink);
@@ -395,6 +445,24 @@ nav {
 .kg-subtotal-label { font-size:11px; color:var(--ink3); text-align:right; }
 .kg-subtotal-val { font-size:20px; font-weight:800; color:var(--primary); text-align:right; margin-top:2px; }
 
+/* Numpad — 3-col grid */
+.kg-numpad {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:1px; background:rgba(60,60,67,0.1);
+  border-top:1px solid rgba(60,60,67,0.08);
+  margin:0;
+}
+.kg-key.plus-key {
+  background: rgba(26,107,255,0.06);
+  grid-column: span 2;
+}
+.kg-key.plus-key:active { background: rgba(26,107,255,0.18); }
+.kg-key.confirm-inline-key {
+  background: var(--primary) !important;
+}
+.kg-key.confirm-inline-key:active { background: var(--primary-d) !important; }
+
 /* Quick presets */
 .kg-presets {
   display:flex; gap:6px;
@@ -413,34 +481,7 @@ nav {
 }
 .kg-preset-btn:active { background:rgba(26,107,255,0.18); transform:scale(0.93); }
 
-/* Numpad */
-.kg-numpad {
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap:1px; background:rgba(60,60,67,0.1);
-  border-top:1px solid rgba(60,60,67,0.08);
-  margin:0;
-}
-/* digit rows: each digit key spans 4/3 of a column — use a wrapper approach instead */
-/* We'll use a 12-col grid: digits take 4 cols each (3 per row), ops take 3 cols each */
-.kg-numpad {
-  display:grid;
-  grid-template-columns: repeat(12, 1fr);
-}
-.kg-numpad .kg-key:not(.op-key):not(.eq-key) {
-  grid-column: span 4;
-}
-.kg-numpad .op-key {
-  grid-column: span 3;
-  background:rgba(26,107,255,0.06);
-}
-.kg-numpad .op-key:active { background:rgba(26,107,255,0.18); }
-.kg-numpad .op-key.active-op { background:rgba(26,107,255,0.20); box-shadow: inset 0 0 0 2px rgba(26,107,255,0.4); }
-.kg-key.eq-key {
-  grid-column: span 3;
-  background: var(--primary) !important;
-}
-.kg-key.eq-key:active { background: var(--primary-d) !important; }
+/* numpad keys base */
 .kg-key-op {
   font-size:24px; font-weight:500; color:#1A6BFF; line-height:1;
 }
@@ -851,18 +892,22 @@ nav {
     </div>
 
     <div class="kg-display">
-      <div class="kg-display-left">
-        <div class="kg-display-label" id="kg-display-label">น้ำหนัก</div>
-        <div class="kg-expr-row"><span class="kg-expr" id="kg-expr"></span></div>
-        <div class="kg-display-val" id="kg-display-val">
-          <span id="kg-display-num">0</span>
-          <span class="unit" id="kg-unit-label">กก.</span>
-          <span class="cursor"></span>
+      <!-- Tape: รายการที่บวกไปแล้ว -->
+      <div class="kg-tape" id="kg-tape"></div>
+      <!-- Current input row -->
+      <div class="kg-input-row">
+        <div class="kg-input-left">
+          <div class="kg-display-label" id="kg-display-label">น้ำหนัก</div>
+          <div class="kg-display-val">
+            <span id="kg-display-num">0</span>
+            <span class="unit" id="kg-unit-label">กก.</span>
+            <span class="cursor"></span>
+          </div>
         </div>
-      </div>
-      <div class="kg-display-right">
-        <div class="kg-subtotal-label">ยอด</div>
-        <div class="kg-subtotal-val" id="kg-subtotal">฿0</div>
+        <div class="kg-display-right">
+          <div class="kg-subtotal-label">รวม</div>
+          <div class="kg-subtotal-val" id="kg-subtotal">฿0</div>
+        </div>
       </div>
     </div>
 
@@ -886,30 +931,30 @@ nav {
     </div>
 
     <div class="kg-numpad">
-      <!-- Row 1: 1 2 3 -->
       <button class="kg-key" onclick="kpNum('1',event)"><span class="kg-key-num">1</span></button>
       <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span></button>
       <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span></button>
-      <!-- Row 2: 4 5 6 -->
+
       <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span></button>
       <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span></button>
       <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span></button>
-      <!-- Row 3: 7 8 9 -->
+
       <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span></button>
       <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span></button>
       <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span></button>
-      <!-- Row 4: . 0 ⌫ -->
+
       <button class="kg-key dark" onclick="kpDot(event)"><span class="kg-key-num" style="font-size:20px">.</span></button>
       <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
-      <!-- Row 5: + − × = -->
-      <button class="kg-key op-key" id="op-btn-+" onclick="kpOp('+',event)"><span class="kg-key-op">+</span></button>
-      <button class="kg-key op-key" id="op-btn--" onclick="kpOp('-',event)"><span class="kg-key-op">−</span></button>
-      <button class="kg-key op-key" id="op-btn-*" onclick="kpOp('*',event)"><span class="kg-key-op">×</span></button>
-      <button class="kg-key op-key eq-key" onclick="kpEqual(event)"><span class="kg-key-op" style="color:white">=</span></button>
+
+      <!-- + spans 2 cols, ✓ takes 1 col -->
+      <button class="kg-key plus-key" onclick="kpPlus(event)"><span class="kg-key-op" style="font-size:30px;color:var(--primary)">+</span></button>
+      <button class="kg-key confirm-inline-key" onclick="confirmKg()">
+        <i class="ph ph-check kg-key-icon" style="color:white;font-size:20px;"></i>
+      </button>
     </div>
 
-    <div class="kg-confirm-row">
+    <div class="kg-confirm-row" id="kg-confirm-row">
       <button class="kg-confirm-btn" id="kg-confirm-btn" onclick="confirmKg()" disabled>
         <i class="ph ph-shopping-cart-simple"></i>
         <span id="kg-confirm-label">เพิ่มในตะกร้า</span>
@@ -977,33 +1022,36 @@ function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
 function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
 
 // ══════════════════════════════════════════
-//  KG MODAL STATE
+//  KG MODAL STATE  —  tape-add model
 // ══════════════════════════════════════════
 let kgModalItemId = null;
-let kgBuffer = '';      // ตัวเลขปัจจุบัน
-let kgPrevVal = null;   // ค่าก่อนหน้า (เครื่องคิดเลข)
-let kgOperator = null;  // '+' '-' '*' '/'
-let kgJustCalc = false; // หลัง = แล้วกดตัวเลขใหม่
-let currentMode = 'kg'; // 'kg' | 'piece'
+let kgBuffer = '';       // ตัวเลขที่กำลังพิมพ์อยู่
+let kgEntries = [];      // [{val: number}]  รายการที่บวกแล้ว
+let currentMode = 'kg';  // 'kg' | 'piece'
+
+function kgTotal() {
+  return kgEntries.reduce((s, e) => s + e.val, 0);
+}
 
 function openKgModal(id) {
   const item = ITEMS.find(x => x.id === id);
   if (!item) return;
   kgModalItemId = id;
 
-  // กำหนด mode จาก item.sell_mode (default 'kg')
   const itemMode = item.sell_mode || 'kg';
   setMode(itemMode);
 
-  kgBuffer = cart[id] ? String(cart[id].qty) : '';
-  kgPrevVal = null; kgOperator = null; kgJustCalc = false;
-  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
+  // ถ้า item มีใน cart → โหลด qty เดิมเป็น entry แรก
+  kgBuffer = '';
+  kgEntries = [];
+  if (cart[id]) {
+    kgEntries = [{ val: cart[id].qty }];
+  }
 
   document.getElementById('kg-item-icon').innerHTML = renderIcon(item.icon, item.cat, 26);
   document.getElementById('kg-item-name').textContent = item.name;
   document.getElementById('kg-item-price').textContent = `฿${Number(item.buy_price).toFixed(2)} / ${item.unit||'กก.'}`;
 
-  // ล็อค mode ตาม sell_mode ของ item ไม่ให้ user เปลี่ยน
   const toggle = document.getElementById('kg-mode-toggle');
   toggle.style.display = item.sell_mode ? 'none' : 'flex';
 
@@ -1020,17 +1068,15 @@ function closeKgModal() {
   document.body.style.overflow = '';
   kgModalItemId = null;
   kgBuffer = '';
+  kgEntries = [];
 }
 
 function setMode(mode) {
   currentMode = mode;
-  // อัปเดต toggle buttons
   document.getElementById('mode-btn-kg').classList.toggle('active', mode === 'kg');
   document.getElementById('mode-btn-piece').classList.toggle('active', mode === 'piece');
-  // สลับ presets
   document.getElementById('kg-presets-kg').style.display    = mode === 'kg'    ? 'flex' : 'none';
   document.getElementById('kg-presets-piece').style.display = mode === 'piece' ? 'flex' : 'none';
-  // อัปเดต display label + unit
   if (mode === 'kg') {
     document.getElementById('kg-display-label').textContent = 'น้ำหนัก';
     document.getElementById('kg-unit-label').textContent    = 'กก.';
@@ -1038,81 +1084,72 @@ function setMode(mode) {
     document.getElementById('kg-display-label').textContent = 'จำนวน';
     document.getElementById('kg-unit-label').textContent    = 'ชิ้น';
   }
-  // reset buffer เมื่อเปลี่ยน mode
-  kgBuffer = ''; kgPrevVal = null; kgOperator = null; kgJustCalc = false;
-  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
+  kgBuffer = ''; kgEntries = [];
   updateKgDisplay();
 }
 
 function updateKgDisplay() {
-  const numEl   = document.getElementById('kg-display-num');
-  const subEl   = document.getElementById('kg-subtotal');
-  const btnEl   = document.getElementById('kg-confirm-btn');
-  const lblEl   = document.getElementById('kg-confirm-label');
-  const exprEl  = document.getElementById('kg-expr');
-
-  // แสดง expression บนบรรทัดเล็ก
-  const opSym = {'+':'+', '-':'−', '*':'×'};
-  if (exprEl) {
-    if (kgOperator && kgPrevVal !== null) {
-      exprEl.textContent = `${kgPrevVal} ${opSym[kgOperator]}`;
-      exprEl.style.opacity = '1';
-    } else {
-      exprEl.textContent = '';
-      exprEl.style.opacity = '0';
-    }
-  }
-
-  // แสดงตัวเลขปัจจุบัน
-  const displayNum = kgBuffer || '0';
-  numEl.textContent = displayNum;
-
-  // คำนวณยอดสำหรับปุ่ม confirm (preview ผลลัพธ์)
-  const cur = parseFloat(kgBuffer) || 0;
-  let val = cur;
-  if (kgOperator && kgPrevVal !== null && !kgJustCalc && cur > 0) {
-    val = calcResult(kgPrevVal, cur, kgOperator);
-  } else if (kgJustCalc && kgBuffer !== '') {
-    // หลังกด = หรือกด op → แสดงค่าใน buffer
-    val = parseFloat(kgBuffer) || 0;
-  }
-
-  const item = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
-  const price = item ? Number(item.buy_price) : 0;
-  const sub = val * price;
-  subEl.textContent = sub > 0 ? `฿${sub.toFixed(2)}` : '฿0';
-
   const unitText = currentMode === 'kg' ? 'กก.' : 'ชิ้น';
-  const valid = val > 0;
+  const cur      = parseFloat(kgBuffer) || 0;
+  const total    = kgTotal() + cur;
+
+  // ── tape list ──
+  const tapeEl = document.getElementById('kg-tape');
+  tapeEl.innerHTML = kgEntries.map((e, i) => `
+    <div class="kg-tape-entry">
+      <span>
+        ${i > 0 ? '<span class="kg-tape-plus">+</span>' : ''}
+        <span class="kg-tape-num">${formatCalc(e.val)}</span>
+        <span class="kg-tape-unit">${unitText}</span>
+      </span>
+      <button class="kg-tape-del" onclick="tapeDelete(${i})">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+  `).join('');
+  // auto-scroll tape to bottom
+  tapeEl.scrollTop = tapeEl.scrollHeight;
+
+  // ── current buffer ──
+  document.getElementById('kg-display-num').textContent = kgBuffer || '0';
+
+  // ── subtotal ──
+  const item  = kgModalItemId ? ITEMS.find(x => x.id === kgModalItemId) : null;
+  const price = item ? Number(item.buy_price) : 0;
+  const sub   = total * price;
+  document.getElementById('kg-subtotal').textContent = sub > 0 ? `฿${sub.toFixed(2)}` : '฿0';
+
+  // ── confirm button ──
+  const btnEl = document.getElementById('kg-confirm-btn');
+  const lblEl = document.getElementById('kg-confirm-label');
+  const valid = total > 0;
   btnEl.disabled = !valid;
   if (valid) {
-    lblEl.textContent = `เพิ่ม ${formatCalc(val)} ${unitText} = ฿${sub.toFixed(2)}`;
+    lblEl.textContent = `เพิ่ม ${formatCalc(total)} ${unitText} = ฿${sub.toFixed(2)}`;
   } else {
     lblEl.textContent = 'เพิ่มในตะกร้า';
   }
 }
 
+// ── tape actions ──
+function tapeDelete(i) {
+  kgEntries.splice(i, 1);
+  updateKgDisplay();
+}
+
+// ── numpad ──
 function kpNum(n, e) {
   rippleKey(e);
-  if (kgJustCalc) {
-    // หลังกด = แล้วกดตัวเลข → เริ่มใหม่
-    kgBuffer = n;
-    kgJustCalc = false;
-  } else if (kgBuffer.replace(/[^0-9]/g,'').length >= 8) {
-    return;
-  } else if (kgBuffer === '0') {
-    kgBuffer = n;
-  } else {
-    kgBuffer += n;
-  }
+  if (kgBuffer.replace(/[^0-9]/g,'').length >= 8) return;
+  if (kgBuffer === '0') kgBuffer = n;
+  else kgBuffer += n;
   updateKgDisplay();
 }
 
 function kpDot(e) {
   rippleKey(e);
   if (currentMode === 'piece') return;
-  if (kgJustCalc) { kgBuffer = '0.'; kgJustCalc = false; }
-  else if (!kgBuffer.includes('.')) {
+  if (!kgBuffer.includes('.')) {
     if (!kgBuffer) kgBuffer = '0';
     kgBuffer += '.';
   }
@@ -1121,81 +1158,43 @@ function kpDot(e) {
 
 function kpBack(e) {
   rippleKey(e);
-  if (kgJustCalc) {
-    // ลบหลัง = → clear ทั้งหมด
-    kgBuffer = ''; kgPrevVal = null; kgOperator = null; kgJustCalc = false;
-    document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
-  } else {
+  if (kgBuffer.length > 0) {
+    // ลบตัวสุดท้ายใน buffer ปัจจุบัน
     kgBuffer = kgBuffer.slice(0, -1);
+  } else if (kgEntries.length > 0) {
+    // buffer ว่างแล้ว → ดึง entry สุดท้ายกลับมาแก้
+    const last = kgEntries.pop();
+    kgBuffer = formatCalc(last.val);
   }
   updateKgDisplay();
 }
 
-function kpOp(op, e) {
+function kpPlus(e) {
   rippleKey(e);
-  const cur = parseFloat(kgBuffer) || 0;
-
-  if (kgOperator && kgPrevVal !== null && !kgJustCalc && kgBuffer !== '') {
-    // มี operator ค้างและพิมพ์ตัวเลขแล้ว → คำนวณก่อน
-    const result = calcResult(kgPrevVal, cur, kgOperator);
-    kgBuffer = formatCalc(result);
-    kgPrevVal = result;
-  } else if (kgJustCalc) {
-    // กด op ต่อหลัง = → ใช้ผลลัพธ์เดิมเป็น prevVal
-    kgPrevVal = parseFloat(kgBuffer) || 0;
-    kgJustCalc = false;
-  } else {
-    kgPrevVal = cur;
-  }
-
-  kgOperator = op;
-  kgJustCalc = true; // รอตัวเลขถัดไป
-
-  // highlight op button
-  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
-  const opBtn = document.getElementById(`op-btn-${op}`);
-  if (opBtn) opBtn.classList.add('active-op');
-
+  const cur = parseFloat(kgBuffer);
+  if (!cur || cur <= 0) return; // ไม่มีตัวเลข → ไม่ทำอะไร
+  kgEntries.push({ val: cur });
+  kgBuffer = '';
   updateKgDisplay();
-}
-
-function kpEqual(e) {
-  rippleKey(e);
-  if (!kgOperator || kgPrevVal === null) return; // ไม่มี operator → ไม่ทำอะไร
-  const cur = parseFloat(kgBuffer) || 0;
-  const result = calcResult(kgPrevVal, cur, kgOperator);
-  kgBuffer = formatCalc(result);
-  kgPrevVal = null;
-  kgOperator = null;
-  kgJustCalc = true; // หลัง = กดตัวเลขต่อ = เริ่มใหม่
-  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
-  updateKgDisplay();
-}
-
-function calcResult(a, b, op) {
-  switch(op) {
-    case '+': return a + b;
-    case '-': return Math.max(0, a - b); // ไม่ให้ติดลบ
-    case '*': return a * b;
-  }
-  return b;
-}
-
-function formatCalc(v) {
-  if (Number.isInteger(v)) return String(v);
-  return parseFloat(v.toFixed(4)).toString();
 }
 
 function setPreset(val) {
-  kgBuffer = String(val);
-  kgPrevVal = null; kgOperator = null; kgJustCalc = false;
-  document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
+  // กด preset → เหมือนพิมพ์ตัวเลข แล้วกด +
+  const cur = parseFloat(kgBuffer);
+  if (cur > 0) kgEntries.push({ val: cur });
+  kgEntries.push({ val });
+  kgBuffer = '';
   updateKgDisplay();
   // pulse animation
   const el = document.getElementById('kg-display-num');
   el.style.transition = 'transform .12s';
   el.style.transform = 'scale(1.08)';
   setTimeout(() => { el.style.transform = 'scale(1)'; }, 120);
+}
+
+function formatCalc(v) {
+  if (Number.isInteger(v)) return String(v);
+  return parseFloat(v.toFixed(4)).toString();
 }
 
 function rippleKey(e) {
@@ -1210,30 +1209,27 @@ function rippleKey(e) {
 }
 
 async function confirmKg() {
-  // ถ้ามี operator ค้างอยู่ ให้คำนวณก่อน (เหมือนกด =)
-  if (kgOperator && kgPrevVal !== null) {
-    const cur = parseFloat(kgBuffer) || 0;
-    const result = calcResult(kgPrevVal, cur, kgOperator);
-    kgBuffer = formatCalc(result);
-    kgPrevVal = null; kgOperator = null; kgJustCalc = false;
-    document.querySelectorAll('.kg-key.op-key').forEach(b => b.classList.remove('active-op'));
-  }
-  const val = parseFloat(kgBuffer);
-  if (!val || val <= 0 || !kgModalItemId) { closeKgModal(); return; }
-  const id = kgModalItemId;
+  // commit buffer ถ้ายังมี
+  const cur = parseFloat(kgBuffer);
+  if (cur > 0) kgEntries.push({ val: cur });
+  kgBuffer = '';
+
+  const total = kgTotal();
+  if (!total || total <= 0 || !kgModalItemId) { closeKgModal(); return; }
+
+  const id   = kgModalItemId;
   const item = ITEMS.find(x => x.id === id);
   if (!item) { closeKgModal(); return; }
 
   const mode      = currentMode;
   const unitLabel = mode === 'kg' ? 'กก.' : (item.unit || 'ชิ้น');
 
-  // เพิ่ม/อัปเดตใน cart — ไม่ clear cart
-  cart[id] = { item, qty: val, mode, unitLabel };
+  cart[id] = { item, qty: total, mode, unitLabel };
 
   closeKgModal();
   renderGrid();
   renderCartPanel();
-  toast(`✓ ${item.name} ${val} ${unitLabel}`);
+  toast(`✓ ${item.name} ${formatCalc(total)} ${unitLabel}`);
 }
 
 // ══════════════════════════════════════════

@@ -236,19 +236,12 @@ nav{
   --calc-func-h:   #4A4A4C;
   --calc-op:       #F5A623;       /* ปุ่ม operator (+) — amber warm */
   --calc-op-h:     #FFBF47;
-  --calc-confirm:  #30D158;       /* ปุ่ม confirm — green */
-  --calc-confirm-h:#28B84E;
   --calc-text:     #FFFFFF;       /* ตัวเลขบนปุ่ม */
   --calc-text-dim: rgba(255,255,255,0.45);
-  --calc-tape-bg:  rgba(255,255,255,0.05);
   --calc-handle:   rgba(255,255,255,0.2);
   --calc-divider:  rgba(255,255,255,0.06);
   --calc-val-color:#FFFFFF;
-  --calc-sub-color:rgba(255,255,255,0.5);
   --calc-accent:   #F5A623;       /* ตัวเลขยอดรวม */
-  --calc-preset-bg:rgba(245,166,35,0.12);
-  --calc-preset-bd:rgba(245,166,35,0.3);
-  --calc-preset-cl:#F5A623;
 }
 
 .kg-modal-backdrop {
@@ -299,14 +292,6 @@ nav{
 .kg-item-icon { font-size:30px; line-height:1; }
 .kg-item-name { font-size:16px; font-weight:700; color:#FFFFFF; }
 .kg-item-price { font-size:12px; color:rgba(255,255,255,0.45); margin-top:2px; }
-.kg-item-stock-label {
-  display:inline-flex; align-items:center; gap:3px;
-  font-size:11px; font-weight:600; margin-top:3px;
-  padding:2px 8px; border-radius:100px;
-  background:rgba(0,200,83,0.15); color:#4CD97B;
-}
-.kg-item-stock-label.low { background:rgba(255,159,10,0.15); color:#FFB340; }
-.kg-item-stock-label.empty { background:rgba(255,59,48,0.15); color:#FF6B6B; }
 .kg-close-btn {
   width:32px; height:32px; border-radius:50%;
   background: rgba(255,255,255,0.10);
@@ -450,10 +435,10 @@ nav{
 }
 .kg-key.plus-key:active { background: rgba(245,166,35,0.28); }
 .kg-key.plus-key .kg-key-op { color: var(--calc-op) !important; font-size:26px; font-weight:700; }
-.kg-key.confirm-inline-key {
-  background: var(--calc-confirm) !important;
+.kg-key.clear-inline-key {
+  background: var(--calc-func) !important;
 }
-.kg-key.confirm-inline-key:active { background: var(--calc-confirm-h) !important; }
+.kg-key.clear-inline-key:active { background: rgba(255,59,48,0.35) !important; }
 
 /* Stock info zone — แทนที่ presets */
 .kg-stock-zone {
@@ -856,8 +841,8 @@ nav{
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
       <!-- + spans 2 cols, ✓ takes 1 col -->
       <button class="kg-key plus-key" onclick="kpPlus(event)"><span class="kg-key-op">+</span></button>
-      <button class="kg-key confirm-inline-key" onclick="confirmKg()">
-        <i class="ph ph-check kg-key-icon" style="color:white;font-size:20px;"></i>
+      <button class="kg-key clear-inline-key" onclick="kpClear(event)">
+        <span class="kg-key-num" style="font-size:22px;font-weight:700;color:rgba(255,80,60,0.9);">C</span>
       </button>
     </div>
 
@@ -1157,6 +1142,12 @@ function kpPlus(e) {
   if (!cur || cur <= 0) return;
   kgEntries.push({ val: cur });
   kgBuffer = '';
+  updateKgDisplay();
+}
+function kpClear(e) {
+  rippleKey(e);
+  kgBuffer = '';
+  kgEntries = [];
   updateKgDisplay();
 }
 function rippleKey(e) {

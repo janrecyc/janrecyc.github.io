@@ -1858,7 +1858,10 @@ async function loadItems() {
 
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 400));
-    ITEMS = DEMO_ITEMS;
+    // FIX: deep copy เพื่อกัน mutation ของ stock_qty ไปกระทบ DEMO_ITEMS ต้นฉบับ
+    // ถ้าใช้ ITEMS = DEMO_ITEMS ตรงๆ → deductLocalStock จะแก้ object เดียวกัน
+    // พอ refresh/loadItems ใหม่จะได้ stock เดิมกลับมา (ไม่ reset)
+    ITEMS = DEMO_ITEMS.map(item => ({ ...item }));
     document.getElementById('config-banner').style.display = 'flex';
     renderCatBar();
     renderFactorySelect();
@@ -1948,8 +1951,21 @@ async function saveSellTransaction() {
   }));
   const totalAmt = lines.reduce((s, l) => s + l.subtotal, 0);
 
+  // ── FIX: deduct stock ใน ITEMS memory ทันที ก่อน render ──
+  // ป้องกัน race condition กับ loadItems() และทำให้ demo mode ถูกต้องด้วย
+  function deductLocalStock(soldLines) {
+    soldLines.forEach(line => {
+      const item = ITEMS.find(i => Number(i.id) === Number(line.item_id));
+      if (item) {
+        item.stock_qty = Math.max(0, (item.stock_qty || 0) - line.qty);
+      }
+    });
+  }
+
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 700));
+    // FIX #1: deduct stock ใน memory ก่อน render
+    deductLocalStock(lines);
     _pendingSellReceipt = { lines, totalAmt, factoryName };
     cart = {};
     closeCartModal();
@@ -1966,13 +1982,18 @@ async function saveSellTransaction() {
       prefer: 'return=representation',
     });
     if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
+    // FIX #2: deduct stock ใน memory ก่อน render (optimistic update)
+    // แล้วค่อย re-fetch จาก DB เพื่อ sync ค่าจริง
+    deductLocalStock(lines);
     _pendingSellReceipt = { lines, totalAmt, factoryName };
     cart = {};
     closeCartModal();
-    renderGrid();
+    renderGrid();      // render ด้วย stock ที่ deduct แล้ว ทันที
     renderCartBadge();
-    loadItems();
     showSellDialog(lines, totalAmt, factoryName);
+    // FIX #3: await loadItems เพื่อให้ DB commit เสร็จก่อน fetch
+    // ใช้ delay เล็กน้อยเผื่อ RPC commit latency
+    setTimeout(() => loadItems(), 1200);
   } catch (err) {
     toast('❌ บันทึกไม่สำเร็จ: ' + err.message, 'error');
     sendBtn.disabled = false;

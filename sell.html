@@ -602,18 +602,143 @@ nav{
 
 /* factory selector inside cart */
 .factory-wrap{padding:0 20px 8px;flex-shrink:0;}
-.factory-label{font-size:11px;color:var(--ink3);font-weight:500;margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px;}
+.factory-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.factory-label{font-size:11px;color:var(--ink3);font-weight:500;text-transform:uppercase;letter-spacing:.6px;}
+.factory-edit-btn{
+  display:flex;align-items:center;gap:4px;
+  font-family:'Prompt',sans-serif;font-size:11px;font-weight:600;
+  color:var(--primary);background:rgba(255,107,0,0.08);
+  border:none;border-radius:100px;padding:4px 10px;cursor:pointer;
+  transition:background .15s;
+}
+.factory-edit-btn:active{background:rgba(255,107,0,0.18);}
+.factory-edit-btn i{font-size:12px;}
+
+.factory-select-wrap{position:relative;}
 .factory-select{
-  width:100%;padding:10px 14px;border-radius:12px;
+  width:100%;padding:10px 36px 10px 14px;border-radius:12px;
   background:var(--surface);border:1px solid rgba(10,10,30,0.08);
   font-family:'Prompt',sans-serif;font-size:13px;font-weight:600;
   color:var(--ink);outline:none;cursor:pointer;
   appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8A9A' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 14px center;
   transition:border-color .15s;
 }
 .factory-select:focus{border-color:var(--primary);}
+.factory-select-arrow{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  pointer-events:none;color:var(--ink3);font-size:16px;
+}
+
+/* ══ FACTORY EDIT MODAL ══ */
+.fedit-backdrop{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(0,0,0,0);backdrop-filter:blur(0px);
+  transition:background .25s,backdrop-filter .25s;
+  pointer-events:none;
+}
+.fedit-backdrop.open{
+  background:rgba(0,0,0,0.50);backdrop-filter:blur(10px);
+  pointer-events:all;
+}
+.fedit-modal{
+  position:fixed;left:0;right:0;bottom:0;z-index:901;
+  transform:translateY(100%);
+  transition:transform .38s cubic-bezier(0.32,0.72,0,1);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.fedit-modal.open{transform:translateY(0);}
+.fedit-sheet{
+  background:var(--white);border-radius:24px 24px 0 0;
+  box-shadow:0 -4px 40px rgba(0,0,0,0.18);
+  display:flex;flex-direction:column;max-height:85dvh;overflow:hidden;
+}
+.fedit-handle{
+  width:36px;height:4px;background:rgba(60,60,67,0.3);
+  border-radius:100px;margin:10px auto 0;flex-shrink:0;
+}
+.fedit-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px 10px;flex-shrink:0;
+  border-bottom:1px solid rgba(10,10,30,0.06);
+}
+.fedit-title{font-size:16px;font-weight:800;color:var(--ink);}
+.fedit-close-btn{
+  width:32px;height:32px;border-radius:50%;background:var(--surface);
+  border:none;color:var(--ink2);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background .12s;
+}
+.fedit-close-btn:active{background:#e0e0ea;}
+
+.fedit-list{flex:1;overflow-y:auto;padding:12px 20px;scrollbar-width:none;}
+.fedit-list::-webkit-scrollbar{display:none;}
+
+.fedit-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 0;border-bottom:1px solid rgba(10,10,30,0.05);
+}
+.fedit-item:last-child{border-bottom:none;}
+.fedit-item-icon{
+  width:40px;height:40px;border-radius:12px;
+  background:rgba(255,107,0,0.10);color:var(--primary);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.fedit-item-fields{flex:1;display:flex;flex-direction:column;gap:4px;}
+.fedit-item-name-input{
+  border:none;outline:none;
+  font-family:'Prompt',sans-serif;font-size:14px;font-weight:700;
+  color:var(--ink);background:transparent;width:100%;
+  padding:4px 8px;border-radius:8px;
+  transition:background .15s,box-shadow .15s;
+}
+.fedit-item-name-input:focus{
+  background:var(--surface);
+  box-shadow:0 0 0 2px rgba(255,107,0,0.25);
+}
+.fedit-item-loc-input{
+  border:none;outline:none;
+  font-family:'Prompt',sans-serif;font-size:12px;font-weight:400;
+  color:var(--ink3);background:transparent;width:100%;
+  padding:3px 8px;border-radius:8px;
+  transition:background .15s,box-shadow .15s;
+}
+.fedit-item-loc-input:focus{
+  background:var(--surface);
+  box-shadow:0 0 0 2px rgba(255,107,0,0.15);
+}
+.fedit-item-del{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(255,59,48,0.07);border:none;
+  color:var(--red);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background .12s;
+}
+.fedit-item-del:active{background:rgba(255,59,48,0.18);}
+
+.fedit-add-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;margin:12px 0 4px;padding:12px;
+  border:2px dashed rgba(255,107,0,0.30);border-radius:14px;
+  background:rgba(255,107,0,0.04);
+  font-family:'Prompt',sans-serif;font-size:13px;font-weight:600;
+  color:var(--primary);cursor:pointer;transition:all .15s;
+}
+.fedit-add-btn:active{background:rgba(255,107,0,0.10);}
+.fedit-add-btn i{font-size:18px;}
+
+.fedit-footer{
+  padding:12px 20px 14px;border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;
+}
+.fedit-save-btn{
+  width:100%;padding:14px;border-radius:16px;
+  background:linear-gradient(135deg,#FF6B00 0%,#CC5200 100%);
+  color:white;border:none;
+  font-family:'Prompt',sans-serif;font-size:15px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;box-shadow:0 4px 16px rgba(255,107,0,0.35);
+  transition:opacity .15s,transform .1s;
+}
+.fedit-save-btn:active{opacity:0.85;transform:scale(0.98);}
 
 .cart-list{flex:1;overflow-y:auto;padding:0 20px 8px;scrollbar-width:none;}
 .cart-list::-webkit-scrollbar{display:none;}
@@ -765,6 +890,24 @@ nav{
 
 <div id="toast"></div>
 
+<!-- ══ FACTORY EDIT MODAL ══ -->
+<div class="fedit-backdrop" id="fedit-backdrop" onclick="closeFactoryEdit()"></div>
+<div class="fedit-modal" id="fedit-modal">
+  <div class="fedit-sheet">
+    <div class="fedit-handle"></div>
+    <div class="fedit-head">
+      <span class="fedit-title">✏️ แก้ไขชื่อโรงงาน</span>
+      <button class="fedit-close-btn" onclick="closeFactoryEdit()"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="fedit-list" id="fedit-list"></div>
+    <div class="fedit-footer">
+      <button class="fedit-save-btn" onclick="saveFactoryEdit()">
+        <i class="ph ph-check-circle"></i> บันทึกการเปลี่ยนแปลง
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ iOS WEIGHT MODAL ══ -->
 <div class="kg-modal-backdrop" id="kg-backdrop" onclick="closeKgModal()"></div>
 <div class="kg-modal" id="kg-modal">
@@ -871,13 +1014,16 @@ nav{
 
     <!-- Factory selector -->
     <div class="factory-wrap">
-      <div class="factory-label">โรงงานปลายทาง</div>
-      <select class="factory-select" id="factory-select">
-        <option value="factory_a">🏭 โรงงาน A — อยุธยา</option>
-        <option value="factory_b">🏭 โรงงาน B — สมุทรปราการ</option>
-        <option value="factory_c">🏭 โรงงาน C — ชลบุรี</option>
-        <option value="factory_d">🏭 โรงงาน D — ระยอง</option>
-      </select>
+      <div class="factory-label-row">
+        <div class="factory-label">โรงงานปลายทาง</div>
+        <button class="factory-edit-btn" onclick="openFactoryEdit()">
+          <i class="ph ph-pencil-simple"></i> แก้ไขโรงงาน
+        </button>
+      </div>
+      <div class="factory-select-wrap">
+        <select class="factory-select" id="factory-select"></select>
+        <i class="ph ph-caret-down factory-select-arrow"></i>
+      </div>
     </div>
 
     <div class="cart-list" id="cart-list">
@@ -1401,8 +1547,16 @@ async function loadFactories() {
 
 function renderFactorySelect() {
   const sel = document.getElementById('factory-select');
-  if (!sel || !FACTORIES.length) return;
-  sel.innerHTML = FACTORIES.map(f =>
+  if (!sel) return;
+  // Prefer local edits, then Supabase FACTORIES, then demo defaults
+  const local = getLocalFactories();
+  const source = local || (FACTORIES.length ? FACTORIES : [
+    {id:'factory_a', name:'โรงงาน A', location:'อยุธยา'},
+    {id:'factory_b', name:'โรงงาน B', location:'สมุทรปราการ'},
+    {id:'factory_c', name:'โรงงาน C', location:'ชลบุรี'},
+    {id:'factory_d', name:'โรงงาน D', location:'ระยอง'},
+  ]);
+  sel.innerHTML = source.map(f =>
     `<option value="${f.id}">🏭 ${f.name}${f.location ? ' — '+f.location : ''}</option>`
   ).join('');
 }
@@ -1416,6 +1570,7 @@ async function loadItems() {
     ITEMS = DEMO_ITEMS;
     document.getElementById('config-banner').style.display = 'flex';
     renderCatBar();
+    renderFactorySelect();
     renderGrid();
     return;
   }
@@ -1530,6 +1685,168 @@ async function saveSellTransaction() {
     sendBtn.disabled = false;
     sendBtn.innerHTML = `<i class="ph ph-truck"></i><span>ยืนยันส่งโรงงาน</span><span class="send-amount-tag" id="send-tag">฿${Math.round(totalAmt).toLocaleString('th-TH')}</span>`;
   }
+}
+
+// ══════════════════════════════════════════
+//  FACTORY EDIT MODAL
+// ══════════════════════════════════════════
+let LOCAL_FACTORIES = null; // user-edited local list
+
+function getLocalFactories() {
+  if (LOCAL_FACTORIES !== null) return LOCAL_FACTORIES;
+  try {
+    const saved = localStorage.getItem('scrappos_factories');
+    if (saved) return JSON.parse(saved);
+  } catch(_) {}
+  return null;
+}
+
+function saveLocalFactories(list) {
+  LOCAL_FACTORIES = list;
+  try { localStorage.setItem('scrappos_factories', JSON.stringify(list)); } catch(_) {}
+}
+
+function buildLocalFactoryOptions() {
+  const local = getLocalFactories();
+  if (!local) return; // use data from Supabase / demo
+  const sel = document.getElementById('factory-select');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = local.map(f =>
+    `<option value="${f.id}">🏭 ${f.name}${f.location ? ' — ' + f.location : ''}</option>`
+  ).join('');
+  // restore selection if still valid
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+function openFactoryEdit() {
+  // Build editable list from current <select> options
+  const sel = document.getElementById('factory-select');
+  const factories = [...sel.options].map(o => {
+    const raw  = o.text.replace('🏭 ', '');
+    const dash = raw.indexOf(' — ');
+    return {
+      id:       o.value,
+      name:     dash >= 0 ? raw.slice(0, dash) : raw,
+      location: dash >= 0 ? raw.slice(dash + 3) : '',
+    };
+  });
+  renderFactoryEditList(factories);
+  document.getElementById('fedit-backdrop').classList.add('open');
+  document.getElementById('fedit-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFactoryEdit() {
+  document.getElementById('fedit-backdrop').classList.remove('open');
+  document.getElementById('fedit-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderFactoryEditList(factories) {
+  const list = document.getElementById('fedit-list');
+  list.innerHTML = factories.map((f, i) => `
+    <div class="fedit-item" id="fedit-row-${i}">
+      <div class="fedit-item-icon"><i class="ph ph-factory"></i></div>
+      <div class="fedit-item-fields">
+        <input class="fedit-item-name-input" id="fedit-name-${i}"
+          value="${escHtml(f.name)}" placeholder="ชื่อโรงงาน" maxlength="60">
+        <input class="fedit-item-loc-input" id="fedit-loc-${i}"
+          value="${escHtml(f.location)}" placeholder="ที่ตั้ง (เช่น อยุธยา)" maxlength="60">
+      </div>
+      <button class="fedit-item-del" onclick="deleteFactoryRow(${i})" title="ลบ">
+        <i class="ph ph-trash"></i>
+      </button>
+    </div>
+  `).join('') + `
+    <button class="fedit-add-btn" onclick="addFactoryRow()">
+      <i class="ph ph-plus-circle"></i> เพิ่มโรงงานใหม่
+    </button>
+  `;
+  list._count = factories.length;
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function deleteFactoryRow(i) {
+  const row = document.getElementById(`fedit-row-${i}`);
+  if (row) { row.style.opacity='0.3'; row.style.pointerEvents='none'; row.dataset.deleted='1'; }
+}
+
+let _feditNewCount = 0;
+function addFactoryRow() {
+  const list = document.getElementById('fedit-list');
+  const addBtn = list.querySelector('.fedit-add-btn');
+  const i = 'new_' + (++_feditNewCount);
+  const div = document.createElement('div');
+  div.className = 'fedit-item';
+  div.id = `fedit-row-${i}`;
+  div.innerHTML = `
+    <div class="fedit-item-icon"><i class="ph ph-factory"></i></div>
+    <div class="fedit-item-fields">
+      <input class="fedit-item-name-input" id="fedit-name-${i}"
+        value="" placeholder="ชื่อโรงงาน" maxlength="60" autofocus>
+      <input class="fedit-item-loc-input" id="fedit-loc-${i}"
+        value="" placeholder="ที่ตั้ง (เช่น อยุธยา)" maxlength="60">
+    </div>
+    <button class="fedit-item-del" onclick="deleteFactoryRow('${i}')" title="ลบ">
+      <i class="ph ph-trash"></i>
+    </button>
+  `;
+  div.dataset.isnew = '1';
+  div.dataset.newid = i;
+  list.insertBefore(div, addBtn);
+  setTimeout(() => div.querySelector('input').focus(), 50);
+}
+
+function saveFactoryEdit() {
+  const list = document.getElementById('fedit-list');
+  const rows = list.querySelectorAll('.fedit-item');
+  const result = [];
+  rows.forEach(row => {
+    if (row.dataset.deleted === '1') return;
+    const idx   = row.id.replace('fedit-row-', '');
+    const name  = (document.getElementById(`fedit-name-${idx}`)?.value || '').trim();
+    const loc   = (document.getElementById(`fedit-loc-${idx}`)?.value || '').trim();
+    if (!name) return;
+    const isNew = row.dataset.isnew === '1';
+    result.push({
+      id:       isNew ? 'local_' + row.dataset.newid : row.querySelector('input')?.closest('.fedit-item')?.id?.replace('fedit-row-','') || idx,
+      name,
+      location: loc,
+    });
+  });
+
+  if (!result.length) { toast('⚠️ ต้องมีโรงงานอย่างน้อย 1 แห่ง', 'error'); return; }
+
+  // Re-derive IDs correctly from original options
+  const sel = document.getElementById('factory-select');
+  const origOpts = [...sel.options];
+  let j = 0;
+  const finalList = result.map((f, fi) => {
+    // try match with original option by order
+    if (!String(f.id).startsWith('local_') && origOpts[fi]) {
+      return { ...f, id: origOpts[fi].value };
+    }
+    return { ...f };
+  });
+
+  saveLocalFactories(finalList);
+
+  // Re-render select
+  const prevVal = sel.value;
+  sel.innerHTML = finalList.map(f =>
+    `<option value="${f.id}">🏭 ${f.name}${f.location ? ' — ' + f.location : ''}</option>`
+  ).join('');
+  if ([...sel.options].some(o => o.value === prevVal)) sel.value = prevVal;
+
+  // Also update FACTORIES array for Supabase path
+  FACTORIES = finalList;
+
+  closeFactoryEdit();
+  toast('✓ บันทึกชื่อโรงงานแล้ว');
 }
 
 // ══════════════════════════════════════════

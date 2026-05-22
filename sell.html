@@ -812,6 +812,168 @@ nav{
   padding:4px 12px;border-radius:100px;
   font-size:14px;font-weight:700;
 }
+
+/* ══════════════════════════════
+   CONFIRM DIALOG (ต้องการใบเสร็จ?)
+══════════════════════════════ */
+.sell-dialog-backdrop {
+  position:fixed;inset:0;z-index:600;
+  background:rgba(10,10,30,0.45);
+  backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;
+  transition:opacity .22s;
+}
+.sell-dialog-backdrop.show{opacity:1;pointer-events:all;}
+
+.sell-dialog-box {
+  position:fixed;bottom:0;left:0;right:0;z-index:601;
+  background:var(--white);
+  border-radius:24px 24px 0 0;
+  padding:0 20px env(safe-area-inset-bottom,20px);
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.22,1,.36,1);
+}
+.sell-dialog-box.show{transform:translateY(0);}
+
+.sdlg-handle-row{display:flex;justify-content:center;padding:12px 0 0;}
+.sdlg-handle{width:36px;height:4px;background:rgba(10,10,30,0.10);border-radius:2px;}
+
+.sdlg-icon {
+  width:64px;height:64px;border-radius:20px;
+  background:rgba(255,107,0,0.10);
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;color:var(--primary);
+  margin:18px auto 0;
+}
+.sdlg-title{text-align:center;font-size:20px;font-weight:800;color:var(--ink);margin:12px 0 6px;letter-spacing:-0.3px;}
+.sdlg-sub{text-align:center;font-size:13px;color:var(--ink3);line-height:1.5;margin-bottom:16px;}
+
+.sdlg-summary {
+  background:var(--surface);border-radius:14px;
+  padding:12px 16px;margin-bottom:16px;
+}
+.sdlg-summary-inner{display:flex;align-items:center;justify-content:space-between;}
+.sdlg-factory-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px;color:var(--ink3);}
+.sdlg-factory-name{font-size:13px;font-weight:600;color:var(--ink2);}
+.sdlg-summary-amount{font-size:24px;font-weight:800;color:var(--primary);}
+.sdlg-summary-items{font-size:12px;color:var(--ink3);text-align:right;margin-top:2px;}
+
+.sdlg-btn-row{display:flex;gap:10px;margin-bottom:6px;}
+.sdlg-btn{
+  flex:1;padding:15px 0;border-radius:16px;border:none;
+  font-family:'Prompt',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:7px;transition:all .14s;
+}
+.sdlg-btn:active{transform:scale(0.97);}
+.sdlg-btn.no{background:var(--surface);color:var(--ink2);}
+.sdlg-btn.yes{background:var(--primary);color:#fff;box-shadow:0 4px 16px rgba(255,107,0,0.30);}
+
+/* ══════════════════════════════
+   SELL RECEIPT SHEET (ใบส่งสินค้า)
+══════════════════════════════ */
+.sell-receipt-backdrop{
+  position:fixed;inset:0;z-index:620;
+  background:rgba(10,10,30,0.50);
+  backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.sell-receipt-backdrop.show{opacity:1;pointer-events:all;}
+
+.sell-receipt-sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:621;
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+  padding-bottom:env(safe-area-inset-bottom,16px);
+  max-height:94dvh;overflow-y:auto;scrollbar-width:none;
+}
+.sell-receipt-sheet::-webkit-scrollbar{display:none;}
+.sell-receipt-sheet.show{transform:translateY(0);}
+
+.srcp-handle-row{display:flex;justify-content:center;padding:12px 0 0;flex-shrink:0;}
+.srcp-handle{width:36px;height:4px;background:rgba(10,10,30,0.10);border-radius:2px;}
+
+/* paper card */
+.srcp-paper{
+  margin:12px 16px 0;
+  background:#FFFEF5;
+  border-radius:20px;
+  border:1.5px dashed rgba(10,10,30,0.10);
+  padding:22px 20px 20px;
+  box-shadow:0 2px 16px rgba(10,10,30,0.06);
+}
+.srcp-shop{text-align:center;margin-bottom:16px;}
+.srcp-shop-name{font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;}
+.srcp-shop-sub{font-size:11px;color:var(--ink3);margin-top:3px;}
+.srcp-shop-tel{font-size:12px;color:var(--ink2);margin-top:2px;font-weight:500;}
+
+.srcp-divider{border:none;border-top:1.5px dashed rgba(10,10,30,0.12);margin:13px 0;}
+
+.srcp-type-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 14px;border-radius:100px;
+  font-size:13px;font-weight:700;margin-bottom:10px;
+  background:rgba(255,107,0,0.10);color:var(--primary);
+}
+.srcp-factory-badge{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 12px;border-radius:12px;margin-bottom:10px;
+  background:rgba(10,10,30,0.04);border:1px solid rgba(10,10,30,0.06);
+}
+.srcp-factory-label{font-size:11px;color:var(--ink3);}
+.srcp-factory-name{font-size:13px;font-weight:700;color:var(--ink);}
+
+.srcp-meta-row{display:flex;justify-content:space-between;margin-bottom:4px;}
+.srcp-meta-label{font-size:12px;color:var(--ink3);}
+.srcp-meta-val{font-size:12px;color:var(--ink2);font-weight:600;}
+
+/* line items */
+.srcp-line{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:8px 0;border-bottom:1px solid rgba(10,10,30,0.05);
+}
+.srcp-line-left{flex:1;}
+.srcp-line-name{font-size:14px;color:var(--ink2);font-weight:500;}
+.srcp-line-detail{font-size:11px;color:var(--ink3);margin-top:2px;}
+.srcp-line-amt{font-size:14px;font-weight:700;color:var(--ink);margin-left:10px;flex-shrink:0;}
+
+/* total */
+.srcp-total-block{
+  margin-top:14px;padding-top:14px;
+  border-top:2px dashed rgba(10,10,30,0.12);
+}
+.srcp-total-row{display:flex;justify-content:space-between;align-items:flex-end;}
+.srcp-total-label{font-size:14px;font-weight:700;color:var(--ink3);}
+.srcp-total-amt{font-size:30px;font-weight:800;color:var(--primary);letter-spacing:-0.5px;}
+.srcp-total-kg{font-size:12px;color:var(--ink3);text-align:right;margin-top:3px;}
+
+.srcp-footer{text-align:center;font-size:11px;color:var(--ink3);margin-top:14px;line-height:1.6;}
+.srcp-bill-no{font-family:monospace;font-size:10px;color:var(--ink3);text-align:center;margin-top:10px;letter-spacing:0.5px;}
+
+/* action buttons */
+.srcp-actions{display:flex;gap:10px;padding:14px 16px 0;}
+.sra-btn{
+  flex:1;padding:14px;border-radius:16px;border:none;
+  font-family:'Prompt',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:6px;transition:all .14s;
+}
+.sra-btn:active{transform:scale(0.97);}
+.sra-btn.close{background:var(--white);color:var(--ink2);box-shadow:var(--card-sh);}
+.sra-btn.print{background:var(--ink);color:#fff;}
+
+/* print */
+@media print {
+  body > *:not(.sell-receipt-sheet){display:none !important;}
+  .sell-receipt-sheet{position:static !important;transform:none !important;
+    max-height:none !important;background:white !important;}
+  .srcp-handle-row,.srcp-actions{display:none !important;}
+  .sell-receipt-backdrop{display:none !important;}
+  .srcp-paper{border:none !important;box-shadow:none !important;
+    margin:0 !important;padding:10mm !important;}
+}
 </style>
 </head>
 <body>
@@ -905,6 +1067,53 @@ nav{
         <i class="ph ph-check-circle"></i> บันทึกการเปลี่ยนแปลง
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ══ SELL CONFIRM DIALOG ══ -->
+<div class="sell-dialog-backdrop" id="sdlg-backdrop"></div>
+<div class="sell-dialog-box" id="sdlg-box">
+  <div class="sdlg-handle-row"><div class="sdlg-handle"></div></div>
+  <div class="sdlg-icon"><i class="ph-fill ph-truck"></i></div>
+  <div class="sdlg-title">ส่งสำเร็จ! 🎉</div>
+  <div class="sdlg-sub">ต้องการพิมพ์ใบส่งสินค้าไหม?</div>
+  <div class="sdlg-summary">
+    <div class="sdlg-factory-row">
+      <i class="ph ph-factory" style="font-size:14px;"></i>
+      <span class="sdlg-factory-name" id="sdlg-factory">—</span>
+    </div>
+    <div class="sdlg-summary-inner">
+      <div>
+        <div style="font-size:11px;color:var(--ink3);">มูลค่าส่ง</div>
+        <div class="sdlg-summary-amount" id="sdlg-amount">฿0</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="sdlg-summary-items" id="sdlg-items">0 รายการ</div>
+      </div>
+    </div>
+  </div>
+  <div class="sdlg-btn-row">
+    <button class="sdlg-btn no" onclick="skipSellReceipt()">
+      <i class="ph ph-x"></i> ไม่ต้องการ
+    </button>
+    <button class="sdlg-btn yes" onclick="openSellReceipt()">
+      <i class="ph ph-receipt"></i> ต้องการใบส่ง
+    </button>
+  </div>
+</div>
+
+<!-- ══ SELL RECEIPT SHEET ══ -->
+<div class="sell-receipt-backdrop" id="srcp-backdrop" onclick="closeSellReceipt()"></div>
+<div class="sell-receipt-sheet" id="srcp-sheet">
+  <div class="srcp-handle-row"><div class="srcp-handle"></div></div>
+  <div class="srcp-paper" id="srcp-paper"><!-- filled by JS --></div>
+  <div class="srcp-actions">
+    <button class="sra-btn close" onclick="closeSellReceipt()">
+      <i class="ph ph-arrow-left"></i> ปิด
+    </button>
+    <button class="sra-btn print" onclick="window.print()">
+      <i class="ph ph-printer"></i> พิมพ์ใบส่ง
+    </button>
   </div>
 </div>
 
@@ -1064,6 +1273,11 @@ nav{
 const SUPABASE_URL  = 'https://dhvbbdcsejtvgilcgpfh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodmJiZGNzZWp0dmdpbGNncGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTEwMTMsImV4cCI6MjA5MzY2NzAxM30.B8TSWtXjf6A-Uq1f_JWf2Ghg2I2pCM2N1PV3r8yBlrs';
 const SUPABASE_READY = !SUPABASE_URL.includes('YOUR_PROJECT');
+
+// ══ ตั้งค่าร้าน — แก้ตรงนี้ ══
+const SHOP_NAME    = 'ScrapPOS';
+const SHOP_TAGLINE = 'ร้านรับซื้อของเก่า / รีไซเคิล';
+const SHOP_TEL     = '';   // เบอร์โทร เช่น '081-234-5678'
 
 // ══════════════════════════════════════════
 //  DEMO DATA
@@ -1659,11 +1873,12 @@ async function saveSellTransaction() {
 
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 700));
-    closeCartModal();
-    toast(`✓ ส่งแล้ว → ${factoryName.split(' — ')[0]} (Demo)`);
+    _pendingSellReceipt = { lines, totalAmt, factoryName };
     cart = {};
+    closeCartModal();
     renderGrid();
     renderCartBadge();
+    showSellDialog(lines, totalAmt, factoryName);
     return;
   }
 
@@ -1674,17 +1889,137 @@ async function saveSellTransaction() {
       prefer: 'return=representation',
     });
     if (!result || !result.success) throw new Error('RPC ไม่สำเร็จ');
-    closeCartModal();
-    toast(`✓ ส่งแล้ว → ${factoryName.split(' — ')[0]} | ฿${totalAmt.toFixed(2)}`);
+    _pendingSellReceipt = { lines, totalAmt, factoryName };
     cart = {};
+    closeCartModal();
     renderGrid();
     renderCartBadge();
     loadItems();
+    showSellDialog(lines, totalAmt, factoryName);
   } catch (err) {
     toast('❌ บันทึกไม่สำเร็จ: ' + err.message, 'error');
     sendBtn.disabled = false;
     sendBtn.innerHTML = `<i class="ph ph-truck"></i><span>ยืนยันส่งโรงงาน</span><span class="send-amount-tag" id="send-tag">฿${Math.round(totalAmt).toLocaleString('th-TH')}</span>`;
   }
+}
+
+// ══════════════════════════════════════════
+//  SELL RECEIPT SYSTEM
+// ══════════════════════════════════════════
+let _pendingSellReceipt = null;
+
+function fmtB(n) {
+  const v = Number(n || 0);
+  return v === Math.floor(v)
+    ? v.toLocaleString('th-TH')
+    : v.toLocaleString('th-TH', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtQtyStr(qty, mode, unit) {
+  return `${fmtB(qty)} ${unit || (mode==='kg' ? 'กก.' : 'ชิ้น')}`;
+}
+function escHtmlSell(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showSellDialog(lines, totalAmt, factoryName) {
+  document.getElementById('sdlg-factory').textContent = factoryName.split(' — ')[0];
+  document.getElementById('sdlg-amount').textContent  = '฿' + fmtB(totalAmt);
+  document.getElementById('sdlg-items').textContent   = lines.length + ' รายการ';
+  document.getElementById('sdlg-backdrop').classList.add('show');
+  document.getElementById('sdlg-box').classList.add('show');
+}
+
+function hideSellDialog() {
+  document.getElementById('sdlg-backdrop').classList.remove('show');
+  document.getElementById('sdlg-box').classList.remove('show');
+}
+
+function skipSellReceipt() {
+  hideSellDialog();
+  toast('✅ บันทึกส่งสำเร็จ');
+  _pendingSellReceipt = null;
+}
+
+function openSellReceipt() {
+  hideSellDialog();
+  if (!_pendingSellReceipt) return;
+  const { lines, totalAmt, factoryName } = _pendingSellReceipt;
+
+  const now     = new Date();
+  const dateStr = now.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  const timeStr = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
+  const billNo  = 'S' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') +
+                  String(now.getDate()).padStart(2,'0') + '-' +
+                  String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') +
+                  String(now.getSeconds()).padStart(2,'0');
+  const totalKg = lines.filter(l => l.mode==='kg').reduce((s, l) => s + l.qty, 0);
+  const [factShort, factLoc] = factoryName.split(' — ');
+
+  const linesHtml = lines.map(l => `
+    <div class="srcp-line">
+      <div class="srcp-line-left">
+        <div class="srcp-line-name">${escHtmlSell(l.item_name)}</div>
+        <div class="srcp-line-detail">
+          ${fmtQtyStr(l.qty, l.mode, l.unit_label)} × ฿${fmtB(l.price)}/${l.unit_label||'กก.'}
+        </div>
+      </div>
+      <div class="srcp-line-amt">฿${fmtB(l.subtotal)}</div>
+    </div>`).join('');
+
+  const telHtml = SHOP_TEL
+    ? `<div class="srcp-shop-tel"><i class="ph ph-phone"></i> ${escHtmlSell(SHOP_TEL)}</div>` : '';
+
+  document.getElementById('srcp-paper').innerHTML = `
+    <div class="srcp-shop">
+      <div class="srcp-shop-name">🔄 ${escHtmlSell(SHOP_NAME)}</div>
+      <div class="srcp-shop-sub">${escHtmlSell(SHOP_TAGLINE)}</div>
+      ${telHtml}
+    </div>
+    <hr class="srcp-divider">
+    <div class="srcp-type-badge">
+      <i class="ph-fill ph-upload-simple"></i> ใบส่งสินค้า
+    </div>
+    <div class="srcp-factory-badge">
+      <i class="ph ph-factory" style="font-size:16px;color:var(--ink3);"></i>
+      <div>
+        <div class="srcp-factory-label">โรงงานปลายทาง</div>
+        <div class="srcp-factory-name">${escHtmlSell(factShort)}${factLoc ? ' — '+escHtmlSell(factLoc) : ''}</div>
+      </div>
+    </div>
+    <div class="srcp-meta-row">
+      <span class="srcp-meta-label">วันที่</span>
+      <span class="srcp-meta-val">${dateStr}</span>
+    </div>
+    <div class="srcp-meta-row">
+      <span class="srcp-meta-label">เวลา</span>
+      <span class="srcp-meta-val">${timeStr} น.</span>
+    </div>
+    <div class="srcp-meta-row">
+      <span class="srcp-meta-label">เลขบิล</span>
+      <span class="srcp-meta-val">${billNo}</span>
+    </div>
+    <hr class="srcp-divider">
+    ${linesHtml}
+    <div class="srcp-total-block">
+      <div class="srcp-total-row">
+        <span class="srcp-total-label">มูลค่าส่ง</span>
+        <span class="srcp-total-amt">฿${fmtB(totalAmt)}</span>
+      </div>
+      ${totalKg > 0 ? `<div class="srcp-total-kg">น้ำหนักรวม ${fmtB(totalKg)} กก.</div>` : ''}
+    </div>
+    <hr class="srcp-divider">
+    <div class="srcp-footer">ขอบคุณที่ใช้บริการ 🙏<br>${escHtmlSell(SHOP_NAME)}</div>
+    <div class="srcp-bill-no">${billNo}</div>
+  `;
+
+  document.getElementById('srcp-backdrop').classList.add('show');
+  document.getElementById('srcp-sheet').classList.add('show');
+  _pendingSellReceipt = null;
+}
+
+function closeSellReceipt() {
+  document.getElementById('srcp-backdrop').classList.remove('show');
+  document.getElementById('srcp-sheet').classList.remove('show');
 }
 
 // ══════════════════════════════════════════

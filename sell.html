@@ -964,15 +964,92 @@ nav{
 .sra-btn.close{background:var(--white);color:var(--ink2);box-shadow:var(--card-sh);}
 .sra-btn.print{background:var(--ink);color:#fff;}
 
-/* print */
+/* ══════════════════════════════
+   PRINT — 58 mm thermal receipt
+══════════════════════════════ */
 @media print {
-  body > *:not(.sell-receipt-sheet){display:none !important;}
-  .sell-receipt-sheet{position:static !important;transform:none !important;
-    max-height:none !important;background:white !important;}
-  .srcp-handle-row,.srcp-actions{display:none !important;}
-  .sell-receipt-backdrop{display:none !important;}
-  .srcp-paper{border:none !important;box-shadow:none !important;
-    margin:0 !important;padding:10mm !important;}
+  /* กระดาษ 58mm — printable width ~48mm */
+  @page {
+    size: 58mm auto;
+    margin: 2mm 3mm;
+  }
+
+  /* ซ่อนทุกอย่างยกเว้น receipt sheet */
+  body > *                          { display:none !important; }
+  .sell-receipt-sheet               { display:block !important; }
+
+  /* reset sheet layout */
+  .sell-receipt-sheet {
+    position: static !important;
+    transform: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: white !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding-bottom: 0 !important;
+    width: 52mm !important;
+  }
+
+  /* ซ่อน handle + action buttons */
+  .srcp-handle-row,
+  .srcp-actions,
+  .sell-receipt-backdrop            { display:none !important; }
+
+  /* paper card — ไม่มี border/shadow */
+  .srcp-paper {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+    width: 100% !important;
+  }
+
+  /* ── Typography ── */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .srcp-shop-name  { font-size: 13pt !important; font-weight: 900 !important; }
+  .srcp-shop-sub   { font-size: 7pt  !important; }
+  .srcp-shop-tel   { font-size: 8pt  !important; }
+
+  .srcp-type-badge {
+    font-size: 8pt !important;
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    background: #eee !important;
+    color: #333 !important;
+  }
+
+  .srcp-factory-badge {
+    padding: 4px 6px !important;
+    border-radius: 4px !important;
+    border: 1px solid #ccc !important;
+    background: #f8f8f8 !important;
+  }
+  .srcp-factory-label { font-size: 6.5pt !important; }
+  .srcp-factory-name  { font-size: 8.5pt !important; }
+
+  .srcp-meta-label,
+  .srcp-meta-val      { font-size: 7.5pt !important; }
+  .srcp-meta-row      { margin-bottom: 2px !important; }
+
+  .srcp-divider       { margin: 5px 0 !important; border-top-width: 1px !important; }
+
+  .srcp-line          { padding: 4px 0 !important; }
+  .srcp-line-name     { font-size: 8.5pt !important; font-weight: 600 !important; }
+  .srcp-line-detail   { font-size: 7pt   !important; }
+  .srcp-line-amt      { font-size: 8.5pt !important; font-weight: 700 !important; }
+
+  .srcp-total-block   { margin-top: 5px !important; padding-top: 5px !important; }
+  .srcp-total-label   { font-size: 8pt   !important; }
+  .srcp-total-amt     { font-size: 16pt  !important; color: #000 !important; }
+  .srcp-total-kg      { font-size: 7pt   !important; }
+
+  .srcp-footer        { font-size: 7pt   !important; margin-top: 6px !important; }
+  .srcp-bill-no       { font-size: 6.5pt !important; margin-top: 4px !important; }
+  .srcp-shop          { margin-bottom: 6px !important; }
 }
 </style>
 </head>

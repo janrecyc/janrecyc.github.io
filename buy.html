@@ -308,19 +308,12 @@ nav {
   --calc-func-h:   #4A4A4C;
   --calc-op:       #F5A623;       /* ปุ่ม operator (+) — amber warm */
   --calc-op-h:     #FFBF47;
-  --calc-confirm:  #30D158;       /* ปุ่ม confirm — green */
-  --calc-confirm-h:#28B84E;
   --calc-text:     #FFFFFF;       /* ตัวเลขบนปุ่ม */
   --calc-text-dim: rgba(255,255,255,0.45);
-  --calc-tape-bg:  rgba(255,255,255,0.05);
   --calc-handle:   rgba(255,255,255,0.2);
   --calc-divider:  rgba(255,255,255,0.06);
   --calc-val-color:#FFFFFF;
-  --calc-sub-color:rgba(255,255,255,0.5);
   --calc-accent:   #F5A623;       /* ตัวเลขยอดรวม */
-  --calc-preset-bg:rgba(245,166,35,0.12);
-  --calc-preset-bd:rgba(245,166,35,0.3);
-  --calc-preset-cl:#F5A623;
 }
 
 .kg-modal-backdrop {
@@ -483,33 +476,13 @@ nav {
 }
 .kg-key.plus-key {
   background: rgba(245,166,35,0.12);
-  grid-column: span 2;
 }
 .kg-key.plus-key:active { background: rgba(245,166,35,0.28); }
 .kg-key.plus-key .kg-key-op { color: var(--calc-op) !important; font-size:26px; font-weight:700; }
-.kg-key.confirm-inline-key {
-  background: var(--calc-confirm) !important;
-}
-.kg-key.confirm-inline-key:active { background: var(--calc-confirm-h) !important; }
-
-/* Quick presets */
-.kg-presets {
-  display:flex; gap:6px;
-  padding: 0 16px 10px;
-  overflow-x:auto; scrollbar-width:none;
-}
-.kg-presets::-webkit-scrollbar{display:none;}
-.kg-preset-btn {
-  flex-shrink:0;
-  font-family:'Prompt',sans-serif; font-size:12px; font-weight:700;
-  padding:7px 16px; border-radius:100px;
-  border:1.5px solid var(--calc-preset-bd);
-  background:var(--calc-preset-bg);
-  color:var(--calc-preset-cl); cursor:pointer;
-  transition:all .12s;
-  letter-spacing:.3px;
-}
-.kg-preset-btn:active { background:rgba(245,166,35,0.28); transform:scale(0.93); }
+.kg-key.multiply-key { background: rgba(245,166,35,0.07); }
+.kg-key.multiply-key:active { background: rgba(245,166,35,0.22); }
+.kg-key.clear-inline-key { background: var(--calc-func) !important; }
+.kg-key.clear-inline-key:active { background: rgba(255,59,48,0.35) !important; }
 
 /* numpad keys base */
 .kg-key-op {
@@ -945,25 +918,6 @@ nav {
       </div>
     </div>
 
-    <div class="kg-presets" id="kg-presets-kg">
-      <button class="kg-preset-btn" onclick="setPreset(0.5)">0.5 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(1)">1 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(2)">2 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(5)">5 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(10)">10 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(20)">20 กก.</button>
-      <button class="kg-preset-btn" onclick="setPreset(50)">50 กก.</button>
-    </div>
-    <div class="kg-presets" id="kg-presets-piece" style="display:none;">
-      <button class="kg-preset-btn" onclick="setPreset(1)">1 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(2)">2 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(5)">5 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(10)">10 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(20)">20 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(50)">50 ชิ้น</button>
-      <button class="kg-preset-btn" onclick="setPreset(100)">100 ชิ้น</button>
-    </div>
-
     <div class="kg-numpad">
       <button class="kg-key" onclick="kpNum('1',event)"><span class="kg-key-num">1</span></button>
       <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span></button>
@@ -981,11 +935,9 @@ nav {
       <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
       <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
 
-      <!-- + spans 2 cols, ✓ takes 1 col -->
-      <button class="kg-key plus-key" onclick="kpPlus(event)"><span class="kg-key-op" style="font-size:30px;color:var(--primary)">+</span></button>
-      <button class="kg-key confirm-inline-key" onclick="confirmKg()">
-        <i class="ph ph-check kg-key-icon" style="color:white;font-size:20px;"></i>
-      </button>
+      <button class="kg-key multiply-key" onclick="kpMultiply(event)"><span class="kg-key-op" style="color:var(--calc-op);font-size:22px;font-weight:700;">×</span></button>
+      <button class="kg-key plus-key" onclick="kpPlus(event)"><span class="kg-key-op">+</span></button>
+      <button class="kg-key clear-inline-key" onclick="kpClear(event)"><span class="kg-key-num" style="font-size:22px;font-weight:700;color:rgba(255,80,60,0.9);">C</span></button>
     </div>
 
     <div class="kg-confirm-row" id="kg-confirm-row">
@@ -1058,10 +1010,11 @@ function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
 // ══════════════════════════════════════════
 //  KG MODAL STATE  —  tape-add model
 // ══════════════════════════════════════════
-let kgModalItemId = null;
-let kgBuffer = '';       // ตัวเลขที่กำลังพิมพ์อยู่
-let kgEntries = [];      // [{val: number}]  รายการที่บวกแล้ว
-let currentMode = 'kg';  // 'kg' | 'piece'
+let kgModalItemId  = null;
+let kgBuffer       = '';       // ตัวเลขที่กำลังพิมพ์อยู่
+let kgEntries      = [];       // [{val: number}]  รายการที่บวกแล้ว
+let currentMode    = 'kg';     // 'kg' | 'piece'
+let kgMultiplyBase = null;     // ตัวเลขแรกก่อน ×
 
 function kgTotal() {
   return kgEntries.reduce((s, e) => s + e.val, 0);
@@ -1079,7 +1032,7 @@ function openKgModal(id) {
 
   // ซ่อน/แสดง mode toggle แล้วตั้ง mode ให้ถูก
   const itemMode = item.sell_mode || 'kg';
-  document.getElementById('kg-mode-toggle').style.display = item.sell_mode ? 'none' : 'flex';
+  document.getElementById('kg-mode-toggle').style.display = item.sell_mode === 'piece' ? 'none' : 'flex';
   setMode(itemMode); // reset buffer+entries ใน setMode
 
   // โหลด qty เดิมจาก cart (หลัง setMode เพื่อไม่ให้ถูก reset)
@@ -1098,17 +1051,16 @@ function closeKgModal() {
   document.getElementById('kg-backdrop').classList.remove('open');
   document.getElementById('kg-modal').classList.remove('open');
   document.body.style.overflow = '';
-  kgModalItemId = null;
-  kgBuffer = '';
-  kgEntries = [];
+  kgModalItemId  = null;
+  kgBuffer       = '';
+  kgEntries      = [];
+  kgMultiplyBase = null;
 }
 
 function setMode(mode) {
   currentMode = mode;
   document.getElementById('mode-btn-kg').classList.toggle('active', mode === 'kg');
   document.getElementById('mode-btn-piece').classList.toggle('active', mode === 'piece');
-  document.getElementById('kg-presets-kg').style.display    = mode === 'kg'    ? 'flex' : 'none';
-  document.getElementById('kg-presets-piece').style.display = mode === 'piece' ? 'flex' : 'none';
   if (mode === 'kg') {
     document.getElementById('kg-display-label').textContent = 'น้ำหนัก';
     document.getElementById('kg-unit-label').textContent    = 'กก.';
@@ -1124,6 +1076,16 @@ function updateKgDisplay() {
   const unitText = currentMode === 'kg' ? 'กก.' : 'ชิ้น';
   const cur      = parseFloat(kgBuffer) || 0;
   const total    = kgTotal() + cur;
+
+  // ── multiply indicator ──
+  const lblEl2 = document.getElementById('kg-display-label');
+  if (kgMultiplyBase !== null) {
+    lblEl2.textContent = `${formatCalc(kgMultiplyBase)} ×`;
+    lblEl2.style.color = 'var(--calc-op)';
+  } else {
+    lblEl2.textContent = currentMode === 'kg' ? 'น้ำหนัก' : 'จำนวน';
+    lblEl2.style.color = '';
+  }
 
   // ── tape list ──
   const tapeEl = document.getElementById('kg-tape');
@@ -1204,29 +1166,37 @@ function kpBack(e) {
 function kpPlus(e) {
   rippleKey(e);
   const cur = parseFloat(kgBuffer);
-  if (!cur || cur <= 0) return; // ไม่มีตัวเลข → ไม่ทำอะไร
-  kgEntries.push({ val: cur });
+  if (!cur || cur <= 0) return;
+  if (kgMultiplyBase !== null) {
+    kgEntries.push({ val: kgMultiplyBase * cur });
+    kgMultiplyBase = null;
+  } else {
+    kgEntries.push({ val: cur });
+  }
   kgBuffer = '';
   updateKgDisplay();
-}
-
-function setPreset(val) {
-  // กด preset → เหมือนพิมพ์ตัวเลข แล้วกด +
-  const cur = parseFloat(kgBuffer);
-  if (cur > 0) kgEntries.push({ val: cur });
-  kgEntries.push({ val });
-  kgBuffer = '';
-  updateKgDisplay();
-  // pulse animation
-  const el = document.getElementById('kg-display-num');
-  el.style.transition = 'transform .12s';
-  el.style.transform = 'scale(1.08)';
-  setTimeout(() => { el.style.transform = 'scale(1)'; }, 120);
 }
 
 function formatCalc(v) {
   if (Number.isInteger(v)) return String(v);
   return parseFloat(v.toFixed(4)).toString();
+}
+
+function kpClear(e) {
+  rippleKey(e);
+  kgBuffer = '';
+  kgEntries = [];
+  kgMultiplyBase = null;
+  updateKgDisplay();
+}
+
+function kpMultiply(e) {
+  rippleKey(e);
+  const cur = parseFloat(kgBuffer);
+  if (!cur || cur <= 0) return;
+  kgMultiplyBase = kgMultiplyBase !== null ? kgMultiplyBase * cur : cur;
+  kgBuffer = '';
+  updateKgDisplay();
 }
 
 function rippleKey(e) {
@@ -1243,7 +1213,14 @@ function rippleKey(e) {
 async function confirmKg() {
   // commit buffer ถ้ายังมี
   const cur = parseFloat(kgBuffer);
-  if (cur > 0) kgEntries.push({ val: cur });
+  if (cur > 0) {
+    if (kgMultiplyBase !== null) {
+      kgEntries.push({ val: kgMultiplyBase * cur });
+      kgMultiplyBase = null;
+    } else {
+      kgEntries.push({ val: cur });
+    }
+  }
   kgBuffer = '';
 
   const total = kgTotal();
@@ -1353,9 +1330,10 @@ async function confirmCart() {
     const result = await sbFetch('rpc/record_buy_transaction', {
       method: 'POST',
       body: { p_lines: lines },
-      prefer: 'return=representation',
+      prefer: 'return=minimal',
     });
-    if (result !== null && result.success === false) throw new Error(result.message || 'RPC ไม่สำเร็จ');
+    // result=minimal → PostgREST return body ว่าง (null) เมื่อสำเร็จ
+    // ถ้า function throw exception → sbFetch จะ throw ให้อัตโนมัติ (res.ok = false)
     // บันทึกสำเร็จ → ถามใบเสร็จ
     _pendingReceipt = { lines, totalAmt };
     cart = {};
@@ -1614,14 +1592,27 @@ document.getElementById('search-input').addEventListener('input', e => {
   renderGrid();
 });
 
-// Swipe down to close modal
+// Swipe down to close modal — เฉพาะ handle/header เท่านั้น
 let touchStartY = 0;
+let swipeFromHandle = false;
+const kgHandleEl = document.querySelector('#kg-modal .kg-handle');
+const kgHeaderEl = document.querySelector('#kg-modal .kg-header');
+[kgHandleEl, kgHeaderEl].forEach(el => {
+  if (!el) return;
+  el.addEventListener('touchstart', e => {
+    touchStartY = e.touches[0].clientY;
+    swipeFromHandle = true;
+  }, {passive:true});
+});
 document.getElementById('kg-modal').addEventListener('touchstart', e => {
-  touchStartY = e.touches[0].clientY;
+  if (!e.target.closest('.kg-handle') && !e.target.closest('.kg-header')) {
+    swipeFromHandle = false;
+  }
 }, {passive:true});
 document.getElementById('kg-modal').addEventListener('touchmove', e => {
+  if (!swipeFromHandle) return;
   const dy = e.touches[0].clientY - touchStartY;
-  if (dy > 60) closeKgModal();
+  if (dy > 60) { swipeFromHandle = false; closeKgModal(); }
 }, {passive:true});
 
 function toast(msg, type = '') {

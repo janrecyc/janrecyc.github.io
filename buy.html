@@ -732,6 +732,58 @@ nav {
   .receipt-paper { border:none !important; box-shadow:none !important;
     margin:0 !important; padding:10mm !important; }
 }
+
+/* ══ CASH BALANCE BAR ══ */
+.cash-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin:0 16px 10px;
+  padding:10px 14px;
+  border-radius:14px;
+  background:var(--white);
+  box-shadow:var(--card-sh);
+  gap:10px;
+  transition:background .2s;
+}
+.cash-bar.warn  { background:#FFF3E0; }
+.cash-bar.danger{ background:#FFEBEE; }
+
+.cash-bar-left  { display:flex; align-items:center; gap:8px; }
+.cash-bar-icon  {
+  width:32px; height:32px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+  background:rgba(52,199,89,0.12); color:var(--green);
+}
+.cash-bar.warn  .cash-bar-icon  { background:rgba(255,149,0,0.12); color:#E65100; }
+.cash-bar.danger .cash-bar-icon { background:rgba(255,59,48,0.12);  color:var(--red); }
+
+.cash-bar-label { font-size:11px; color:var(--ink3); font-weight:500; }
+.cash-bar-amt   { font-size:16px; font-weight:800; color:var(--green); letter-spacing:-0.3px; }
+.cash-bar.warn  .cash-bar-amt   { color:#E65100; }
+.cash-bar.danger .cash-bar-amt  { color:var(--red); }
+
+.cash-bar-msg   { font-size:11px; font-weight:600; text-align:right; }
+.cash-bar.warn  .cash-bar-msg   { color:#E65100; }
+.cash-bar.danger .cash-bar-msg  { color:var(--red); }
+
+/* ── insufficient warning on confirm button ── */
+.cash-insufficient-warn {
+  display:none; align-items:center; gap:6px;
+  margin:0 0 8px;
+  padding:9px 12px; border-radius:12px;
+  background:#FFEBEE;
+  font-size:12px; font-weight:600; color:var(--red);
+}
+.cash-insufficient-warn.show { display:flex; }
+.cash-insufficient-warn i { font-size:16px; flex-shrink:0; }
+
+/* ── blocked confirm button state ── */
+.cart-confirm-btn.blocked {
+  background:#ccc !important;
+  box-shadow:none !important;
+  cursor:not-allowed !important;
+  opacity:0.7;
+}
 </style>
 </head>
 <body>
@@ -768,6 +820,18 @@ nav {
       </div>
     </div>
 
+    <!-- CASH BALANCE BAR -->
+    <div class="cash-bar" id="cash-bar">
+      <div class="cash-bar-left">
+        <div class="cash-bar-icon"><i class="ph ph-wallet"></i></div>
+        <div>
+          <div class="cash-bar-label">เงินสดคงเหลือ</div>
+          <div class="cash-bar-amt" id="cash-bar-amt">กำลังโหลด...</div>
+        </div>
+      </div>
+      <div class="cash-bar-msg" id="cash-bar-msg"></div>
+    </div>
+
     <div class="cat-bar" id="cat-bar"><button class="cat-btn on" data-cat="all">ทั้งหมด</button></div>
 
     <div class="item-grid-wrap">
@@ -792,6 +856,10 @@ nav {
   </div>
   <div class="cart-items" id="cart-items-list"></div>
   <div class="cart-confirm-row">
+    <div class="cash-insufficient-warn" id="cash-insufficient-warn">
+      <i class="ph ph-warning-circle"></i>
+      <span id="cash-insufficient-text">เงินสดไม่พอ — ขาดอีก ฿0</span>
+    </div>
     <button class="cart-confirm-btn" id="cart-confirm-btn" onclick="confirmCart()">
       <i class="ph ph-check-circle"></i>
       <span id="cart-confirm-label">บันทึกทั้งหมด</span>
@@ -1004,7 +1072,7 @@ function renderIcon(icon, cat, size=28) {
 let ITEMS = [];
 let cart = {};
 let CATS = [];
-function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
+let cashBalance = null;  // เงินสดคงเหลือ (null = ยังไม่โหลด)function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
 function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
 
 // ══════════════════════════════════════════
@@ -1250,6 +1318,8 @@ function renderCartPanel() {
   const countEl  = document.getElementById('cart-count');
   const btnEl    = document.getElementById('cart-confirm-btn');
   const lblEl    = document.getElementById('cart-confirm-label');
+  const warnEl   = document.getElementById('cash-insufficient-warn');
+  const warnTxt  = document.getElementById('cash-insufficient-text');
 
   const entries = Object.values(cart);
   const count   = entries.length;
@@ -1257,10 +1327,13 @@ function renderCartPanel() {
   panel.classList.toggle('has-items', count > 0);
   countEl.textContent = count;
 
-  if (!count) { listEl.innerHTML = ''; return; }
+  if (!count) {
+    listEl.innerHTML = '';
+    warnEl.classList.remove('show');
+    return;
+  }
 
   const totalAmt = entries.reduce((s, c) => {
-    // fix floating point: ปัดทศนิยม 2 ตำแหน่ง
     return s + Math.round(c.qty * Number(c.item.buy_price) * 100) / 100;
   }, 0);
 
@@ -1278,7 +1351,19 @@ function renderCartPanel() {
   `).join('');
 
   lblEl.textContent = `บันทึก ${count} รายการ — ฿${totalAmt.toFixed(2)}`;
-  btnEl.disabled = false;
+
+  // ── cash check ──
+  if (cashBalance !== null && cashBalance < totalAmt) {
+    const short = totalAmt - cashBalance;
+    warnTxt.textContent = `เงินสดไม่พอ — ขาดอีก ฿${short.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    warnEl.classList.add('show');
+    btnEl.disabled = true;
+    btnEl.classList.add('blocked');
+  } else {
+    warnEl.classList.remove('show');
+    btnEl.disabled = false;
+    btnEl.classList.remove('blocked');
+  }
 }
 
 function removeFromCart(id) {
@@ -1299,10 +1384,7 @@ async function confirmCart() {
 
   const btnEl = document.getElementById('cart-confirm-btn');
   const lblEl = document.getElementById('cart-confirm-label');
-  btnEl.disabled = true;
-  lblEl.textContent = 'กำลังบันทึก...';
 
-  // fix floating point ตรงนี้ด้วย
   const lines = entries.map(c => ({
     item_id:    c.item.id,
     item_name:  c.item.name,
@@ -1315,9 +1397,21 @@ async function confirmCart() {
   }));
   const totalAmt = lines.reduce((s, l) => s + l.subtotal, 0);
 
+  // ── double-check เงินสดก่อนบันทึก ──
+  if (cashBalance !== null && cashBalance < totalAmt) {
+    const short = (totalAmt - cashBalance).toLocaleString('th-TH', {minimumFractionDigits:2});
+    toast(`❌ เงินสดไม่พอ — ขาดอีก ฿${short}`, 'error');
+    return;
+  }
+
+  btnEl.disabled = true;
+  lblEl.textContent = 'กำลังบันทึก...';
+
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 700));
-    // บันทึกสำเร็จ → ถามใบเสร็จ
+    // Demo: หัก cashBalance ชั่วคราว
+    if (cashBalance !== null) cashBalance -= totalAmt;
+    renderCashBar();
     _pendingReceipt = { lines, totalAmt };
     cart = {};
     renderGrid();
@@ -1332,14 +1426,13 @@ async function confirmCart() {
       body: { p_lines: lines },
       prefer: 'return=minimal',
     });
-    // result=minimal → PostgREST return body ว่าง (null) เมื่อสำเร็จ
-    // ถ้า function throw exception → sbFetch จะ throw ให้อัตโนมัติ (res.ok = false)
-    // บันทึกสำเร็จ → ถามใบเสร็จ
     _pendingReceipt = { lines, totalAmt };
     cart = {};
     renderGrid();
     renderCartPanel();
+    // reload ทั้ง items และ cash balance
     loadItems();
+    setTimeout(() => loadCashBalance(), 800);
     showDialog(lines, totalAmt);
   } catch (err) {
     toast('❌ บันทึกไม่สำเร็จ: ' + err.message, 'error');
@@ -1523,9 +1616,73 @@ function renderCatBar() {
 let activeCat = 'all';
 let query = '';
 
+// ══════════════════════════════════════════
+//  CASH BALANCE
+// ══════════════════════════════════════════
+async function loadCashBalance() {
+  if (!SUPABASE_READY) {
+    // Demo: แสดง 0 (ไม่มีข้อมูลจริง)
+    cashBalance = 0;
+    renderCashBar();
+    return;
+  }
+  try {
+    // คำนวณจาก transactions:
+    // deposit = +, sell = +, withdraw = -, buy = -
+    const rows = await sbFetch(
+      'transactions?select=type,total_amount&type=in.(deposit,withdraw,buy,sell)'
+    ) || [];
+    let bal = 0;
+    rows.forEach(r => {
+      const amt = Number(r.total_amount || 0);
+      if (r.type === 'deposit' || r.type === 'sell') bal += amt;
+      if (r.type === 'withdraw' || r.type === 'buy')  bal -= amt;
+    });
+    cashBalance = Math.round(bal * 100) / 100;
+  } catch (_) {
+    cashBalance = null;
+  }
+  renderCashBar();
+  renderCartPanel(); // อัปเดต warning ถ้า cart มีของอยู่
+}
+
+function renderCashBar() {
+  const bar    = document.getElementById('cash-bar');
+  const amtEl  = document.getElementById('cash-bar-amt');
+  const msgEl  = document.getElementById('cash-bar-msg');
+  const iconEl = bar.querySelector('.cash-bar-icon i');
+
+  if (cashBalance === null) {
+    amtEl.textContent = 'โหลดไม่ได้';
+    bar.className = 'cash-bar';
+    msgEl.textContent = '';
+    return;
+  }
+
+  const fmt = cashBalance.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  amtEl.textContent = `฿${fmt}`;
+
+  if (cashBalance <= 0) {
+    bar.className = 'cash-bar danger';
+    iconEl.className = 'ph ph-warning-circle';
+    msgEl.textContent = '⚠️ ไม่มีเงินสด';
+  } else if (cashBalance < 500) {
+    bar.className = 'cash-bar warn';
+    iconEl.className = 'ph ph-warning';
+    msgEl.textContent = 'เงินสดใกล้หมด';
+  } else {
+    bar.className = 'cash-bar';
+    iconEl.className = 'ph ph-wallet';
+    msgEl.textContent = '';
+  }
+}
+
 async function loadItems() {
   const grid = document.getElementById('item-grid');
   grid.innerHTML = `<div class="grid-loading"><i class="ph ph-spinner-gap spin" style="font-size:28px;"></i><span style="font-size:13px;">กำลังโหลดสินค้า...</span></div>`;
+
+  // โหลดเงินสดพร้อมกันเลย
+  loadCashBalance();
 
   if (!SUPABASE_READY) {
     await new Promise(r => setTimeout(r, 400));

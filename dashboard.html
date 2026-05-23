@@ -256,8 +256,146 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
 
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,10,30,0.88);color:white;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px);z-index:999;}
 #toast.toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* ══ PROFILE AVATAR BUTTON ══ */
+.avatar-btn {
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg, var(--primary) 0%, #CC5200 100%);
+  border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:white; font-size:15px; font-weight:800;
+  box-shadow:0 2px 8px rgba(255,107,0,0.35);
+  flex-shrink:0; transition:transform .12s;
+  font-family:'Prompt',sans-serif;
+}
+.avatar-btn:active { transform:scale(0.92); }
+
+/* ══ PROFILE SHEET ══ */
+.profile-backdrop {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(10,10,30,0.45); backdrop-filter:blur(6px);
+  opacity:0; pointer-events:none; transition:opacity .22s;
+}
+.profile-backdrop.show { opacity:1; pointer-events:all; }
+
+.profile-sheet {
+  position:fixed; bottom:0; left:0; right:0; z-index:501;
+  background:var(--white); border-radius:24px 24px 0 0;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+  padding-bottom:env(safe-area-inset-bottom,16px);
+  overflow:hidden;
+}
+.profile-sheet.show { transform:translateY(0); }
+
+.ps-handle-row { display:flex; justify-content:center; padding:12px 0 0; }
+.ps-handle { width:36px; height:4px; background:rgba(10,10,30,0.10); border-radius:2px; }
+
+/* hero gradient top */
+.ps-hero {
+  background:linear-gradient(135deg,#0A0A0F 0%,#1A1A2E 60%,#16213E 100%);
+  padding:24px 20px 20px; text-align:center; position:relative; overflow:hidden;
+}
+.ps-hero::before {
+  content:''; position:absolute; top:-30px; right:-30px;
+  width:140px; height:140px;
+  background:radial-gradient(circle,rgba(255,107,0,0.30) 0%,transparent 70%);
+  border-radius:50%;
+}
+.ps-avatar-wrap {
+  width:72px; height:72px; border-radius:50%;
+  background:linear-gradient(135deg,var(--primary) 0%,#CC5200 100%);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 10px;
+  font-size:30px; font-weight:800; color:white;
+  font-family:'Prompt',sans-serif;
+  box-shadow:0 4px 20px rgba(255,107,0,0.40);
+  border:3px solid rgba(255,255,255,0.15);
+}
+.ps-name { font-size:18px; font-weight:800; color:white; margin-bottom:4px; }
+.ps-email { font-size:12px; color:rgba(255,255,255,0.50); }
+.ps-role-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  margin-top:8px; padding:4px 12px; border-radius:100px;
+  background:rgba(255,107,0,0.20); color:var(--primary);
+  font-size:11px; font-weight:700; border:1px solid rgba(255,107,0,0.30);
+}
+
+/* info rows */
+.ps-body { padding:16px 20px 8px; }
+.ps-info-row {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 0; border-bottom:1px solid rgba(10,10,30,0.05);
+}
+.ps-info-row:last-child { border-bottom:none; }
+.ps-info-icon {
+  width:34px; height:34px; border-radius:10px;
+  background:var(--surface); display:flex; align-items:center; justify-content:center;
+  font-size:16px; color:var(--ink3); flex-shrink:0;
+}
+.ps-info-label { font-size:11px; color:var(--ink3); }
+.ps-info-val { font-size:13px; font-weight:600; color:var(--ink); }
+
+/* action buttons */
+.ps-actions { padding:8px 20px 4px; display:flex; flex-direction:column; gap:8px; }
+.ps-action-btn {
+  width:100%; padding:14px; border-radius:16px; border:none;
+  font-family:'Prompt',sans-serif; font-size:14px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  cursor:pointer; transition:all .14s;
+}
+.ps-action-btn:active { transform:scale(0.98); }
+.ps-btn-reset  { background:rgba(255,59,48,0.08); color:var(--red); }
+.ps-btn-logout { background:var(--ink); color:white; }
+
+/* ══ RESET CONFIRM MODAL ══ */
+.reset-backdrop {
+  position:fixed; inset:0; z-index:600;
+  background:rgba(10,10,30,0.55); backdrop-filter:blur(8px);
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.reset-backdrop.show { opacity:1; pointer-events:all; }
+
+.reset-box {
+  position:fixed; bottom:0; left:0; right:0; z-index:601;
+  background:var(--white); border-radius:24px 24px 0 0;
+  padding:0 20px env(safe-area-inset-bottom,20px);
+  transform:translateY(100%);
+  transition:transform .30s cubic-bezier(.22,1,.36,1);
+}
+.reset-box.show { transform:translateY(0); }
+
+.reset-handle-row { display:flex; justify-content:center; padding:12px 0 0; }
+.reset-handle { width:36px; height:4px; background:rgba(10,10,30,0.10); border-radius:2px; }
+
+.reset-icon {
+  width:60px; height:60px; border-radius:18px;
+  background:rgba(255,59,48,0.10);
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; color:var(--red); margin:18px auto 0;
+}
+.reset-title { text-align:center; font-size:18px; font-weight:800; color:var(--ink); margin:10px 0 6px; }
+.reset-sub {
+  text-align:center; font-size:13px; color:var(--ink3); line-height:1.6;
+  margin-bottom:16px; padding:0 10px;
+}
+.reset-warning {
+  background:rgba(255,59,48,0.06); border:1px solid rgba(255,59,48,0.15);
+  border-radius:12px; padding:10px 14px; margin-bottom:16px;
+  font-size:12px; color:var(--red); font-weight:500; line-height:1.6;
+}
+.reset-warning i { margin-right:4px; }
+.reset-btn-row { display:flex; gap:10px; margin-bottom:4px; }
+.reset-btn {
+  flex:1; padding:15px; border-radius:16px; border:none;
+  font-family:'Prompt',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  gap:7px; transition:all .14s;
+}
+.reset-btn:active { transform:scale(0.97); }
+.reset-btn.cancel { background:var(--surface); color:var(--ink2); }
+.reset-btn.confirm { background:var(--red); color:white; box-shadow:0 4px 16px rgba(255,59,48,0.30); }
+.reset-btn.confirm:disabled { opacity:0.6; pointer-events:none; }
 </style>
-</head>
 <body>
 
 <div class="status-bar"></div>
@@ -275,7 +413,7 @@ nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="loadDashboard()"><i class="ph ph-arrows-clockwise"></i></button>
-      <button class="icon-btn" onclick="window.AUTH && window.AUTH.logout()" title="ออกจากระบบ"><i class="ph ph-sign-out"></i></button>
+      <button class="avatar-btn" id="avatar-btn" onclick="openProfile()" title="โปรไฟล์">?</button>
     </div>
   </div>
   <div class="page-title">Dashboard <span class="page-sub" id="h-time">--:--</span></div>
@@ -1124,8 +1262,184 @@ function toast(msg) {
     user:  session.user,
     logout: async () => { await _sb.auth.signOut(); window.location.replace('login.html'); }
   };
+
+  // ตั้ง avatar initial ทันที
+  const initial = (session.user.email || '?').charAt(0).toUpperCase();
+  const avatarBtn = document.getElementById('avatar-btn');
+  if (avatarBtn) avatarBtn.textContent = initial;
+
   loadDashboard();
 })();
+</script>
+
+<!-- ══ PROFILE SHEET ══ -->
+<div class="profile-backdrop" id="profile-backdrop" onclick="closeProfile()"></div>
+<div class="profile-sheet" id="profile-sheet">
+  <div class="ps-handle-row"><div class="ps-handle"></div></div>
+  <div class="ps-hero">
+    <div class="ps-avatar-wrap" id="ps-avatar">?</div>
+    <div class="ps-name" id="ps-name">—</div>
+    <div class="ps-email" id="ps-email">—</div>
+    <div class="ps-role-badge"><i class="ph ph-shield-check"></i> Admin</div>
+  </div>
+  <div class="ps-body">
+    <div class="ps-info-row">
+      <div class="ps-info-icon"><i class="ph ph-envelope"></i></div>
+      <div>
+        <div class="ps-info-label">อีเมล</div>
+        <div class="ps-info-val" id="ps-info-email">—</div>
+      </div>
+    </div>
+    <div class="ps-info-row">
+      <div class="ps-info-icon"><i class="ph ph-calendar-blank"></i></div>
+      <div>
+        <div class="ps-info-label">สมัครเมื่อ</div>
+        <div class="ps-info-val" id="ps-info-created">—</div>
+      </div>
+    </div>
+    <div class="ps-info-row">
+      <div class="ps-info-icon"><i class="ph ph-clock-clockwise"></i></div>
+      <div>
+        <div class="ps-info-label">เข้าสู่ระบบล่าสุด</div>
+        <div class="ps-info-val" id="ps-info-last">—</div>
+      </div>
+    </div>
+    <div class="ps-info-row">
+      <div class="ps-info-icon"><i class="ph ph-fingerprint"></i></div>
+      <div>
+        <div class="ps-info-label">User ID</div>
+        <div class="ps-info-val" id="ps-info-uid" style="font-size:11px;font-family:monospace;word-break:break-all;">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="ps-actions">
+    <button class="ps-action-btn ps-btn-reset" onclick="openResetConfirm()">
+      <i class="ph ph-arrow-counter-clockwise"></i> รีเซ็ตข้อมูลทั้งหมด
+    </button>
+    <button class="ps-action-btn ps-btn-logout" onclick="window.AUTH && window.AUTH.logout()">
+      <i class="ph ph-sign-out"></i> ออกจากระบบ
+    </button>
+  </div>
+</div>
+
+<!-- ══ RESET CONFIRM MODAL ══ -->
+<div class="reset-backdrop" id="reset-backdrop"></div>
+<div class="reset-box" id="reset-box">
+  <div class="reset-handle-row"><div class="reset-handle"></div></div>
+  <div class="reset-icon"><i class="ph ph-warning-octagon"></i></div>
+  <div class="reset-title">รีเซ็ตข้อมูลทั้งหมด?</div>
+  <div class="reset-sub">ระบบจะล้างข้อมูลทุกอย่างและไม่สามารถกู้คืนได้</div>
+  <div class="reset-warning">
+    <i class="ph ph-trash"></i> transactions ทั้งหมดจะถูกลบ<br>
+    <i class="ph ph-trash"></i> sort_logs ทั้งหมดจะถูกลบ<br>
+    <i class="ph ph-arrow-counter-clockwise"></i> stock ทุกชิ้นจะถูกรีเซ็ตเป็น 0
+  </div>
+  <div class="reset-btn-row">
+    <button class="reset-btn cancel" onclick="closeResetConfirm()">
+      <i class="ph ph-x"></i> ยกเลิก
+    </button>
+    <button class="reset-btn confirm" id="reset-confirm-btn" onclick="doReset()">
+      <i class="ph ph-warning-octagon"></i> รีเซ็ตเลย
+    </button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  PROFILE SHEET
+// ══════════════════════════════════════════
+function openProfile() {
+  const user = window.AUTH?.user;
+  if (!user) return;
+
+  const email    = user.email || '—';
+  const initial  = email.charAt(0).toUpperCase();
+  const created  = user.created_at
+    ? new Date(user.created_at).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})
+    : '—';
+  const lastSign = user.last_sign_in_at
+    ? new Date(user.last_sign_in_at).toLocaleString('th-TH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+    : '—';
+
+  document.getElementById('ps-avatar').textContent       = initial;
+  document.getElementById('ps-name').textContent         = user.user_metadata?.full_name || email.split('@')[0];
+  document.getElementById('ps-email').textContent        = email;
+  document.getElementById('ps-info-email').textContent   = email;
+  document.getElementById('ps-info-created').textContent = created;
+  document.getElementById('ps-info-last').textContent    = lastSign;
+  document.getElementById('ps-info-uid').textContent     = user.id || '—';
+
+  document.getElementById('profile-backdrop').classList.add('show');
+  document.getElementById('profile-sheet').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProfile() {
+  document.getElementById('profile-backdrop').classList.remove('show');
+  document.getElementById('profile-sheet').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ══════════════════════════════════════════
+//  RESET MODAL
+// ══════════════════════════════════════════
+function openResetConfirm() {
+  closeProfile();
+  setTimeout(() => {
+    document.getElementById('reset-backdrop').classList.add('show');
+    document.getElementById('reset-box').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }, 280);
+}
+
+function closeResetConfirm() {
+  document.getElementById('reset-backdrop').classList.remove('show');
+  document.getElementById('reset-box').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+async function doReset() {
+  const btn = document.getElementById('reset-confirm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ph ph-spinner-gap spin"></i> กำลังรีเซ็ต...';
+
+  if (!SUPABASE_READY) {
+    await new Promise(r => setTimeout(r, 900));
+    closeResetConfirm();
+    toast('✅ รีเซ็ตสำเร็จ (Demo)');
+    setTimeout(() => loadDashboard(), 400);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-warning-octagon"></i> รีเซ็ตเลย';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/reset_all_data`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${window.AUTH?.token || SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    const result = await res.json();
+    closeResetConfirm();
+    toast(`✅ รีเซ็ตสำเร็จ — items ${result.item_count} รายการยังคงอยู่`);
+    setTimeout(() => loadDashboard(), 500);
+  } catch (err) {
+    toast(`❌ รีเซ็ตไม่สำเร็จ: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-warning-octagon"></i> รีเซ็ตเลย';
+  }
+}
 </script>
 </body>
 </html>

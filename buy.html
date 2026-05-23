@@ -117,6 +117,11 @@ header {
   border:1.5px solid transparent;
   min-height:140px;
 }
+.item-card::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.7) 0%,transparent 50%);
+  pointer-events:none;
+}
 .item-card:active{transform:scale(0.95);}
 .item-card.selected { border-color:var(--primary); box-shadow:var(--card-sh-active); }
 
@@ -728,38 +733,32 @@ nav {
     margin:0 !important; padding:10mm !important; }
 }
 
-/* ══ CASH BALANCE BAR ══ */
-.cash-bar {
-  display:flex; align-items:center; justify-content:space-between;
-  margin:0 16px 10px;
-  padding:10px 14px;
-  border-radius:14px;
-  background:var(--white);
-  box-shadow:var(--card-sh);
-  gap:10px;
-  transition:background .2s;
+/* ══ CASH PILL (header compact) ══ */
+.cash-pill {
+  display:flex; align-items:center; gap:5px;
+  padding:5px 10px 5px 8px;
+  border-radius:100px;
+  background:rgba(0,200,83,0.10);
+  border:1px solid rgba(0,200,83,0.20);
+  transition:background .2s, border-color .2s;
+  cursor:default;
 }
-.cash-bar.warn  { background:#FFF3E0; }
-.cash-bar.danger{ background:#FFEBEE; }
+.cash-pill.warn   { background:rgba(255,149,0,0.10); border-color:rgba(255,149,0,0.25); }
+.cash-pill.danger { background:rgba(255,59,48,0.10);  border-color:rgba(255,59,48,0.25); }
 
-.cash-bar-left  { display:flex; align-items:center; gap:8px; }
-.cash-bar-icon  {
-  width:32px; height:32px; border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:16px; flex-shrink:0;
-  background:rgba(52,199,89,0.12); color:var(--green);
+.cash-pill-icon { font-size:14px; color:var(--green); flex-shrink:0; }
+.cash-pill.warn   .cash-pill-icon { color:#E65100; }
+.cash-pill.danger .cash-pill-icon { color:var(--red); }
+
+.cash-pill-amt {
+  font-size:13px; font-weight:700; color:var(--green); letter-spacing:-0.3px; white-space:nowrap;
 }
-.cash-bar.warn  .cash-bar-icon  { background:rgba(255,149,0,0.12); color:#E65100; }
-.cash-bar.danger .cash-bar-icon { background:rgba(255,59,48,0.12);  color:var(--red); }
+.cash-pill.warn   .cash-pill-amt { color:#E65100; }
+.cash-pill.danger .cash-pill-amt { color:var(--red); }
 
-.cash-bar-label { font-size:11px; color:var(--ink3); font-weight:500; }
-.cash-bar-amt   { font-size:16px; font-weight:800; color:var(--green); letter-spacing:-0.3px; }
-.cash-bar.warn  .cash-bar-amt   { color:#E65100; }
-.cash-bar.danger .cash-bar-amt  { color:var(--red); }
-
-.cash-bar-msg   { font-size:11px; font-weight:600; text-align:right; }
-.cash-bar.warn  .cash-bar-msg   { color:#E65100; }
-.cash-bar.danger .cash-bar-msg  { color:var(--red); }
+.cash-pill-msg { font-size:11px; font-weight:600; color:var(--ink3); }
+.cash-pill.warn   .cash-pill-msg { color:#E65100; }
+.cash-pill.danger .cash-pill-msg { color:var(--red); }
 
 /* ── insufficient warning on confirm button ── */
 .cash-insufficient-warn {
@@ -797,6 +796,11 @@ nav {
       <span class="app-name">ScrapPOS</span>
     </div>
     <div class="header-actions">
+      <div class="cash-pill" id="cash-bar">
+        <i class="ph ph-wallet cash-pill-icon" id="cash-pill-icon"></i>
+        <span class="cash-pill-amt" id="cash-bar-amt">...</span>
+        <span class="cash-pill-msg" id="cash-bar-msg"></span>
+      </div>
       <button class="icon-btn" title="รีเฟรช" onclick="loadItems()">
         <i class="ph ph-arrows-clockwise"></i>
       </button>
@@ -815,17 +819,6 @@ nav {
       </div>
     </div>
 
-    <!-- CASH BALANCE BAR -->
-    <div class="cash-bar" id="cash-bar">
-      <div class="cash-bar-left">
-        <div class="cash-bar-icon"><i class="ph ph-wallet"></i></div>
-        <div>
-          <div class="cash-bar-label">เงินสดคงเหลือ</div>
-          <div class="cash-bar-amt" id="cash-bar-amt">กำลังโหลด...</div>
-        </div>
-      </div>
-      <div class="cash-bar-msg" id="cash-bar-msg"></div>
-    </div>
 
     <div class="cat-bar" id="cat-bar"><button class="cat-btn on" data-cat="all">ทั้งหมด</button></div>
 
@@ -964,7 +957,6 @@ nav {
     <div class="kg-display">
       <!-- Tape: รายการที่บวกไปแล้ว -->
       <div class="kg-tape" id="kg-tape"></div>
-      <div class="kg-tape-divider"></div>
       <!-- Current input row -->
       <div class="kg-input-row">
         <div class="kg-input-left">
@@ -1068,8 +1060,7 @@ function renderIcon(icon, cat, size=28) {
 let ITEMS = [];
 let cart = {};
 let CATS = [];
-let cashBalance = null;  // เงินสดคงเหลือ (null = ยังไม่โหลด)
-function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
+let cashBalance = null;  // เงินสดคงเหลือ (null = ยังไม่โหลด)function catLabel(s){ return CATS.find(c=>c.slug===s)?.label||s; }
 function catIcon(s){  return CATS.find(c=>c.slug===s)?.icon||'📦'; }
 
 // ══════════════════════════════════════════
@@ -1644,15 +1635,15 @@ async function loadCashBalance() {
 }
 
 function renderCashBar() {
-  const bar    = document.getElementById('cash-bar');
-  const amtEl  = document.getElementById('cash-bar-amt');
-  const msgEl  = document.getElementById('cash-bar-msg');
-  const iconEl = bar.querySelector('.cash-bar-icon i');
+  const bar   = document.getElementById('cash-bar');
+  const amtEl = document.getElementById('cash-bar-amt');
+  const msgEl = document.getElementById('cash-bar-msg');
+  const iconEl = document.getElementById('cash-pill-icon');
 
   if (cashBalance === null) {
-    amtEl.textContent = 'โหลดไม่ได้';
-    bar.className = 'cash-bar';
-    msgEl.textContent = '';
+    amtEl.textContent = '—';
+    bar.className = 'cash-pill';
+    if (msgEl) msgEl.textContent = '';
     return;
   }
 
@@ -1660,17 +1651,17 @@ function renderCashBar() {
   amtEl.textContent = `฿${fmt}`;
 
   if (cashBalance <= 0) {
-    bar.className = 'cash-bar danger';
-    iconEl.className = 'ph ph-warning-circle';
-    msgEl.textContent = '⚠️ ไม่มีเงินสด';
+    bar.className = 'cash-pill danger';
+    if (iconEl) iconEl.className = 'ph ph-warning-circle cash-pill-icon';
+    if (msgEl) msgEl.textContent = '';
   } else if (cashBalance < 500) {
-    bar.className = 'cash-bar warn';
-    iconEl.className = 'ph ph-warning';
-    msgEl.textContent = 'เงินสดใกล้หมด';
+    bar.className = 'cash-pill warn';
+    if (iconEl) iconEl.className = 'ph ph-warning cash-pill-icon';
+    if (msgEl) msgEl.textContent = '';
   } else {
-    bar.className = 'cash-bar';
-    iconEl.className = 'ph ph-wallet';
-    msgEl.textContent = '';
+    bar.className = 'cash-pill';
+    if (iconEl) iconEl.className = 'ph ph-wallet cash-pill-icon';
+    if (msgEl) msgEl.textContent = '';
   }
 }
 

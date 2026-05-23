@@ -1647,8 +1647,8 @@ function renderCashBar() {
     return;
   }
 
-  const fmt = cashBalance.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
-  amtEl.textContent = `฿${fmt}`;
+  const fmt = Math.floor(cashBalance).toLocaleString('th-TH');
+  amtEl.textContent = fmt;
 
   if (cashBalance <= 0) {
     bar.className = 'cash-pill danger';

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ประวัติ</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <button class="back-btn" onclick="location.href='index.html'">←</button>
+  <h1>ประวัติทั้งหมด</h1>
+</header>
+
+<main>
+  <div class="summary-card">
+    <div class="row"><span class="label">รับซื้อรวม</span><span class="value buy" id="sum-buy">฿0.00</span></div>
+    <div class="row"><span class="label">ขายออกรวม</span><span class="value sell" id="sum-sell">฿0.00</span></div>
+  </div>
+  <div id="tx-list"></div>
+</main>
+
+<script src="js/common.js"></script>
+<script src="js/db.js"></script>
+<script src="js/history.js"></script>
+</body>
+</html>

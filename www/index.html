@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>รับซื้อ-ขาย</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <h1>รับซื้อ-ขายของเก่า</h1>
+</header>
+
+<main>
+  <div class="big-btn-grid">
+    <button class="big-btn buy" onclick="location.href='transaction.html?type=buy'">
+      <span class="icon">📥</span>
+      <span>รับซื้อ</span>
+    </button>
+    <button class="big-btn sell" onclick="location.href='transaction.html?type=sell'">
+      <span class="icon">📤</span>
+      <span>ขายออก</span>
+    </button>
+  </div>
+
+  <div class="summary-card">
+    <div class="row"><span class="label">วันนี้</span><span class="label" id="today-date"></span></div>
+    <div class="row"><span class="label">รับซื้อรวม</span><span class="value buy" id="sum-buy">฿0.00</span></div>
+    <div class="row"><span class="label">ขายออกรวม</span><span class="value sell" id="sum-sell">฿0.00</span></div>
+  </div>
+
+  <div class="link-row">
+    <a class="link-btn" href="history.html">📋 ประวัติทั้งหมด</a>
+    <a class="link-btn" href="#" id="export-btn">⬇️ Export ข้อมูล</a>
+  </div>
+</main>
+
+<script src="js/common.js"></script>
+<script src="js/db.js"></script>
+<script src="js/export.js"></script>
+<script>
+async function loadSummary() {
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+  try {
+    const txs = await DB.getTodayTransactions();
+    const buyTotal = txs.filter(t => t.type === 'buy').reduce((s, t) => s + t.total, 0);
+    const sellTotal = txs.filter(t => t.type === 'sell').reduce((s, t) => s + t.total, 0);
+    document.getElementById('sum-buy').textContent = formatMoney(buyTotal);
+    document.getElementById('sum-sell').textContent = formatMoney(sellTotal);
+  } catch (e) {
+    console.error(e);
+  }
+}
+document.getElementById('export-btn').onclick = (e) => { e.preventDefault(); exportAllData(); };
+loadSummary();
+</script>
+</body>
+</html>

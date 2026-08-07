@@ -1,9 +1,0 @@
-{
-  "appId": "com.janrecyc.simplescrap",
-  "appName": "รับซื้อ-ขาย",
-  "webDir": "www",
-  "bundledWebRuntime": false,
-  "server": {
-    "androidScheme": "https"
-  }
-}

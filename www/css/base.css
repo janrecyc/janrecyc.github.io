@@ -1,0 +1,51 @@
+/* ══════════════════════════════════════════
+   base.css — CSS Variables & Reset
+   ScrapPOS shared styles
+══════════════════════════════════════════ */
+
+:root {
+  --ink:       #0A0A0F;
+  --ink2:      #3A3A4A;
+  --ink3:      #8A8A9A;
+  --surface:   #F5F5FA;
+  --white:     #FFFFFF;
+  --primary:   #1A6BFF;
+  --primary-d: #0040CC;
+  --green:     #00C853;
+  --red:       #FF3B30;
+  --amber:     #FF9F0A;
+  --card-sh:   0 2px 20px rgba(10,10,30,0.07), 0 0 0 0.5px rgba(10,10,30,0.06);
+  --card-sh-active: 0 8px 32px rgba(26,107,255,0.18), 0 0 0 1.5px #1A6BFF;
+  --r: 20px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Prompt', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* ── Keyframes shared ── */
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes pulse   { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeDown{ from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn  { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:translateX(0); } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+@keyframes tape-in {
+  from { opacity:0; transform: translateY(-6px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.spin { animation: spin .8s linear infinite; }

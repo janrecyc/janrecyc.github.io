@@ -1,10 +1,10 @@
 // ══════════════════════════════════════════
 //  sell.js — Logic for sell.html (ขายออก)
-//  ScrapPOS
+//  JanRecyc
 // ══════════════════════════════════════════
 
 // ══ ตั้งค่าร้าน — แก้ตรงนี้ ══
-const SHOP_NAME    = 'ScrapPOS';
+const SHOP_NAME    = 'JanRecyc';
 const SHOP_TAGLINE = 'ร้านรับซื้อของเก่า / รีไซเคิล';
 const SHOP_TEL     = '';   // เบอร์โทร เช่น '081-234-5678'
 

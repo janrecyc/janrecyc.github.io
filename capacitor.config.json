@@ -1,6 +1,6 @@
 {
-  "appId": "com.janrecyc.scrappos.local",
-  "appName": "ScrapPOS",
+  "appId": "com.janrecyc.pos.local",
+  "appName": "JanRecyc",
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {

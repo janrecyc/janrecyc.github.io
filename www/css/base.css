@@ -21,6 +21,10 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+  overscroll-behavior: none;
+}
+
 body {
   font-family: 'Prompt', sans-serif;
   -webkit-tap-highlight-color: transparent;

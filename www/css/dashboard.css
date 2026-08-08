@@ -7,6 +7,7 @@
   --primary:   #FF6B00;
   --primary-d: #CC5200;
   --primary-l: rgba(255,107,0,0.10);
+  --nav-accent: #FF6B00;
   --green:     #00C853;
   --green-l:   rgba(0,200,83,0.10);
   --red:       #FF3B30;
@@ -121,7 +122,7 @@ header {
 .config-banner i{color:var(--amber);font-size:16px;}
 
 .scroll-body {
-  flex:1;overflow-y:auto;
+  flex:1;overflow-y:auto;overscroll-behavior:contain;
   padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 80px);
   scrollbar-width:none;
 }
@@ -245,9 +246,9 @@ svg{width:100%;height:auto;}
 nav{background:var(--white);border-top:1px solid rgba(10,10,30,0.06);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0px);}
 .nav-row{display:flex;}
 .nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;text-decoration:none;color:var(--ink3);font-size:10px;font-weight:500;position:relative;}
-.nav-tab.on{color:var(--primary);}
+.nav-tab.on{color:var(--nav-accent);}
 .nav-tab i{font-size:20px;}
-.nav-tab-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--primary);border-radius:0 0 2px 2px;transition:width .2s;}
+.nav-tab-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--nav-accent);border-radius:0 0 2px 2px;transition:width .2s;}
 .nav-tab.on .nav-tab-indicator{width:24px;}
 
 /* CASH MODAL */

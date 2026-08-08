@@ -1,6 +1,6 @@
 {
-  "appId": "com.janrecyc.simplescrap",
-  "appName": "รับซื้อ-ขาย",
+  "appId": "com.janrecyc.scrappos.local",
+  "appName": "ScrapPOS",
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {

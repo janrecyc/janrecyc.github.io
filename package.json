@@ -1,8 +1,8 @@
 {
-  "name": "simple-scrap-app",
+  "name": "scrappos-local",
   "version": "1.0.0",
   "private": true,
-  "description": "แอพรับซื้อ-ขายของเก่าแบบง่าย ใช้ฐานข้อมูล SQLite ในเครื่อง (offline, ไม่ต้องมีเน็ต)",
+  "description": "ScrapPOS (buy/sell/sort/items/dashboard) running fully offline on local SQLite — no Supabase, no login",
   "scripts": {
     "sync": "npx cap sync android",
     "open:android": "npx cap open android",
@@ -11,9 +11,7 @@
   "dependencies": {
     "@capacitor-community/sqlite": "^6.0.2",
     "@capacitor/android": "^6.1.2",
-    "@capacitor/core": "^6.1.2",
-    "@capacitor/filesystem": "^6.0.1",
-    "@capacitor/share": "^6.0.2"
+    "@capacitor/core": "^6.1.2"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2"

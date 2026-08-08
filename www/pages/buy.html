@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ScrapPOS — รับซื้อ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/buy.css">
+</head>
+<body>
+
+<div class="status-bar"></div>
+
+<div class="config-banner" id="config-banner">
+  <i class="ph ph-warning-circle"></i>
+  <span>กรุณาตั้งค่า Supabase ใน <b>js/supabase.js</b> — ตอนนี้ใช้ข้อมูล Demo</span>
+</div>
+
+<header>
+  <div class="header-top">
+    <div class="app-logo">
+      <div class="logo-mark"><i class="ph ph-recycle"></i></div>
+      <span class="app-name">ScrapPOS</span>
+    </div>
+    <div class="header-actions">
+      <div class="cash-pill" id="cash-bar">
+        <i class="ph ph-wallet cash-pill-icon" id="cash-pill-icon"></i>
+        <span class="cash-pill-amt" id="cash-bar-amt">...</span>
+        <span class="cash-pill-msg" id="cash-bar-msg"></span>
+      </div>
+      <button class="icon-btn" title="รีเฟรช" onclick="loadItems()">
+        <i class="ph ph-arrows-clockwise"></i>
+      </button>
+      <button class="icon-btn" onclick="window.AUTH && window.AUTH.logout()" title="ออกจากระบบ">
+        <i class="ph ph-sign-out"></i>
+      </button>
+    </div>
+  </div>
+  <div class="page-title">รับซื้อ <span class="page-sub">Buy</span></div>
+</header>
+
+<div class="app-body">
+  <div class="catalogue">
+    <div class="search-area">
+      <div class="search-field">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="ค้นหาสินค้า...">
+      </div>
+    </div>
+
+    <div class="cat-bar" id="cat-bar">
+      <button class="cat-btn on" data-cat="all">ทั้งหมด</button>
+    </div>
+
+    <div class="item-grid-wrap">
+      <div class="item-grid" id="item-grid">
+        <div class="grid-loading">
+          <i class="ph ph-spinner-gap spin" style="font-size:28px;"></i>
+          <span style="font-size:13px;">กำลังโหลดสินค้า...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART PANEL -->
+  <div class="cart-panel" id="cart-panel">
+    <div class="cart-header">
+      <div class="cart-title">
+        <i class="ph ph-shopping-cart-simple"></i>
+        ตะกร้ารับซื้อ
+        <span class="cart-count-badge" id="cart-count">0</span>
+      </div>
+      <button class="cart-clear-btn" onclick="clearCart()">ล้างทั้งหมด</button>
+    </div>
+    <div class="cart-items" id="cart-items-list"></div>
+    <div class="cart-confirm-row">
+      <div class="cash-insufficient-warn" id="cash-insufficient-warn">
+        <i class="ph ph-warning-circle"></i>
+        <span id="cash-insufficient-text">เงินสดไม่พอ — ขาดอีก ฿0</span>
+      </div>
+      <button class="cart-confirm-btn" id="cart-confirm-btn" onclick="confirmCart()">
+        <i class="ph ph-check-circle"></i>
+        <span id="cart-confirm-label">บันทึกทั้งหมด</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav>
+  <div class="nav-row">
+    <a href="buy.html" class="nav-tab on">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph-fill ph-download-simple"></i><span>รับซื้อ</span>
+    </a>
+    <a href="sell.html" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-upload-simple"></i><span>ขายออก</span>
+    </a>
+    <a href="sort.html" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-recycle"></i><span>คัดแยก</span>
+    </a>
+    <a href="items.html" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-pencil-simple"></i><span>สินค้า</span>
+    </a>
+    <a href="dashboard.html" class="nav-tab">
+      <div class="nav-tab-indicator"></div>
+      <i class="ph ph-chart-pie-slice"></i><span>Dashboard</span>
+    </a>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<!-- CONFIRM DIALOG -->
+<div class="dialog-backdrop" id="dlg-backdrop"></div>
+<div class="dialog-box" id="dlg-box">
+  <div class="dialog-handle-row"><div class="dialog-handle"></div></div>
+  <div class="dialog-icon"><i class="ph-fill ph-check-circle"></i></div>
+  <div class="dialog-title">บันทึกสำเร็จ! 🎉</div>
+  <div class="dialog-sub">ต้องการพิมพ์ใบเสร็จให้ลูกค้าไหม?</div>
+  <div class="dialog-summary">
+    <div>
+      <div class="dialog-summary-label">ยอดที่จ่าย</div>
+      <div class="dialog-summary-amount" id="dlg-amount">฿0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="dialog-summary-items" id="dlg-items">0 รายการ</div>
+    </div>
+  </div>
+  <div class="dialog-btn-row">
+    <button class="dialog-btn no" onclick="skipReceipt()">
+      <i class="ph ph-x"></i> ไม่ต้องการ
+    </button>
+    <button class="dialog-btn yes" onclick="openReceipt()">
+      <i class="ph ph-receipt"></i> ต้องการใบเสร็จ
+    </button>
+  </div>
+</div>
+
+<!-- RECEIPT SHEET -->
+<div class="receipt-backdrop" id="rcp-backdrop" onclick="closeReceipt()"></div>
+<div class="receipt-sheet" id="rcp-sheet">
+  <div class="receipt-handle-row"><div class="receipt-handle"></div></div>
+  <div class="receipt-paper" id="rcp-paper"><!-- filled by JS --></div>
+  <div class="receipt-actions">
+    <button class="ra-btn close" onclick="closeReceipt()">
+      <i class="ph ph-arrow-left"></i> ปิด
+    </button>
+    <button class="ra-btn print" onclick="printReceipt()">
+      <i class="ph ph-printer"></i> พิมพ์ใบเสร็จ
+    </button>
+  </div>
+</div>
+
+<!-- KG MODAL -->
+<div class="kg-modal-backdrop" id="kg-backdrop" onclick="closeKgModal()"></div>
+<div class="kg-modal" id="kg-modal">
+  <div class="kg-sheet">
+    <div class="kg-handle"></div>
+
+    <div class="kg-header">
+      <div class="kg-item-info">
+        <div class="kg-item-icon" id="kg-item-icon">🔩</div>
+        <div>
+          <div class="kg-item-name" id="kg-item-name">เหล็กหนัก</div>
+          <div class="kg-item-price" id="kg-item-price">฿4.50 / กก.</div>
+        </div>
+      </div>
+      <button class="kg-close-btn" onclick="closeKgModal()">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+
+    <div class="kg-mode-toggle" id="kg-mode-toggle">
+      <button class="kg-mode-btn active" id="mode-btn-kg" onclick="setMode('kg')">
+        <i class="ph ph-barbell"></i> กิโลกรัม
+      </button>
+      <button class="kg-mode-btn" id="mode-btn-piece" onclick="setMode('piece')">
+        <i class="ph ph-stack"></i> ชิ้น / อัน
+      </button>
+    </div>
+
+    <div class="kg-display">
+      <div class="kg-tape" id="kg-tape"></div>
+      <div class="kg-input-row">
+        <div class="kg-input-left">
+          <div class="kg-display-label" id="kg-display-label">น้ำหนัก</div>
+          <div class="kg-display-val">
+            <span id="kg-display-num">0</span>
+            <span class="unit" id="kg-unit-label">กก.</span>
+            <span class="cursor"></span>
+          </div>
+        </div>
+        <div class="kg-display-right">
+          <div class="kg-subtotal-label">รวม</div>
+          <div class="kg-subtotal-val" id="kg-subtotal">฿0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kg-numpad">
+      <button class="kg-key" onclick="kpNum('1',event)"><span class="kg-key-num">1</span></button>
+      <button class="kg-key" onclick="kpNum('2',event)"><span class="kg-key-num">2</span></button>
+      <button class="kg-key" onclick="kpNum('3',event)"><span class="kg-key-num">3</span></button>
+
+      <button class="kg-key" onclick="kpNum('4',event)"><span class="kg-key-num">4</span></button>
+      <button class="kg-key" onclick="kpNum('5',event)"><span class="kg-key-num">5</span></button>
+      <button class="kg-key" onclick="kpNum('6',event)"><span class="kg-key-num">6</span></button>
+
+      <button class="kg-key" onclick="kpNum('7',event)"><span class="kg-key-num">7</span></button>
+      <button class="kg-key" onclick="kpNum('8',event)"><span class="kg-key-num">8</span></button>
+      <button class="kg-key" onclick="kpNum('9',event)"><span class="kg-key-num">9</span></button>
+
+      <button class="kg-key dark" onclick="kpDot(event)"><span class="kg-key-num" style="font-size:20px">.</span></button>
+      <button class="kg-key" onclick="kpNum('0',event)"><span class="kg-key-num">0</span></button>
+      <button class="kg-key dark" onclick="kpBack(event)"><i class="ph ph-backspace kg-key-icon"></i></button>
+
+      <button class="kg-key multiply-key" onclick="kpMultiply(event)">
+        <span class="kg-key-op" style="color:var(--calc-op);font-size:22px;font-weight:700;">×</span>
+      </button>
+      <button class="kg-key plus-key" onclick="kpPlus(event)"><span class="kg-key-op">+</span></button>
+      <button class="kg-key dark clear-inline-key" onclick="kpClear(event)">
+        <i class="ph ph-x kg-key-icon"></i>
+      </button>
+    </div>
+
+    <div class="kg-confirm-row">
+      <button class="kg-confirm-btn" id="kg-confirm-btn" onclick="confirmKg()" disabled>
+        <i class="ph ph-check-circle"></i>
+        <span id="kg-confirm-label">เพิ่มในตะกร้า</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/supabase.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/local-rest.js"></script>
+<script src="../js/buy.js"></script>
+</body>
+</html>

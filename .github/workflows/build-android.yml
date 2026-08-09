@@ -38,6 +38,11 @@ jobs:
           cp -f resources/android-icon/mipmap-anydpi-v26/*.xml android/app/src/main/res/mipmap-anydpi-v26/
           # ไอคอนดีไซน์ใหม่อ้างอิง @drawable/ic_launcher_background และ @drawable/ic_launcher_foreground
           # (ไม่ใช่สีพื้นหลังแบบเดิมแล้ว) จึงต้องคัดลอกเลเยอร์ drawable ไปด้วย
+          # เทมเพลตเริ่มต้นของ Capacitor มี drawable/ic_launcher_background.xml (และบางเวอร์ชันมี
+          # drawable-v24/ic_launcher_foreground.xml) นิยาม resource ชื่อเดียวกันไว้ก่อนแล้ว ต้องลบทิ้ง
+          # ก่อน ไม่งั้นจะชน .png ของเรา (ห้ามมี resource ชื่อซ้ำในชนิดเดียวกัน ต่อให้นามสกุลต่างกัน)
+          find android/app/src/main/res -type d -name 'drawable*' \
+            -exec rm -f {}/ic_launcher_background.xml {}/ic_launcher_foreground.xml \;
           mkdir -p android/app/src/main/res/drawable
           cp -f resources/android-icon/drawable/*.png android/app/src/main/res/drawable/
 

@@ -36,10 +36,10 @@ jobs:
           done
           mkdir -p android/app/src/main/res/mipmap-anydpi-v26
           cp -f resources/android-icon/mipmap-anydpi-v26/*.xml android/app/src/main/res/mipmap-anydpi-v26/
-          # เปลี่ยนสีพื้นหลังของ adaptive icon ให้เป็นสีกรมท่าตามดีไซน์ใหม่
-          # (หาไฟล์ที่นิยาม ic_launcher_background แล้วแก้ค่าสีในไฟล์นั้น กันปัญหา resource ซ้ำ)
-          grep -rl 'ic_launcher_background' android/app/src/main/res/values/*.xml | \
-            xargs sed -i -E 's/(<color name="ic_launcher_background">)#[0-9A-Fa-f]{6,8}(<\/color>)/\1#0A0A0F\2/'
+          # ไอคอนดีไซน์ใหม่อ้างอิง @drawable/ic_launcher_background และ @drawable/ic_launcher_foreground
+          # (ไม่ใช่สีพื้นหลังแบบเดิมแล้ว) จึงต้องคัดลอกเลเยอร์ drawable ไปด้วย
+          mkdir -p android/app/src/main/res/drawable
+          cp -f resources/android-icon/drawable/*.png android/app/src/main/res/drawable/
 
       - name: Sync Capacitor (copies www/ + plugins into Android project)
         run: npx cap sync android

@@ -8,8 +8,9 @@ let SHOP_NAME    = 'ScrapPOS';
 let SHOP_TAGLINE = 'ร้านรับซื้อของเก่า / รีไซเคิล';
 let SHOP_TEL     = '';   // เบอร์โทร เช่น '081-234-5678'
 let SHOP_ADDRESS = '';
+let SHOP_LOGO    = '';
 
-// โหลดข้อมูลร้าน (ชื่อ/เบอร์โทร/ที่อยู่) จากตาราง profiles มาทับค่าเริ่มต้นด้านบน
+// โหลดข้อมูลร้าน (ชื่อ/เบอร์โทร/ที่อยู่/โลโก้) จากตาราง profiles มาทับค่าเริ่มต้นด้านบน
 // เพื่อให้ใบเสร็จใช้ชื่อร้านที่ตั้งไว้ในเมนู "ข้อมูลร้าน" (Dashboard) แทนคำว่า ScrapPOS เฉยๆ
 async function loadShopProfileForReceipt() {
   try {
@@ -18,6 +19,7 @@ async function loadShopProfileForReceipt() {
     const p = rows[0];
     if (p.name)  SHOP_NAME    = p.name;
     if (p.phone) SHOP_TEL     = p.phone;
+    if (p.logo)  SHOP_LOGO    = p.logo;
     const addr = [p.address, p.district, p.province, p.postal_code].filter(Boolean).join(' ');
     if (addr) SHOP_ADDRESS = addr;
   } catch (e) { console.warn('loadShopProfileForReceipt:', e); }
@@ -444,7 +446,8 @@ function openReceipt() {
 
   document.getElementById('rcp-paper').innerHTML = `
     <div class="rp-shop">
-      <div class="rp-shop-name">🔄 ${esc(SHOP_NAME)}</div>
+      ${SHOP_LOGO ? `<img class="rp-shop-logo" src="${SHOP_LOGO}" alt="โลโก้ร้าน">` : ''}
+      <div class="rp-shop-name">${SHOP_LOGO ? '' : '🔄 '}${esc(SHOP_NAME)}</div>
       <div class="rp-shop-sub">${esc(SHOP_TAGLINE)}</div>
       ${telHtml}
       ${addrHtml}

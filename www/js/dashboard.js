@@ -685,8 +685,59 @@ async function loadShopProfile() {
     document.getElementById('pse-maps-url').value = p.maps_url    || '';
     document.getElementById('pse-lat').value      = p.lat != null ? p.lat : '';
     document.getElementById('pse-lng').value      = p.lng != null ? p.lng : '';
+    _shopLogoDataUrl = p.logo || null;
+    renderShopLogoPreview();
   } catch(e) { console.warn('loadShopProfile:', e); }
 }
+
+// ── โลโก้ร้าน ──
+let _shopLogoDataUrl = null;
+
+function renderShopLogoPreview() {
+  const box = document.getElementById('pse-logo-preview');
+  const removeBtn = document.getElementById('pse-logo-remove-btn');
+  if (!box) return;
+  if (_shopLogoDataUrl) {
+    box.innerHTML = `<img src="${_shopLogoDataUrl}" alt="โลโก้ร้าน">`;
+    if (removeBtn) removeBtn.style.display = '';
+  } else {
+    box.innerHTML = '<i class="ph ph-recycle"></i>';
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
+window.handleShopLogoFile = function(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = ''; // เผื่อเลือกไฟล์เดิมซ้ำ จะได้ยิง change อีกครั้งได้
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('❌ กรุณาเลือกไฟล์รูปภาพ', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      // ย่อ+ครอปเป็นสี่เหลี่ยมจัตุรัส 160x160 กัน logo ไฟล์ใหญ่เกินไป (เก็บเป็น TEXT ใน SQLite)
+      const SIZE = 160;
+      const canvas = document.createElement('canvas');
+      canvas.width = SIZE; canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+      const side = Math.min(img.width, img.height);
+      const sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+      _shopLogoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      renderShopLogoPreview();
+    };
+    img.onerror = () => toast('❌ อ่านรูปภาพไม่สำเร็จ', 'error');
+    img.src = reader.result;
+  };
+  reader.onerror = () => toast('❌ อ่านไฟล์ไม่สำเร็จ', 'error');
+  reader.readAsDataURL(file);
+};
+
+window.removeShopLogo = function() {
+  _shopLogoDataUrl = null;
+  renderShopLogoPreview();
+};
 
 window.saveShopProfile = async function() {
   const btn    = document.getElementById('pse-save-btn');
@@ -710,6 +761,7 @@ window.saveShopProfile = async function() {
     maps_url:      document.getElementById('pse-maps-url').value.trim() || null,
     lat:           parseFloat(document.getElementById('pse-lat').value)  || null,
     lng:           parseFloat(document.getElementById('pse-lng').value)  || null,
+    logo:          _shopLogoDataUrl || null,
   };
 
   try {

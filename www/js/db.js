@@ -72,13 +72,27 @@ async function dbInit() {
         maps_url TEXT,
         lat REAL,
         lng REAL,
+        logo TEXT,
         is_active INTEGER DEFAULT 1
       );
     `,
     transaction: true
   });
+  await _migrateAddColumn(sq, 'profiles', 'logo', 'TEXT');
   _dbReady = true;
   await _seedDefaults(sq);
+}
+
+// เพิ่มคอลัมน์ให้ตารางที่มีอยู่แล้ว (สำหรับแอพที่เคยติดตั้งไปก่อนหน้านี้)
+// CREATE TABLE IF NOT EXISTS ด้านบนจะไม่เพิ่มคอลัมน์ใหม่ให้ตารางเดิมที่มีอยู่แล้ว จึงต้องเช็คแยก
+async function _migrateAddColumn(sq, table, column, type) {
+  try {
+    const info = await sq.query({ database: DB_NAME, statement: `PRAGMA table_info(${table})`, values: [] });
+    const cols = (info.values || []).map(r => r.name);
+    if (!cols.includes(column)) {
+      await sq.execute({ database: DB_NAME, statements: `ALTER TABLE ${table} ADD COLUMN ${column} ${type};`, transaction: true });
+    }
+  } catch (e) { console.warn('_migrateAddColumn:', table, column, e); }
 }
 
 // ══════════════════════════════════════════

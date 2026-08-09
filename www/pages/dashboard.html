@@ -308,6 +308,20 @@
     <button class="shop-close-btn" onclick="closeShopEdit()"><i class="ph ph-x"></i></button>
   </div>
   <div class="shop-sheet-body">
+    <div class="ps-logo-row">
+      <div class="ps-logo-preview" id="pse-logo-preview" onclick="document.getElementById('pse-logo-file').click()">
+        <i class="ph ph-recycle"></i>
+      </div>
+      <div class="ps-logo-actions">
+        <button type="button" class="ps-logo-btn" onclick="document.getElementById('pse-logo-file').click()">
+          <i class="ph ph-image"></i> เปลี่ยนโลโก้
+        </button>
+        <button type="button" class="ps-logo-btn remove" id="pse-logo-remove-btn" onclick="removeShopLogo()" style="display:none;">
+          <i class="ph ph-trash"></i> ลบโลโก้
+        </button>
+      </div>
+      <input type="file" id="pse-logo-file" accept="image/*" style="display:none;" onchange="handleShopLogoFile(event)">
+    </div>
     <div class="ps-field-group">
       <div class="ps-field">
         <label><i class="ph ph-buildings"></i> ชื่อร้าน / บริษัท</label>
@@ -380,6 +394,7 @@
 <script src="../js/supabase.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/local-rest.js"></script>
+<script src="../js/shop-brand.js"></script>
 <script src="../js/dashboard.js"></script>
 </body>
 </html>

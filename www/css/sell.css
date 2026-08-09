@@ -632,6 +632,7 @@ nav{
   padding:22px 20px 20px; box-shadow:0 2px 16px rgba(10,10,30,0.06);
 }
 .srcp-shop{text-align:center;margin-bottom:16px;}
+.srcp-shop-logo{width:44px;height:44px;border-radius:12px;object-fit:cover;margin:0 auto 6px;display:block;}
 .srcp-shop-name{font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;}
 .srcp-shop-sub{font-size:11px;color:var(--ink3);margin-top:3px;}
 .srcp-shop-tel{font-size:12px;color:var(--ink2);margin-top:2px;font-weight:500;}

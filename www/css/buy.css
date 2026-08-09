@@ -575,16 +575,17 @@ nav {
 .rp-footer      { text-align:center; font-size:11px; color:var(--ink3); margin-top:14px; line-height:1.6; }
 .rp-bill-no     { font-family:monospace; font-size:10px; color:var(--ink3); text-align:center; margin-top:10px; letter-spacing:0.5px; }
 
-.receipt-actions { display:flex; gap:10px; padding:14px 16px 0; }
+.receipt-actions { display:flex; gap:8px; padding:14px 16px 0; }
 .ra-btn {
-  flex:1; padding:14px; border-radius:16px; border:none;
-  font-family:'Prompt',sans-serif; font-size:14px; font-weight:700;
+  flex:1; padding:14px 6px; border-radius:16px; border:none;
+  font-family:'Prompt',sans-serif; font-size:13px; font-weight:700;
   cursor:pointer; display:flex; align-items:center; justify-content:center;
-  gap:6px; transition:all .14s;
+  gap:5px; transition:all .14s; white-space:nowrap;
 }
 .ra-btn:active { transform:scale(0.97); }
-.ra-btn.close  { background:var(--white); color:var(--ink2); box-shadow:var(--card-sh); }
+.ra-btn.close  { flex:0.7; background:var(--white); color:var(--ink2); box-shadow:var(--card-sh); }
 .ra-btn.print  { background:var(--ink); color:#fff; }
+.ra-btn.line   { background:#06C755; color:#fff; }
 
 @media print {
   body > *:not(.receipt-sheet) { display:none !important; }

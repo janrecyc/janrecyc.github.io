@@ -663,14 +663,15 @@ nav{
 .srcp-total-kg{font-size:12px;color:var(--ink3);text-align:right;margin-top:3px;}
 .srcp-footer{text-align:center;font-size:11px;color:var(--ink3);margin-top:14px;line-height:1.6;}
 .srcp-bill-no{font-family:monospace;font-size:10px;color:var(--ink3);text-align:center;margin-top:10px;letter-spacing:0.5px;}
-.srcp-actions{display:flex;gap:10px;padding:14px 16px 0;}
+.srcp-actions{display:flex;gap:8px;padding:14px 16px 0;}
 .sra-btn{
-  flex:1;padding:14px;border-radius:16px;border:none; font-family:'Prompt',sans-serif;font-size:14px;font-weight:700;
-  cursor:pointer;display:flex;align-items:center;justify-content:center; gap:6px;transition:all .14s;
+  flex:1;padding:14px 6px;border-radius:16px;border:none; font-family:'Prompt',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center; gap:5px;transition:all .14s; white-space:nowrap;
 }
 .sra-btn:active{transform:scale(0.97);}
-.sra-btn.close{background:var(--white);color:var(--ink2);box-shadow:var(--card-sh);}
+.sra-btn.close{flex:0.7;background:var(--white);color:var(--ink2);box-shadow:var(--card-sh);}
 .sra-btn.print{background:var(--ink);color:#fff;}
+.sra-btn.line {background:#06C755;color:#fff;}
 
 /* ══════════════════════════════
    PRINT — 58 mm thermal receipt

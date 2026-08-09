@@ -525,6 +525,61 @@ async function printReceipt() {
   window.print();
 }
 
+// ══════════════════════════════════════════
+//  ส่งใบเสร็จเป็นรูปภาพผ่าน LINE
+// ══════════════════════════════════════════
+// แปลง #rcp-paper เป็นรูปภาพด้วย html2canvas แล้วแชร์ผ่าน share sheet
+// (เลือกแอป LINE ได้จากหน้าต่างที่เปิดขึ้นมา) ต่างจาก printReceipt() ที่ส่งเป็นข้อความ
+async function sendLine() {
+  const paper = document.getElementById('rcp-paper');
+  if (!paper) return;
+  if (!window.html2canvas) {
+    toast('❌ โหลดตัวสร้างรูปภาพไม่สำเร็จ ลองใหม่อีกครั้ง', 'error');
+    return;
+  }
+
+  let dataUrl;
+  try {
+    const canvas = await html2canvas(paper, {
+      backgroundColor: '#FFFEF5',
+      scale: 2,
+      useCORS: true,
+    });
+    dataUrl = canvas.toDataURL('image/png');
+  } catch (err) {
+    toast('❌ สร้างรูปใบเสร็จไม่สำเร็จ: ' + (err?.message || err), 'error');
+    return;
+  }
+
+  const capShare = window.Capacitor?.Plugins?.Share;
+  const capFs    = window.Capacitor?.Plugins?.Filesystem;
+
+  if (capShare && capFs) {
+    try {
+      const base64   = dataUrl.split(',')[1];
+      const fileName = `receipt-${Date.now()}.png`;
+      await capFs.writeFile({ path: fileName, data: base64, directory: 'CACHE' });
+      const { uri } = await capFs.getUri({ path: fileName, directory: 'CACHE' });
+      await capShare.share({
+        title: `ใบเสร็จ ${SHOP_NAME}`,
+        files: [uri],
+        dialogTitle: 'ส่งใบเสร็จผ่าน LINE',
+      });
+    } catch (err) {
+      if (err && err.message && !/cancel/i.test(err.message)) {
+        toast('❌ ส่งไม่สำเร็จ: ' + err.message, 'error');
+      }
+    }
+    return;
+  }
+
+  // Fallback (เช่นเปิดใน browser ปกติตอนพัฒนา ไม่มี Capacitor): ดาวน์โหลดรูปแทน
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `receipt-${Date.now()}.png`;
+  a.click();
+}
+
 function closeReceipt() {
   document.getElementById('rcp-backdrop').classList.remove('show');
   document.getElementById('rcp-sheet').classList.remove('show');

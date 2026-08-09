@@ -544,6 +544,7 @@ nav {
 .rp-shop-name  { font-size:21px; font-weight:800; color:var(--ink); letter-spacing:-0.3px; }
 .rp-shop-sub   { font-size:11px; color:var(--ink3); margin-top:3px; }
 .rp-shop-tel   { font-size:12px; color:var(--ink2); margin-top:2px; font-weight:500; }
+.rp-shop-addr  { font-size:11px; color:var(--ink3); margin-top:2px; }
 .rp-divider    { border:none; border-top:1.5px dashed rgba(10,10,30,0.12); margin:13px 0; }
 
 .rp-type-badge {

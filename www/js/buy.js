@@ -3,10 +3,25 @@
 //  ScrapPOS
 // ══════════════════════════════════════════
 
-// ── ตั้งค่าร้าน — แก้ตรงนี้ ──
-const SHOP_NAME    = 'ScrapPOS';
-const SHOP_TAGLINE = 'ร้านรับซื้อของเก่า / รีไซเคิล';
-const SHOP_TEL     = '';   // เบอร์โทร เช่น '081-234-5678'
+// ── ตั้งค่าร้าน — ค่าเริ่มต้น (ถ้ายังไม่เคยกรอก "ข้อมูลร้าน" ในหน้า Dashboard) ──
+let SHOP_NAME    = 'ScrapPOS';
+let SHOP_TAGLINE = 'ร้านรับซื้อของเก่า / รีไซเคิล';
+let SHOP_TEL     = '';   // เบอร์โทร เช่น '081-234-5678'
+let SHOP_ADDRESS = '';
+
+// โหลดข้อมูลร้าน (ชื่อ/เบอร์โทร/ที่อยู่) จากตาราง profiles มาทับค่าเริ่มต้นด้านบน
+// เพื่อให้ใบเสร็จใช้ชื่อร้านที่ตั้งไว้ในเมนู "ข้อมูลร้าน" (Dashboard) แทนคำว่า ScrapPOS เฉยๆ
+async function loadShopProfileForReceipt() {
+  try {
+    const rows = await sbFetch('profiles?is_active=eq.true&order=id&limit=1');
+    if (!rows.length) return;
+    const p = rows[0];
+    if (p.name)  SHOP_NAME    = p.name;
+    if (p.phone) SHOP_TEL     = p.phone;
+    const addr = [p.address, p.district, p.province, p.postal_code].filter(Boolean).join(' ');
+    if (addr) SHOP_ADDRESS = addr;
+  } catch (e) { console.warn('loadShopProfileForReceipt:', e); }
+}
 
 const DEMO_ITEMS = [
   {id:1,  name:'เหล็กหนัก',          icon:'ph-nut',           buy_price:4.50,  unit:'กก.',  sell_mode:'kg',    cat:'metal'},
@@ -424,12 +439,15 @@ function openReceipt() {
 
   const telHtml = SHOP_TEL
     ? `<div class="rp-shop-tel"><i class="ph ph-phone"></i> ${esc(SHOP_TEL)}</div>` : '';
+  const addrHtml = SHOP_ADDRESS
+    ? `<div class="rp-shop-addr"><i class="ph ph-map-pin"></i> ${esc(SHOP_ADDRESS)}</div>` : '';
 
   document.getElementById('rcp-paper').innerHTML = `
     <div class="rp-shop">
       <div class="rp-shop-name">🔄 ${esc(SHOP_NAME)}</div>
       <div class="rp-shop-sub">${esc(SHOP_TAGLINE)}</div>
       ${telHtml}
+      ${addrHtml}
     </div>
     <hr class="rp-divider">
     <div class="rp-type-badge"><i class="ph-fill ph-download-simple"></i> ใบรับซื้อ</div>
@@ -456,10 +474,11 @@ function openReceipt() {
   // เก็บข้อความใบเสร็จแบบ plain-text ไว้ใช้ตอนกด "พิมพ์ใบเสร็จ" (ดู printReceipt())
   const totalKgLine = totalKg > 0 ? `น้ำหนักรวม ${fmtB(totalKg)} กก.\n` : '';
   const telLine = SHOP_TEL ? `โทร ${SHOP_TEL}\n` : '';
+  const addrLine = SHOP_ADDRESS ? `${SHOP_ADDRESS}\n` : '';
   _lastReceiptText =
 `🔄 ${SHOP_NAME}
 ${SHOP_TAGLINE}
-${telLine}
+${telLine}${addrLine}
 ใบรับซื้อ
 วันที่ ${dateStr}
 เวลา ${timeStr} น.
@@ -684,4 +703,5 @@ document.getElementById('kg-modal').addEventListener('touchmove', e => {
 (async () => {
   window.AUTH = { user: { email: 'local@device' }, logout: () => {} };
   loadItems();
+  loadShopProfileForReceipt();
 })();

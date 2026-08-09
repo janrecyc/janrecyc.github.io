@@ -635,6 +635,7 @@ nav{
 .srcp-shop-name{font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;}
 .srcp-shop-sub{font-size:11px;color:var(--ink3);margin-top:3px;}
 .srcp-shop-tel{font-size:12px;color:var(--ink2);margin-top:2px;font-weight:500;}
+.srcp-shop-addr{font-size:11px;color:var(--ink3);margin-top:2px;}
 .srcp-divider{border:none;border-top:1.5px dashed rgba(10,10,30,0.12);margin:13px 0;}
 .srcp-type-badge{
   display:inline-flex;align-items:center;gap:5px; padding:5px 14px;border-radius:100px;
@@ -690,6 +691,7 @@ nav{
   .srcp-shop-name  { font-size: 13pt !important; font-weight: 900 !important; }
   .srcp-shop-sub   { font-size: 7pt  !important; }
   .srcp-shop-tel   { font-size: 8pt  !important; }
+  .srcp-shop-addr  { font-size: 7pt  !important; }
   .srcp-type-badge { font-size: 8pt !important; padding: 2px 8px !important; border-radius: 4px !important; background: #eee !important; color: #333 !important; }
   .srcp-factory-badge { padding: 4px 6px !important; border-radius: 4px !important; border: 1px solid #ccc !important; background: #f8f8f8 !important; }
   .srcp-factory-label { font-size: 6.5pt !important; }

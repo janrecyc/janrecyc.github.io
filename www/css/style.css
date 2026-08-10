@@ -1,0 +1,72 @@
+:root {
+  --bg: #16121f;
+  --card: #221c33;
+  --text: #f2eef9;
+  --text-dim: #a99fc2;
+  --nav-active: #8b7bf7;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans Thai", "IBM Plex Sans Thai", -apple-system, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.statusbar-spacer { height: var(--safe-top); }
+
+/* ---- Page header ---- */
+.page-header {
+  padding: 18px 20px 12px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* ---- Content area (empty by default) ---- */
+.content {
+  flex: 1;
+  padding: 0 20px;
+}
+
+/* ---- Bottom nav ---- */
+.bottom-nav {
+  display: flex;
+  background: #1a1626;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 10px 8px calc(10px + var(--safe-bottom));
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 12px;
+  padding: 6px 0;
+}
+.nav-item svg { width: 24px; height: 24px; }
+.nav-item.active { color: var(--nav-active); }
+.nav-item.active .nav-icon-wrap {
+  background: rgba(139,123,247,0.15);
+  border-radius: 14px;
+}
+.nav-icon-wrap {
+  padding: 4px 18px;
+}

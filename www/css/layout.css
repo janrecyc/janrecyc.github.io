@@ -43,6 +43,14 @@ html, body {
   margin: 0 auto;
 }
 
+/* A slim row above .page-header for page-level icon actions
+   (e.g. the search toggle) that sit above the title, not beside it. */
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px 0;
+}
+
 .page-header {
   padding: 18px 20px 12px;
   font-size: 20px;

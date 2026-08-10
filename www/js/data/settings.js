@@ -23,16 +23,11 @@ const SETTINGS_SECTIONS = [
     title: 'ฟีเจอร์',
     items: [
       {
-        type: 'select',
-        id: 'theme-select',
-        label: 'ธีม',
-        options: [
-          { value: 'light', label: 'สว่าง' },
-          { value: 'dark', label: 'มืด' },
-          { value: 'system', label: 'ตามระบบ' }
-        ],
-        get: () => window.getThemePref(),
-        set: (value) => window.setThemePref(value)
+        type: 'toggle',
+        id: 'theme-toggle',
+        label: 'โหมดสว่าง/มืด',
+        get: () => window.getThemePref() === 'light',
+        set: (isOn) => window.setThemePref(isOn ? 'light' : 'dark')
       }
 
       // Add more feature rows here, e.g.:

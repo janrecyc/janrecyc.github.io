@@ -23,6 +23,7 @@ function renderSettingsList() {
   `).join('');
 
   bindSelectRows(mount);
+  bindToggleRows(mount);
 }
 
 function renderRow(item) {
@@ -49,15 +50,17 @@ function renderRow(item) {
           </div>
         </details>`;
     }
-    case 'toggle':
+    case 'toggle': {
+      const isOn = item.get ? item.get() : !!item.value;
       return `
         <div class="list-row">
           <span class="row-label">${item.label}</span>
           <label class="switch">
-            <input type="checkbox" id="${item.id}">
+            <input type="checkbox" data-toggle-id="${item.id}" ${isOn ? 'checked' : ''}>
             <span class="switch-track"></span>
           </label>
         </div>`;
+    }
     case 'value':
       return `
         <div class="list-row">
@@ -105,4 +108,15 @@ function findSelectItem(id) {
     if (found) return found;
   }
   return null;
+}
+
+// Wires up every "toggle" row: flipping the switch calls that
+// row's `set(isOn)` — works for theme or any future on/off setting.
+function bindToggleRows(root) {
+  root.querySelectorAll('[data-toggle-id]').forEach(inputEl => {
+    inputEl.addEventListener('change', () => {
+      const item = findSelectItem(inputEl.dataset.toggleId);
+      if (item && item.set) item.set(inputEl.checked);
+    });
+  });
 }

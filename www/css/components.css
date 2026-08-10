@@ -1,0 +1,61 @@
+/* ============================================================
+   components.css — small reusable UI pieces used across pages
+   (rows, switches, buttons, list items). Add new component
+   styles here as the app grows, grouped by component name.
+   ============================================================ */
+
+/* Generic row — used for settings, profile menu items, etc. */
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.list-row .row-label {
+  font-size: 15px;
+  color: var(--text);
+}
+.list-row .row-value {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.list-row.is-link { cursor: pointer; }
+.list-row.is-link .row-chevron {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+[data-theme="light"] .switch-track { background-color: rgba(0,0,0,0.12); }
+.switch-track::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+.switch input:checked + .switch-track { background-color: var(--nav-active); }
+.switch input:checked + .switch-track::before { transform: translateX(20px); }

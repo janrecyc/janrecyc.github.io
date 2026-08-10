@@ -28,6 +28,66 @@
   font-size: 16px;
 }
 
+/* ---- Settings sections (the purple "ฟีเจอร์" / "การเชื่อมต่อ" labels) ---- */
+.settings-section + .settings-section { margin-top: 18px; }
+.section-title {
+  color: var(--nav-active);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 4px 8px;
+}
+.section-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- Select row (tap to expand a list of options) ---- */
+.select-row {
+  padding: 0;
+  overflow: hidden;
+}
+.select-row summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+.select-row summary::-webkit-details-marker { display: none; }
+.row-value-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.select-row[open] summary .row-chevron { transform: rotate(90deg); }
+.row-chevron { transition: transform 0.15s ease; }
+
+.select-options {
+  border-top: 1px solid var(--border);
+  padding: 4px 0;
+}
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+.option-row:active { background: rgba(139,123,247,0.08); }
+.option-check {
+  color: var(--nav-active);
+  font-weight: 700;
+  width: 16px;
+  text-align: center;
+}
+
 /* Toggle switch */
 .switch {
   position: relative;

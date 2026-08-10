@@ -1,28 +1,37 @@
 /* ============================================================
-   theme.js — applies the saved theme before paint (no flash),
-   and binds the #theme-switch checkbox whenever it exists on
-   the page (rendered statically or via settings-list.js).
+   theme.js — theme preference can be 'light' | 'dark' | 'system'.
+   Applies before paint (no flash) and exposes get/set helpers so
+   any component (e.g. the settings option list) can read/change
+   it without knowing about localStorage or matchMedia.
    ============================================================ */
 (function () {
-  const stored = localStorage.getItem('theme');
-  const preferred = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  document.documentElement.setAttribute('data-theme', preferred);
-
-  function bindThemeSwitch() {
-    const toggle = document.getElementById('theme-switch');
-    if (!toggle || toggle.dataset.bound) return;
-    toggle.dataset.bound = 'true';
-    toggle.checked = document.documentElement.getAttribute('data-theme') === 'light';
-    toggle.addEventListener('change', () => {
-      const next = toggle.checked ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    });
+  function resolveTheme(pref) {
+    if (pref === 'system') {
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    return pref;
   }
 
-  // Expose so component renderers can call it right after they
-  // build the switch markup (e.g. settings-list.js).
-  window.bindThemeSwitch = bindThemeSwitch;
+  function applyTheme(pref) {
+    document.documentElement.setAttribute('data-theme', resolveTheme(pref));
+  }
 
-  document.addEventListener('DOMContentLoaded', bindThemeSwitch);
+  function getThemePref() {
+    return localStorage.getItem('theme') || 'system';
+  }
+
+  function setThemePref(pref) {
+    localStorage.setItem('theme', pref);
+    applyTheme(pref);
+  }
+
+  applyTheme(getThemePref());
+
+  // Live-update if the pref is "system" and the OS theme changes.
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+    if (getThemePref() === 'system') applyTheme('system');
+  });
+
+  window.getThemePref = getThemePref;
+  window.setThemePref = setThemePref;
 })();

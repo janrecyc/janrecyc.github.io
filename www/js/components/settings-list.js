@@ -1,43 +1,108 @@
 /* ============================================================
-   components/settings-list.js — builds settings.html's rows from
-   SETTINGS_ITEMS. Add a new `case` here only when you introduce a
-   genuinely new row TYPE (toggle/value/link already covered) —
-   adding another row of an existing type never touches this file.
+   components/settings-list.js — builds settings.html from
+   SETTINGS_SECTIONS. Add a new `case` in renderRow() only when
+   you introduce a genuinely new row TYPE — adding another row
+   or section of an existing type never touches this file.
    ============================================================ */
 function renderSettingsList() {
   const mount = document.getElementById('settings-mount');
-  if (!mount || typeof SETTINGS_ITEMS === 'undefined') return;
+  if (!mount || typeof SETTINGS_SECTIONS === 'undefined') return;
 
-  if (SETTINGS_ITEMS.length === 0) {
+  if (SETTINGS_SECTIONS.length === 0) {
     mount.innerHTML = '<div class="empty-state">ยังไม่มีรายการตั้งค่า</div>';
     return;
   }
 
-  mount.innerHTML = SETTINGS_ITEMS.map(item => {
-    switch (item.type) {
-      case 'toggle':
-        return `
-          <div class="list-row">
+  mount.innerHTML = SETTINGS_SECTIONS.map(section => `
+    <div class="settings-section">
+      <div class="section-title">${section.title}</div>
+      <div class="section-rows">
+        ${section.items.map(renderRow).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  bindSelectRows(mount);
+}
+
+function renderRow(item) {
+  switch (item.type) {
+    case 'select': {
+      const current = item.get ? item.get() : item.value;
+      const currentLabel = (item.options.find(o => o.value === current) || {}).label || '';
+      return `
+        <details class="list-row select-row" data-select-id="${item.id}">
+          <summary>
             <span class="row-label">${item.label}</span>
-            <label class="switch">
-              <input type="checkbox" id="${item.id}">
-              <span class="switch-track"></span>
-            </label>
-          </div>`;
-      case 'value':
-        return `
-          <div class="list-row">
-            <span class="row-label">${item.label}</span>
-            <span class="row-value">${item.value}</span>
-          </div>`;
-      case 'link':
-        return `
-          <div class="list-row is-link" id="${item.id || ''}">
-            <span class="row-label">${item.label}</span>
-            <span class="row-chevron">›</span>
-          </div>`;
-      default:
-        return '';
+            <span class="row-value-group">
+              <span class="row-value" data-select-value="${item.id}">${currentLabel}</span>
+              <span class="row-chevron">›</span>
+            </span>
+          </summary>
+          <div class="select-options">
+            ${item.options.map(opt => `
+              <div class="option-row" data-select-id="${item.id}" data-value="${opt.value}">
+                <span>${opt.label}</span>
+                <span class="option-check">${opt.value === current ? '✓' : ''}</span>
+              </div>
+            `).join('')}
+          </div>
+        </details>`;
     }
-  }).join('');
+    case 'toggle':
+      return `
+        <div class="list-row">
+          <span class="row-label">${item.label}</span>
+          <label class="switch">
+            <input type="checkbox" id="${item.id}">
+            <span class="switch-track"></span>
+          </label>
+        </div>`;
+    case 'value':
+      return `
+        <div class="list-row">
+          <span class="row-label">${item.label}</span>
+          <span class="row-value">${item.value}</span>
+        </div>`;
+    case 'link':
+      return `
+        <div class="list-row is-link" id="${item.id || ''}">
+          <span class="row-label">${item.label}</span>
+          <span class="row-chevron">›</span>
+        </div>`;
+    default:
+      return '';
+  }
+}
+
+// Wires up every "select" row: clicking an option calls that row's
+// `set(value)`, updates the checkmark + summary text, and closes it.
+function bindSelectRows(root) {
+  root.querySelectorAll('.option-row').forEach(optionEl => {
+    optionEl.addEventListener('click', () => {
+      const selectId = optionEl.dataset.selectId;
+      const value = optionEl.dataset.value;
+      const item = findSelectItem(selectId);
+      if (!item) return;
+
+      if (item.set) item.set(value);
+
+      const details = root.querySelector(`details[data-select-id="${selectId}"]`);
+      if (details) {
+        details.querySelectorAll('.option-check').forEach(el => (el.textContent = ''));
+        optionEl.querySelector('.option-check').textContent = '✓';
+        const valueLabel = root.querySelector(`[data-select-value="${selectId}"]`);
+        if (valueLabel) valueLabel.textContent = optionEl.querySelector('span').textContent;
+        details.removeAttribute('open');
+      }
+    });
+  });
+}
+
+function findSelectItem(id) {
+  for (const section of SETTINGS_SECTIONS) {
+    const found = section.items.find(i => i.id === id);
+    if (found) return found;
+  }
+  return null;
 }

@@ -1,18 +1,50 @@
 /* ============================================================
-   data/settings.js — rows shown on the settings page.
-   Supported row "type" values (extend components/settings-list.js
-   if you add a new type):
-     - "toggle": a switch. Needs a unique `id` so JS can bind to it.
-     - "value":  a label + static text on the right (read-only).
-     - "link":   a label + chevron, for future sub-pages.
+   data/settings.js — settings page content, grouped into
+   SECTIONS (the purple "ฟีเจอร์" / "การเชื่อมต่อ" labels).
 
-   To add a new setting later, just add an object to this array —
+   Each section: { title, items: [...] }
+   Row "type" values (extend components/settings-list.js's
+   switch statement if you add a new type):
+     - "select":  tap to expand a list of options, one selected
+                  at a time (a "radio list" / "single-select list").
+                  Needs `id`, `options: [{value, label}]`.
+                  Reads/writes its value via `get`/`set` functions
+                  you provide, so it can back ANY preference —
+                  not just theme.
+     - "toggle":  a switch. Needs a unique `id`.
+     - "value":   a label + static text on the right (read-only).
+     - "link":    a label + chevron, for a future sub-page.
+
+   To add a new section or row later, edit this array only —
    no HTML changes required on settings.html.
    ============================================================ */
-const SETTINGS_ITEMS = [
-  { type: 'toggle', id: 'theme-switch', label: 'โหมดสว่าง/มืด' }
+const SETTINGS_SECTIONS = [
+  {
+    title: 'ฟีเจอร์',
+    items: [
+      {
+        type: 'select',
+        id: 'theme-select',
+        label: 'ธีม',
+        options: [
+          { value: 'light', label: 'สว่าง' },
+          { value: 'dark', label: 'มืด' },
+          { value: 'system', label: 'ตามระบบ' }
+        ],
+        get: () => window.getThemePref(),
+        set: (value) => window.setThemePref(value)
+      }
 
-  // Examples for future items — uncomment / edit when ready:
-  // { type: 'value', label: 'โปรโตคอล', value: 'อัตโนมัติ' },
-  // { type: 'link',  id: 'about-link', label: 'เกี่ยวกับ' },
+      // Add more feature rows here, e.g.:
+      // { type: 'toggle', id: 'netshield', label: 'NetShield' },
+    ]
+  }
+
+  // Add more sections here, e.g.:
+  // {
+  //   title: 'การเชื่อมต่อ',
+  //   items: [
+  //     { type: 'value', label: 'โปรโตคอล', value: 'Smart (auto)' },
+  //   ]
+  // },
 ];

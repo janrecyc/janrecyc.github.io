@@ -16,8 +16,15 @@
   <div class="shell">
     <nav class="bottom-nav" id="nav-mount"></nav>
     <main class="main">
-      <div class="page-header">ประเทศ</div>
-      <div class="content"><div id="country-mount"></div></div>
+      <div class="page-header">
+        <span>ประเทศ</span>
+        <span id="search-toggle-mount"></span>
+      </div>
+      <div class="content">
+        <div id="search-mount"></div>
+        <div class="filter-tabs" id="filters-mount"></div>
+        <div id="country-mount"></div>
+      </div>
     </main>
   </div>
 </div>
@@ -25,10 +32,14 @@
 <script src="js/data/nav.js"></script>
 <script src="js/components/nav.js"></script>
 <script src="js/data/countries.js"></script>
+<script src="js/data/country-filters.js"></script>
 <script src="js/components/country-list.js"></script>
+<script src="js/components/country-filters.js"></script>
+<script src="js/components/search-bar.js"></script>
+<script src="js/pages/country-page.js"></script>
 <script>
   renderNav('country');
-  renderCountryList();
+  initCountryPage();
 </script>
 </body>
 </html>

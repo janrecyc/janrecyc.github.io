@@ -88,6 +88,71 @@
   text-align: center;
 }
 
+/* ---- Icon button (header actions, e.g. search toggle) ---- */
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.icon-btn svg { width: 20px; height: 20px; }
+
+/* ---- Search bar ---- */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+.search-row svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.search-input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+}
+.search-input::placeholder { color: var(--text-dim); }
+
+/* ---- Filter chips ---- */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.filter-tabs::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.filter-chip.active {
+  background: var(--nav-active);
+  color: #fff;
+}
+
 /* Toggle switch */
 .switch {
   position: relative;

@@ -1,17 +1,20 @@
 /* ============================================================
    components/country-list.js — builds country.html's rows from
-   COUNTRY_ITEMS. Shows a placeholder until real data is added.
+   whatever array it's given (already filtered/searched by the
+   page controller). Shows a placeholder when the list is empty.
    ============================================================ */
-function renderCountryList() {
+function renderCountryList(items) {
   const mount = document.getElementById('country-mount');
-  if (!mount || typeof COUNTRY_ITEMS === 'undefined') return;
+  if (!mount) return;
 
-  if (COUNTRY_ITEMS.length === 0) {
-    mount.innerHTML = '<div class="empty-state">ยังไม่มีข้อมูลประเทศ</div>';
+  const list = items || [];
+
+  if (list.length === 0) {
+    mount.innerHTML = '<div class="empty-state">ไม่พบประเทศที่ตรงกับเงื่อนไข</div>';
     return;
   }
 
-  mount.innerHTML = COUNTRY_ITEMS.map(item => `
+  mount.innerHTML = list.map(item => `
     <div class="list-row">
       <span class="row-label">${item.flag} ${item.name}</span>
       <span class="row-value">${item.ping}</span>

@@ -1,0 +1,16 @@
+{
+  "name": "shop-app-template",
+  "version": "1.0.0",
+  "description": "Template แอพร้านรับซื้อของเก่า บิ้วผ่าน GitHub Actions",
+  "scripts": {
+    "sync": "cap sync android",
+    "build:android": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

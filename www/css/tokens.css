@@ -1,0 +1,30 @@
+/* ============================================================
+   tokens.css — design tokens only.
+   Add new theme variants here (e.g. a future high-contrast mode)
+   without touching any other CSS file.
+   ============================================================ */
+:root {
+  --bg: #16121f;
+  --card: #221c33;
+  --nav-bg: #1a1626;
+  --text: #f2eef9;
+  --text-dim: #a99fc2;
+  --nav-active: #8b7bf7;
+  --border: rgba(255,255,255,0.06);
+  --icon: #a99fc2;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+[data-theme="light"] {
+  --bg: #f5f3fa;
+  --card: #ffffff;
+  --nav-bg: #ffffff;
+  --text: #1e1a29;
+  --text-dim: #6c637f;
+  --nav-active: #6f5cf0;
+  --border: rgba(0,0,0,0.08);
+  --icon: #6c637f;
+}

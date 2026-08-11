@@ -1,0 +1,190 @@
+/* ============================================================
+   components.css — small reusable UI pieces used across pages
+   (rows, switches, buttons, list items). Add new component
+   styles here as the app grows, grouped by component name.
+   ============================================================ */
+
+/* Generic row — used for settings, profile menu items, etc. */
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.list-row .row-label {
+  font-size: 15px;
+  color: var(--text);
+}
+.list-row .row-value {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.list-row.is-link { cursor: pointer; }
+.list-row.is-link .row-chevron {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+/* ---- Settings sections (the purple "ฟีเจอร์" / "การเชื่อมต่อ" labels) ---- */
+.settings-section + .settings-section { margin-top: 18px; }
+.section-title {
+  color: var(--nav-active);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 4px 8px;
+}
+.section-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- Select row (tap to expand a list of options) ---- */
+.select-row {
+  padding: 0;
+  overflow: hidden;
+}
+.select-row summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+.select-row summary::-webkit-details-marker { display: none; }
+.row-value-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.select-row[open] summary .row-chevron { transform: rotate(90deg); }
+.row-chevron { transition: transform 0.15s ease; }
+
+.select-options {
+  border-top: 1px solid var(--border);
+  padding: 4px 0;
+}
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+.option-row:active { background: rgba(139,123,247,0.08); }
+.option-check {
+  color: var(--nav-active);
+  font-weight: 700;
+  width: 16px;
+  text-align: center;
+}
+
+/* ---- Icon button (header actions, e.g. search toggle) ---- */
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.icon-btn svg { width: 20px; height: 20px; }
+
+/* ---- Search bar ---- */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+/* Our own display:flex above would otherwise beat the browser's
+   default [hidden]{display:none} rule (author CSS always wins
+   over the user-agent stylesheet) — this makes hidden work again. */
+.search-row[hidden] { display: none; }
+.search-row svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.search-input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+}
+.search-input::placeholder { color: var(--text-dim); }
+
+/* ---- Filter chips ---- */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.filter-tabs::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.filter-chip.active {
+  background: var(--nav-active);
+  color: #fff;
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+[data-theme="light"] .switch-track { background-color: rgba(0,0,0,0.12); }
+.switch-track::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+.switch input:checked + .switch-track { background-color: var(--nav-active); }
+.switch input:checked + .switch-track::before { transform: translateX(20px); }

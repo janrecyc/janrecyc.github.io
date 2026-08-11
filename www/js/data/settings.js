@@ -3,6 +3,8 @@
    SECTIONS (the purple "ฟีเจอร์" / "การเชื่อมต่อ" labels).
 
    Each section: { title, items: [...] }
+   Every row can optionally include `icon` (an inline SVG path
+   string, same format as data/nav.js) to show a leading icon.
    Row "type" values (extend components/settings-list.js's
    switch statement if you add a new type):
      - "select":  tap to expand a list of options, one selected
@@ -26,20 +28,21 @@ const SETTINGS_SECTIONS = [
         type: 'toggle',
         id: 'theme-toggle',
         label: 'โหมดสว่าง/มืด',
+        icon: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>',
         get: () => window.getAppliedTheme() === 'light',
         set: (isOn) => window.setThemePref(isOn ? 'light' : 'dark')
       }
 
       // Add more feature rows here, e.g.:
-      // { type: 'toggle', id: 'netshield', label: 'NetShield' },
+      // { type: 'toggle', id: 'low-stock-alert', label: 'แจ้งเตือนสต็อกต่ำ', icon: '<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>' },
     ]
   }
 
   // Add more sections here, e.g.:
   // {
-  //   title: 'การเชื่อมต่อ',
+  //   title: 'ร้านค้า',
   //   items: [
-  //     { type: 'value', label: 'โปรโตคอล', value: 'Smart (auto)' },
+  //     { type: 'value', label: 'อัปเดตราคาล่าสุด', value: '11 ส.ค. 2569' },
   //   ]
   // },
 ];

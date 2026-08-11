@@ -27,6 +27,10 @@ function renderSettingsList() {
 }
 
 function renderRow(item) {
+  const icon = item.icon
+    ? `<span class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${item.icon}</svg></span>`
+    : '';
+
   switch (item.type) {
     case 'select': {
       const current = item.get ? item.get() : item.value;
@@ -34,7 +38,10 @@ function renderRow(item) {
       return `
         <details class="list-row select-row" data-select-id="${item.id}">
           <summary>
-            <span class="row-label">${item.label}</span>
+            <span class="row-main">
+              ${icon}
+              <span class="row-label">${item.label}</span>
+            </span>
             <span class="row-value-group">
               <span class="row-value" data-select-value="${item.id}">${currentLabel}</span>
               <span class="row-chevron">›</span>
@@ -54,7 +61,10 @@ function renderRow(item) {
       const isOn = item.get ? item.get() : !!item.value;
       return `
         <div class="list-row">
-          <span class="row-label">${item.label}</span>
+          <span class="row-main">
+            ${icon}
+            <span class="row-label">${item.label}</span>
+          </span>
           <label class="switch">
             <input type="checkbox" data-toggle-id="${item.id}" ${isOn ? 'checked' : ''}>
             <span class="switch-track"></span>
@@ -64,13 +74,19 @@ function renderRow(item) {
     case 'value':
       return `
         <div class="list-row">
-          <span class="row-label">${item.label}</span>
+          <span class="row-main">
+            ${icon}
+            <span class="row-label">${item.label}</span>
+          </span>
           <span class="row-value">${item.value}</span>
         </div>`;
     case 'link':
       return `
         <div class="list-row is-link" id="${item.id || ''}">
-          <span class="row-label">${item.label}</span>
+          <span class="row-main">
+            ${icon}
+            <span class="row-label">${item.label}</span>
+          </span>
           <span class="row-chevron">›</span>
         </div>`;
     default:

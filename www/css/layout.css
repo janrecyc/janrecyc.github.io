@@ -8,6 +8,7 @@
 html, body {
   height: 100%;
   width: 100%;
+  overflow: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: "Noto Sans Thai", "IBM Plex Sans Thai", -apple-system, sans-serif;
@@ -18,9 +19,10 @@ html, body {
 
 .app {
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .statusbar-spacer { height: var(--safe-top); }
@@ -38,6 +40,7 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
   max-width: 720px;
   margin: 0 auto;

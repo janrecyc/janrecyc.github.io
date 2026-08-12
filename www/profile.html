@@ -17,17 +17,23 @@
     <nav class="bottom-nav" id="nav-mount"></nav>
     <main class="main">
       <div class="page-header">โปรไฟล์</div>
-      <div class="content"></div>
+      <div class="content">
+        <div id="profile-header-mount"></div>
+        <div id="profile-mount"></div>
+      </div>
     </main>
   </div>
 </div>
 
 <script src="js/data/nav.js"></script>
 <script src="js/components/nav.js"></script>
-
+<script src="js/data/profile.js"></script>
+<script src="js/components/profile-header.js"></script>
+<script src="js/components/section-list.js"></script>
 <script>
   renderNav('profile');
-  
+  renderProfileHeader('profile-header-mount');
+  renderSectionList(PROFILE_SECTIONS, 'profile-mount');
 </script>
 </body>
 </html>

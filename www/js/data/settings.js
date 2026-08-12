@@ -7,7 +7,7 @@
    string, same format as data/nav.js) to show a leading icon —
    every row below has one.
 
-   Row "type" values (extend components/settings-list.js's
+   Row "type" values (extend components/section-list.js's
    switch statement if you add a new type):
      - "select":  tap to expand a list of options, one selected
                   at a time (a "radio list" / "single-select list").
@@ -28,7 +28,7 @@
        Wire real `get`/`set` (like theme-toggle does) once there's
        somewhere real to store the setting.
      - "link" rows don't navigate anywhere yet — components/
-       settings-list.js doesn't attach a click handler to
+       section-list.js doesn't attach a click handler to
        `.is-link` rows at all yet. When real sub-pages exist,
        add a click listener there keyed off `item.id`
        (e.g. `location.href = item.href`), and give each link

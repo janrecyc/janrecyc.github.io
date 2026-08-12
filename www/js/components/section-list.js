@@ -1,19 +1,23 @@
 /* ============================================================
-   components/settings-list.js — builds settings.html from
-   SETTINGS_SECTIONS. Add a new `case` in renderRow() only when
-   you introduce a genuinely new row TYPE — adding another row
-   or section of an existing type never touches this file.
-   ============================================================ */
-function renderSettingsList() {
-  const mount = document.getElementById('settings-mount');
-  if (!mount || typeof SETTINGS_SECTIONS === 'undefined') return;
+   components/section-list.js — generic renderer for a "grouped
+   list of rows" page. Used by BOTH settings.html and profile.html
+   (any future page with the same section/row shape can reuse it
+   too) — pass in whichever SECTIONS array and mount id you want.
 
-  if (SETTINGS_SECTIONS.length === 0) {
-    mount.innerHTML = '<div class="empty-state">ยังไม่มีรายการตั้งค่า</div>';
+   Add a new `case` in renderRow() only when you introduce a
+   genuinely new row TYPE — adding another row or section on
+   either page never touches this file.
+   ============================================================ */
+function renderSectionList(sections, mountId) {
+  const mount = document.getElementById(mountId);
+  if (!mount) return;
+
+  if (!sections || sections.length === 0) {
+    mount.innerHTML = '<div class="empty-state">ยังไม่มีรายการ</div>';
     return;
   }
 
-  mount.innerHTML = SETTINGS_SECTIONS.map(section => `
+  mount.innerHTML = sections.map(section => `
     <div class="settings-section">
       <div class="section-title">${section.title}</div>
       <div class="section-rows">
@@ -22,8 +26,8 @@ function renderSettingsList() {
     </div>
   `).join('');
 
-  bindSelectRows(mount);
-  bindToggleRows(mount);
+  bindSelectRows(mount, sections);
+  bindToggleRows(mount, sections);
 }
 
 function renderRow(item) {
@@ -96,12 +100,12 @@ function renderRow(item) {
 
 // Wires up every "select" row: clicking an option calls that row's
 // `set(value)`, updates the checkmark + summary text, and closes it.
-function bindSelectRows(root) {
+function bindSelectRows(root, sections) {
   root.querySelectorAll('.option-row').forEach(optionEl => {
     optionEl.addEventListener('click', () => {
       const selectId = optionEl.dataset.selectId;
       const value = optionEl.dataset.value;
-      const item = findSettingItem(selectId);
+      const item = findSectionItem(selectId, sections);
       if (!item) return;
 
       if (item.set) {
@@ -109,8 +113,7 @@ function bindSelectRows(root) {
       } else {
         // No real backing store yet (scaffold item) — mutate the
         // in-memory fallback so the choice at least survives
-        // until the next full page load, matching what's
-        // documented in data/settings.js.
+        // until the next full page load.
         item.value = value;
       }
 
@@ -126,8 +129,8 @@ function bindSelectRows(root) {
   });
 }
 
-function findSettingItem(id) {
-  for (const section of SETTINGS_SECTIONS) {
+function findSectionItem(id, sections) {
+  for (const section of sections) {
     const found = section.items.find(i => i.id === id);
     if (found) return found;
   }
@@ -136,10 +139,10 @@ function findSettingItem(id) {
 
 // Wires up every "toggle" row: flipping the switch calls that
 // row's `set(isOn)` — works for theme or any future on/off setting.
-function bindToggleRows(root) {
+function bindToggleRows(root, sections) {
   root.querySelectorAll('[data-toggle-id]').forEach(inputEl => {
     inputEl.addEventListener('change', () => {
-      const item = findSettingItem(inputEl.dataset.toggleId);
+      const item = findSectionItem(inputEl.dataset.toggleId, sections);
       if (item && item.set) item.set(inputEl.checked);
     });
   });

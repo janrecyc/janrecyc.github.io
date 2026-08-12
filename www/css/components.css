@@ -54,8 +54,16 @@
   gap: 10px;
 }
 
-/* ---- Select row (tap to expand a list of options) ---- */
+/* ---- Select row (tap to expand a list of options) ----
+   IMPORTANT: .list-row sets display:flex (for icon+label | value
+   layout on plain rows). A <details> element inherits that too,
+   which would lay its two children (<summary> and .select-options)
+   out SIDE BY SIDE instead of stacked — this overrides it back to
+   block so the options list drops down below the summary as
+   expected. .select-row summary has its own flex row for its own
+   icon+label | value+chevron layout, independent of this. */
 .select-row {
+  display: block;
   padding: 0;
   overflow: hidden;
 }

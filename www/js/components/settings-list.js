@@ -104,7 +104,15 @@ function bindSelectRows(root) {
       const item = findSettingItem(selectId);
       if (!item) return;
 
-      if (item.set) item.set(value);
+      if (item.set) {
+        item.set(value);
+      } else {
+        // No real backing store yet (scaffold item) — mutate the
+        // in-memory fallback so the choice at least survives
+        // until the next full page load, matching what's
+        // documented in data/settings.js.
+        item.value = value;
+      }
 
       const details = root.querySelector(`details[data-select-id="${selectId}"]`);
       if (details) {

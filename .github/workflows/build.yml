@@ -46,6 +46,36 @@ jobs:
             npx cap add android
           fi
 
+      - name: Enable Java 8+ desugaring (required by @capacitor-community/sqlite on Android)
+        run: |
+          # @capacitor-community/sqlite's Android native code needs
+          # core library desugaring turned on — a well-documented
+          # manual setup step for this plugin that `cap add android`/
+          # `cap sync` do NOT do automatically. Since android/ is
+          # regenerated fresh every build (never committed — see
+          # .gitignore), this has to be patched in on every run, same
+          # as the versionCode bump below. Appending a second
+          # `android {}` / `dependencies {}` block is safe — Gradle's
+          # Groovy DSL merges repeated blocks in the same file rather
+          # than erroring, so this doesn't disturb Capacitor's
+          # generated config above it.
+          cat >> android/app/build.gradle << 'GRADLE_EOF'
+
+          android {
+              compileOptions {
+                  coreLibraryDesugaringEnabled true
+                  sourceCompatibility JavaVersion.VERSION_1_8
+                  targetCompatibility JavaVersion.VERSION_1_8
+              }
+          }
+
+          dependencies {
+              // เวอร์ชันนี้เข้ากับ AGP ที่ Capacitor 6 ใช้ตอนเขียนโค้ดนี้ —
+              // ถ้า Gradle ฟ้อง version conflict ตอน build ให้ลองขยับเลขนี้ขึ้น
+              coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+          }
+          GRADLE_EOF
+
       - name: Sync web assets to Android project
         run: npx cap sync android
 

@@ -7,16 +7,20 @@
        returns pin_hash/pin_salt
      - verifyPin(userId, pin): true/false
 
-   ⚠️ PLUGIN API NOT DEVICE-TESTED YET. This calls the raw
+   ⚠️ PLUGIN API PARTIALLY DEVICE-TESTED. This calls the raw
    Capacitor.Plugins.CapacitorSQLite bridge directly (no bundler/
    import — matches this project's plain <script> tag setup, no
-   build step). The exact call shape below is written from the
-   plugin's documented API, but I couldn't run it on a real
-   device/emulator to confirm it against the exact installed
-   version. On first real native test: if `initDatabase()` throws,
-   check the installed `@capacitor-community/sqlite` version's docs
-   for `open`/`execute`/`query`/`run` — everything in the app calls
-   ONLY the functions in this file, so any fix stays contained here.
+   build step). A real device test surfaced one confirmed bug,
+   fixed below: open() was being called without createConnection()
+   first (the plugin is connection-based; its normal JS wrapper
+   class does that step for you, which this hand-written bridge
+   version has to do explicitly). If initDatabase() still throws
+   after that fix, check the error text shown on screen (login-
+   page.js now surfaces it directly, not just to console) against
+   the installed @capacitor-community/sqlite version's docs for
+   `createConnection`/`open`/`execute`/`query`/`run` — everything
+   in the app calls ONLY the functions in this file, so any further
+   fix stays contained here.
 
    🌐 BROWSER FALLBACK: CapacitorSQLite only exists inside the
    native app. Opening these HTML files directly in a browser (like
@@ -65,6 +69,30 @@ const AuthDB = (function () {
     if (!usingRealSqlite) {
       await ensureFallbackSeeded();
       return;
+    }
+
+    // @capacitor-community/sqlite uses a CONNECTION-based API: a
+    // connection must be registered with createConnection() before
+    // it can be opened. The plugin's normal npm/JS wrapper class
+    // (SQLiteConnection) does this step for you automatically —
+    // since this project calls the raw native bridge directly (no
+    // bundler, see the file header), it has to be done by hand
+    // here. Missing this call is the most likely reason
+    // initDatabase() throws on a real device.
+    try {
+      await sqlitePlugin.createConnection({
+        database: DB_NAME,
+        version: 1,
+        encrypted: false,
+        mode: 'no-encryption',
+        readonly: false
+      });
+    } catch (err) {
+      // "already exists" is fine (e.g. re-running initDatabase() in
+      // the same app session) — anything else is a real problem and
+      // should still surface to the caller.
+      const msg = String((err && err.message) || err).toLowerCase();
+      if (!msg.includes('already exist')) throw err;
     }
 
     const schema = await fetch('js/db/schema.sql').then(r => r.text());

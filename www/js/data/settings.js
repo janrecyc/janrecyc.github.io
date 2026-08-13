@@ -171,7 +171,12 @@ const SETTINGS_SECTIONS = [
         id: 'app-version',
         label: 'เวอร์ชันแอพ',
         icon: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
-        value: '1.0.0'
+        // APP_VERSION is generated fresh by the CI workflow (see
+        // .github/workflows/build.yml → "Write app version into web
+        // assets") and matches the real Android versionName exactly —
+        // never edit this value by hand, it'll just get overwritten
+        // (and go stale) on the next build.
+        get: () => (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '1.0.0-dev')
       },
       {
         type: 'link',
@@ -204,10 +209,15 @@ const SETTINGS_SECTIONS = [
         icon: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
       },
       {
-        type: 'link',
-        id: 'switch-account',
-        label: 'สลับบัญชี/สลับกะ',
-        icon: '<path d="M17 2l4 4-4 4"/><path d="M3 12v-2a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 12v2a4 4 0 0 1-4 4H3"/>'
+        type: 'toggle',
+        id: 'require-login',
+        label: 'เปิดใช้งานการเข้าสู่ระบบ',
+        icon: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.5" fill="currentColor" stroke="none"/>',
+        // ยังไม่มีระบบ auth จริง — ค่านี้เป็น fallback ในหน่วยความจำ
+        // (ดูคอมเมนต์ scaffold status บนสุดของไฟล์) พอมีระบบ login จริง
+        // ให้เพิ่ม get/set ที่นี่ผูกกับที่เก็บค่าจริง เช่น อ่าน/เขียนไฟล์
+        // การตั้งค่าของร้าน ไม่ใช่แค่ true/false ลอย ๆ
+        value: false
       },
       {
         type: 'link',

@@ -4,3 +4,4 @@ ios/
 *.apk
 *.aab
 .DS_Store
+www/js/generated/

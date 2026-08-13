@@ -77,15 +77,17 @@ function renderRow(item) {
           </label>
         </div>`;
     }
-    case 'value':
+    case 'value': {
+      const val = item.get ? item.get() : item.value;
       return `
         <div class="list-row">
           <span class="row-main">
             ${icon}
             <span class="row-label">${item.label}</span>
           </span>
-          <span class="row-value">${item.value}</span>
+          <span class="row-value">${val}</span>
         </div>`;
+    }
     case 'link':
       return `
         <div class="list-row is-link" id="${item.id || ''}">
@@ -145,7 +147,15 @@ function bindToggleRows(root, sections) {
   root.querySelectorAll('[data-toggle-id]').forEach(inputEl => {
     inputEl.addEventListener('change', () => {
       const item = findSectionItem(inputEl.dataset.toggleId, sections);
-      if (item && item.set) item.set(inputEl.checked);
+      if (!item) return;
+      if (item.set) {
+        item.set(inputEl.checked);
+      } else {
+        // No real backing store yet (scaffold item) — mutate the
+        // in-memory fallback so the choice at least survives
+        // until the next full page load, same pattern as select rows.
+        item.value = inputEl.checked;
+      }
     });
   });
 }

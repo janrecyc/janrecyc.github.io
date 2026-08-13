@@ -26,6 +26,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Compute version
+        id: version
+        run: |
+          # เลขรันของ GitHub Actions (github.run_number) เพิ่มขึ้นทุกครั้งที่บิ้วอัตโนมัติ ไม่ซ้ำ
+          # ใช้ค่าเดียวนี้ทั้งสำหรับ native versionCode/versionName และ "เวอร์ชันแอพ"
+          # ที่แสดงในหน้าตั้งค่า เพื่อให้สองที่นี้ตรงกันเสมอ ไม่มีวันเพี้ยนกัน
+          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "name=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Write app version into web assets
+        run: |
+          mkdir -p www/js/generated
+          echo "const APP_VERSION = '${{ steps.version.outputs.name }}';" > www/js/generated/version.js
+
       - name: Add Android platform (first run only)
         run: |
           if [ ! -d "android" ]; then
@@ -37,19 +51,17 @@ jobs:
 
       - name: Bump app version (versionCode/versionName)
         run: |
-          # ใช้เลขรันของ GitHub Actions เป็น versionCode — เพิ่มขึ้นทุกครั้งที่บิ้ว ไม่ซ้ำ
-          # versionName จะได้ 1.0.<เลขรัน> เช่น 1.0.12
-          sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/" android/app/build.gradle
-          sed -i "s/versionName \"1.0\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+          sed -i "s/versionCode 1/versionCode ${{ steps.version.outputs.code }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"${{ steps.version.outputs.name }}\"/" android/app/build.gradle
 
           # sed ไม่ error ถ้าหา pattern ไม่เจอ (แค่ไม่ทำอะไรเงียบ ๆ) — เช็คซ้ำว่า
           # patch ติดจริง ถ้าไม่ติด (เช่น Capacitor เปลี่ยนรูปแบบไฟล์เริ่มต้นในอนาคต)
           # ให้ build ล้มทันทีแทนที่จะปล่อยผ่านไปแบบเงียบ ๆ ด้วย versionCode เดิม
-          if ! grep -q "versionCode ${{ github.run_number }}" android/app/build.gradle; then
+          if ! grep -q "versionCode ${{ steps.version.outputs.code }}" android/app/build.gradle; then
             echo "::error::versionCode patch ไม่ติด — เช็ครูปแบบเริ่มต้นของ android/app/build.gradle"
             exit 1
           fi
-          if ! grep -q "versionName \"1.0.${{ github.run_number }}\"" android/app/build.gradle; then
+          if ! grep -q "versionName \"${{ steps.version.outputs.name }}\"" android/app/build.gradle; then
             echo "::error::versionName patch ไม่ติด — เช็ครูปแบบเริ่มต้นของ android/app/build.gradle"
             exit 1
           fi

@@ -35,6 +35,25 @@ jobs:
       - name: Sync web assets to Android project
         run: npx cap sync android
 
+      - name: Bump app version (versionCode/versionName)
+        run: |
+          # ใช้เลขรันของ GitHub Actions เป็น versionCode — เพิ่มขึ้นทุกครั้งที่บิ้ว ไม่ซ้ำ
+          # versionName จะได้ 1.0.<เลขรัน> เช่น 1.0.12
+          sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+
+          # sed ไม่ error ถ้าหา pattern ไม่เจอ (แค่ไม่ทำอะไรเงียบ ๆ) — เช็คซ้ำว่า
+          # patch ติดจริง ถ้าไม่ติด (เช่น Capacitor เปลี่ยนรูปแบบไฟล์เริ่มต้นในอนาคต)
+          # ให้ build ล้มทันทีแทนที่จะปล่อยผ่านไปแบบเงียบ ๆ ด้วย versionCode เดิม
+          if ! grep -q "versionCode ${{ github.run_number }}" android/app/build.gradle; then
+            echo "::error::versionCode patch ไม่ติด — เช็ครูปแบบเริ่มต้นของ android/app/build.gradle"
+            exit 1
+          fi
+          if ! grep -q "versionName \"1.0.${{ github.run_number }}\"" android/app/build.gradle; then
+            echo "::error::versionName patch ไม่ติด — เช็ครูปแบบเริ่มต้นของ android/app/build.gradle"
+            exit 1
+          fi
+
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 

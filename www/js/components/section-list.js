@@ -30,6 +30,7 @@ function renderSectionList(sections, mountId) {
 
   bindSelectRows(mount, sections);
   bindToggleRows(mount, sections);
+  bindLinkRows(mount, sections);
 }
 
 function renderRow(item) {
@@ -157,5 +158,18 @@ function bindToggleRows(root, sections) {
         item.value = inputEl.checked;
       }
     });
+  });
+}
+
+// Wires up every "link" row that has an `onSelect` callback (e.g.
+// logout). Rows without one (most "link" placeholders — see the
+// scaffold-status comment in data/settings.js) stay unbound on
+// purpose until there's somewhere real for them to navigate to.
+function bindLinkRows(root, sections) {
+  root.querySelectorAll('.list-row.is-link[id]').forEach(rowEl => {
+    const item = findSectionItem(rowEl.id, sections);
+    if (item && item.onSelect) {
+      rowEl.addEventListener('click', item.onSelect);
+    }
   });
 }

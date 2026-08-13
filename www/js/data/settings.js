@@ -204,26 +204,38 @@ const SETTINGS_SECTIONS = [
     items: [
       {
         type: 'link',
-        id: 'change-password',
-        label: 'เปลี่ยนรหัสผ่าน',
+        id: 'change-pin',
+        label: 'เปลี่ยน PIN',
         icon: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
+      },
+      {
+        type: 'link',
+        id: 'manage-users',
+        label: 'จัดการผู้ใช้งาน',
+        // ยังไม่มีหน้าจัดการผู้ใช้ (เพิ่ม/ลบ/ตั้ง PIN ใหม่) — ต้องสร้าง
+        // ก่อนใช้งานจริง ไม่งั้นจะแก้ PIN ได้แค่ทางฐานข้อมูลตรง ๆ
+        // (ดู js/db/db.js กับ js/db/schema.sql)
+        icon: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 8a3 3 0 1 1 4 2.83"/><path d="M16 20c0-2.5 1.5-4.5 4-5"/>'
       },
       {
         type: 'toggle',
         id: 'require-login',
         label: 'เปิดใช้งานการเข้าสู่ระบบ',
         icon: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.5" fill="currentColor" stroke="none"/>',
-        // ยังไม่มีระบบ auth จริง — ค่านี้เป็น fallback ในหน่วยความจำ
-        // (ดูคอมเมนต์ scaffold status บนสุดของไฟล์) พอมีระบบ login จริง
-        // ให้เพิ่ม get/set ที่นี่ผูกกับที่เก็บค่าจริง เช่น อ่าน/เขียนไฟล์
-        // การตั้งค่าของร้าน ไม่ใช่แค่ true/false ลอย ๆ
-        value: false
+        // ผูกกับระบบ auth จริงแล้ว (js/auth/session.js) — ค่านี้เก็บถาวร
+        // ใน localStorage ของเครื่อง ไม่ใช่แค่ fallback ในหน่วยความจำอีกต่อไป
+        get: () => window.AuthSession.isLoginRequired(),
+        set: (isOn) => window.AuthSession.setLoginRequired(isOn)
       },
       {
         type: 'link',
         id: 'logout',
         label: 'ออกจากระบบ',
-        icon: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>'
+        icon: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
+        onSelect: () => {
+          window.AuthSession.clearSession();
+          location.href = 'login.html';
+        }
       }
     ]
   }

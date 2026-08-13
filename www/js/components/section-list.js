@@ -1,8 +1,10 @@
 /* ============================================================
    components/section-list.js — generic renderer for a "grouped
-   list of rows" page. Used by BOTH settings.html and profile.html
-   (any future page with the same section/row shape can reuse it
-   too) — pass in whichever SECTIONS array and mount id you want.
+   list of rows" page. Used by settings.html (any future page
+   with the same section/row shape can reuse it too — the "บัญชี"
+   section on the settings page is a good example of a row group
+   that used to live on its own page and now lives here instead)
+   — pass in whichever SECTIONS array and mount id you want.
 
    Add a new `case` in renderRow() only when you introduce a
    genuinely new row TYPE — adding another row or section on

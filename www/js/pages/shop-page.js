@@ -32,11 +32,11 @@ function initShopPage() {
 
   function selectTab(tabId) {
     state.activeTab = tabId;
-    renderShopTabs(state.activeTab, selectTab);
+    renderTabFilter(SHOP_TABS, state.activeTab, 'filters-mount', selectTab);
     applyView();
   }
 
-  renderShopTabs(state.activeTab, selectTab);
+  renderTabFilter(SHOP_TABS, state.activeTab, 'filters-mount', selectTab);
 
   renderSearchBar({
     headerMountId: 'search-toggle-mount',

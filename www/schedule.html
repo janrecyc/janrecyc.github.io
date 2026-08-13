@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script src="js/theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>โปรไฟล์</title>
+<title>ตารางงาน</title>
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/nav.css">
@@ -16,10 +16,14 @@
   <div class="shell">
     <nav class="bottom-nav" id="nav-mount"></nav>
     <main class="main">
-      <div class="page-header">โปรไฟล์</div>
+      <div class="top-bar" id="search-toggle-mount"></div>
+      <div class="page-header">
+        <span>ตารางงาน</span>
+      </div>
       <div class="content">
-        <div id="profile-header-mount"></div>
-        <div id="profile-mount"></div>
+        <div id="search-mount"></div>
+        <div class="filter-tabs" id="filters-mount"></div>
+        <div id="schedule-mount"></div>
       </div>
     </main>
   </div>
@@ -27,13 +31,15 @@
 
 <script src="js/data/nav.js"></script>
 <script src="js/components/nav.js"></script>
-<script src="js/data/profile.js"></script>
-<script src="js/components/profile-header.js"></script>
-<script src="js/components/section-list.js"></script>
+<script src="js/data/schedule-jobs.js"></script>
+<script src="js/data/schedule-tabs.js"></script>
+<script src="js/components/schedule-job-list.js"></script>
+<script src="js/components/tab-filter.js"></script>
+<script src="js/components/search-bar.js"></script>
+<script src="js/pages/schedule-page.js"></script>
 <script>
-  renderNav('profile');
-  renderProfileHeader('profile-header-mount');
-  renderSectionList(PROFILE_SECTIONS, 'profile-mount');
+  renderNav('schedule');
+  initSchedulePage();
 </script>
 </body>
 </html>

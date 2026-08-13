@@ -17,10 +17,10 @@ const NAV_ITEMS = [
     icon: '<path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'
   },
   {
-    id: 'profile',
-    href: 'profile.html',
-    label: 'โปรไฟล์',
-    icon: '<rect x="4" y="4" width="16" height="14" rx="2"/><path d="M4 8h16M9 4v4"/>'
+    id: 'schedule',
+    href: 'schedule.html',
+    label: 'ตารางงาน',
+    icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>'
   },
   {
     id: 'settings',

@@ -39,11 +39,47 @@
    Now that "จัดการผู้ใช้งาน" is built, use it to add a real owner
    account and deactivate/delete this demo user before shipping to
    a real shop.
+
+   🔒 DATABASE ENCRYPTION (SQLCipher, via this plugin's `encrypted`
+   option) — NOT DEVICE-TESTED YET, same "errors show on screen"
+   safety net as the user-management functions above applies here
+   too. What this does and doesn't defend against:
+     - DOES stop someone who copies the raw .db file off the device
+       (e.g. an unencrypted phone backup, a forensic file-pull, or
+       just browsing app data with a file manager on an old rooted
+       Android where WebView storage isn't readable) from opening it
+       in a normal SQLite browser and reading pin_hash/pin_salt/names
+       straight out.
+     - Does NOT defend against a fully rooted device where the
+       attacker can also read this app's OTHER storage — the
+       encryption passphrase itself lives in localStorage (see
+       getOrCreateDbSecret() below), which is the same trust level
+       the raw .db file used to be at. Root access that can read one
+       can read the other. True protection against that threat needs
+       the passphrase in Android Keystore (hardware-backed), which
+       needs custom native code beyond this plain-<script>-tag
+       template — flagging this honestly rather than overselling it.
    ============================================================ */
 const AuthDB = (function () {
   const DB_NAME = 'shopapp';
+  const DB_SECRET_KEY = 'shopapp_db_secret'; // localStorage key — see 🔒 note above for what this is/isn't safe from
   let usingRealSqlite = false;
   let sqlitePlugin = null;
+
+  // Random per-install passphrase for the encrypted database. Generated
+  // once, then reused on every launch — losing it (e.g. clearing app
+  // storage without exporting first) makes the existing DB unreadable,
+  // same as forgetting any encryption password.
+  function getOrCreateDbSecret() {
+    let secret = localStorage.getItem(DB_SECRET_KEY);
+    if (!secret) {
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      secret = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+      localStorage.setItem(DB_SECRET_KEY, secret);
+    }
+    return secret;
+  }
 
   // In-memory fallback store (browser testing only — see note above)
   let fallbackUsers = [
@@ -75,6 +111,34 @@ const AuthDB = (function () {
       return;
     }
 
+    // Register the passphrase with the plugin before touching the
+    // connection at all — the plugin needs this in place first for
+    // both encrypting a brand-new DB and re-opening an existing one.
+    const secret = getOrCreateDbSecret();
+    try {
+      const stored = await sqlitePlugin.isSecretStored();
+      if (!stored || !stored.result) {
+        await sqlitePlugin.setEncryptionSecret({ passphrase: secret });
+      }
+    } catch (err) {
+      console.error('setEncryptionSecret() failed:', err);
+      throw err;
+    }
+
+    // mode 'secret' vs 'encryption': 'secret' is for the FIRST TIME a
+    // database is created/encrypted using the passphrase just set
+    // above; 'encryption' is for re-opening an already-encrypted DB
+    // on every later launch. Check whether the DB file already exists
+    // to pick the right one.
+    let dbAlreadyExists = false;
+    try {
+      const existsResult = await sqlitePlugin.isDatabaseExist({ database: DB_NAME });
+      dbAlreadyExists = !!(existsResult && existsResult.result);
+    } catch (err) {
+      console.error('isDatabaseExist() failed:', err);
+      throw err;
+    }
+
     // @capacitor-community/sqlite uses a CONNECTION-based API: a
     // connection must be registered with createConnection() before
     // it can be opened. The plugin's normal npm/JS wrapper class
@@ -87,8 +151,8 @@ const AuthDB = (function () {
       await sqlitePlugin.createConnection({
         database: DB_NAME,
         version: 1,
-        encrypted: false,
-        mode: 'no-encryption',
+        encrypted: true,
+        mode: dbAlreadyExists ? 'encryption' : 'secret',
         readonly: false
       });
     } catch (err) {

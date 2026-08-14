@@ -16,13 +16,7 @@ function initSchedulePage() {
   };
 
   function todayStr() {
-    // ใช้เวลา "ท้องถิ่น" ของเครื่อง ไม่ใช่ toISOString() ที่คืนวันที่แบบ UTC
-    // (เดิมพังช่วง 00:00–06:59 น. เวลาไทย เพราะ UTC ยังเป็นเมื่อวาน)
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`; // YYYY-MM-DD (เวลาท้องถิ่น)
+    return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   }
 
   function applyView() {

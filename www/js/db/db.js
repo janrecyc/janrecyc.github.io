@@ -132,10 +132,17 @@ const AuthDB = (function () {
     // to pick the right one.
     let dbAlreadyExists = false;
     try {
-      const existsResult = await sqlitePlugin.isDatabaseExist({ database: DB_NAME });
+      // NOTE: the real plugin method is `isDatabase` (checks existence
+      // WITHOUT an open connection — exactly our situation here, since
+      // createConnection() hasn't run yet). There is no
+      // `isDatabaseExist` method on this plugin at all — calling it
+      // throws "is not a function", which is the bug this fixes.
+      // (`isDBExists` is a different, similarly-named method that
+      // requires an already-open connection, so it's also wrong here.)
+      const existsResult = await sqlitePlugin.isDatabase({ database: DB_NAME });
       dbAlreadyExists = !!(existsResult && existsResult.result);
     } catch (err) {
-      console.error('isDatabaseExist() failed:', err);
+      console.error('isDatabase() failed:', err);
       throw err;
     }
 

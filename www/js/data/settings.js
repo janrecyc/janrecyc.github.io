@@ -206,16 +206,15 @@ const SETTINGS_SECTIONS = [
         type: 'link',
         id: 'change-pin',
         label: 'เปลี่ยน PIN',
-        icon: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
+        icon: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+        onSelect: () => { location.href = 'change-pin.html'; }
       },
       {
         type: 'link',
         id: 'manage-users',
         label: 'จัดการผู้ใช้งาน',
-        // ยังไม่มีหน้าจัดการผู้ใช้ (เพิ่ม/ลบ/ตั้ง PIN ใหม่) — ต้องสร้าง
-        // ก่อนใช้งานจริง ไม่งั้นจะแก้ PIN ได้แค่ทางฐานข้อมูลตรง ๆ
-        // (ดู js/db/db.js กับ js/db/schema.sql)
-        icon: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 8a3 3 0 1 1 4 2.83"/><path d="M16 20c0-2.5 1.5-4.5 4-5"/>'
+        icon: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 8a3 3 0 1 1 4 2.83"/><path d="M16 20c0-2.5 1.5-4.5 4-5"/>',
+        onSelect: () => { location.href = 'manage-users.html'; }
       },
       {
         type: 'toggle',

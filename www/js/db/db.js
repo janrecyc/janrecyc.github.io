@@ -6,21 +6,25 @@
      - getAllUsers(): active users for the login picker — never
        returns pin_hash/pin_salt
      - verifyPin(userId, pin): true/false
+     - getAllUsersForManagement(): active + inactive, for the
+       "จัดการผู้ใช้งาน" admin list
+     - createUser({name, role, pin}): adds a new user
+     - updateUserInfo(userId, {name, role}): edits name/role
+     - updateUserPin(userId, newPin): resets a user's PIN
+     - setUserActive(userId, isActive): soft delete/restore
 
    ⚠️ PLUGIN API PARTIALLY DEVICE-TESTED. This calls the raw
    Capacitor.Plugins.CapacitorSQLite bridge directly (no bundler/
    import — matches this project's plain <script> tag setup, no
-   build step). A real device test surfaced one confirmed bug,
-   fixed below: open() was being called without createConnection()
-   first (the plugin is connection-based; its normal JS wrapper
-   class does that step for you, which this hand-written bridge
-   version has to do explicitly). If initDatabase() still throws
-   after that fix, check the error text shown on screen (login-
-   page.js now surfaces it directly, not just to console) against
-   the installed @capacitor-community/sqlite version's docs for
-   `createConnection`/`open`/`execute`/`query`/`run` — everything
-   in the app calls ONLY the functions in this file, so any further
-   fix stays contained here.
+   build step). A real device test confirmed the login/verify path
+   above works correctly. The user-management functions added
+   after that (createUser/updateUserInfo/updateUserPin/
+   setUserActive) follow the exact same query/run call shape as the
+   already-confirmed-working functions, so they're the same low
+   risk — but they haven't been exercised on a device themselves
+   yet. If one throws, the error now shows on screen (see
+   manage-users-page.js / change-pin-page.js), and every plugin
+   call in the app still lives only in this one file.
 
    🌐 BROWSER FALLBACK: CapacitorSQLite only exists inside the
    native app. Opening these HTML files directly in a browser (like
@@ -32,10 +36,9 @@
 
    🔑 DEFAULT DEMO PIN: the seeded demo user's PIN is 000000 — this
    is ONLY so the login flow has something to test end-to-end.
-   There is no user-management screen to change/add PINs yet (see
-   the "จัดการผู้ใช้งาน" placeholder row in data/settings.js) — build
-   that before shipping this to a real shop, and remove/replace the
-   demo user.
+   Now that "จัดการผู้ใช้งาน" is built, use it to add a real owner
+   account and deactivate/delete this demo user before shipping to
+   a real shop.
    ============================================================ */
 const AuthDB = (function () {
   const DB_NAME = 'shopapp';
@@ -55,6 +58,7 @@ const AuthDB = (function () {
     }
   ];
   let fallbackSeeded = false;
+  let fallbackNextId = 2;
 
   async function ensureFallbackSeeded() {
     if (fallbackSeeded) return;
@@ -155,7 +159,108 @@ const AuthDB = (function () {
     return attemptHash === row.pin_hash;
   }
 
-  return { initDatabase, getAllUsers, verifyPin };
+  // ---- User management (จัดการผู้ใช้งาน) ----
+
+  async function getAllUsersForManagement() {
+    if (!usingRealSqlite) {
+      await ensureFallbackSeeded();
+      return fallbackUsers.map(({ id, name, role, avatar_icon, active }) => ({ id, name, role, avatar_icon, active }));
+    }
+
+    const result = await sqlitePlugin.query({
+      database: DB_NAME,
+      statement: 'SELECT id, name, role, avatar_icon, active FROM users ORDER BY id',
+      values: []
+    });
+    return result.values || [];
+  }
+
+  async function createUser({ name, role, pin }) {
+    const salt = window.AuthPinHash.generateSalt();
+    const hash = await window.AuthPinHash.hashPin(pin, salt);
+
+    if (!usingRealSqlite) {
+      const user = {
+        id: fallbackNextId++,
+        name,
+        role: role || 'staff',
+        avatar_icon: '👤',
+        pin_hash: hash,
+        pin_salt: salt,
+        active: 1
+      };
+      fallbackUsers.push(user);
+      return user;
+    }
+
+    await sqlitePlugin.run({
+      database: DB_NAME,
+      statement: 'INSERT INTO users (name, role, avatar_icon, pin_hash, pin_salt) VALUES (?, ?, ?, ?, ?)',
+      values: [name, role || 'staff', '👤', hash, salt]
+    });
+  }
+
+  async function updateUserInfo(userId, { name, role }) {
+    if (!usingRealSqlite) {
+      const user = fallbackUsers.find(u => u.id === userId);
+      if (user) {
+        user.name = name;
+        user.role = role;
+      }
+      return;
+    }
+
+    await sqlitePlugin.run({
+      database: DB_NAME,
+      statement: 'UPDATE users SET name = ?, role = ? WHERE id = ?',
+      values: [name, role, userId]
+    });
+  }
+
+  async function updateUserPin(userId, newPin) {
+    const salt = window.AuthPinHash.generateSalt();
+    const hash = await window.AuthPinHash.hashPin(newPin, salt);
+
+    if (!usingRealSqlite) {
+      const user = fallbackUsers.find(u => u.id === userId);
+      if (user) {
+        user.pin_hash = hash;
+        user.pin_salt = salt;
+      }
+      return;
+    }
+
+    await sqlitePlugin.run({
+      database: DB_NAME,
+      statement: 'UPDATE users SET pin_hash = ?, pin_salt = ? WHERE id = ?',
+      values: [hash, salt, userId]
+    });
+  }
+
+  async function setUserActive(userId, isActive) {
+    if (!usingRealSqlite) {
+      const user = fallbackUsers.find(u => u.id === userId);
+      if (user) user.active = isActive ? 1 : 0;
+      return;
+    }
+
+    await sqlitePlugin.run({
+      database: DB_NAME,
+      statement: 'UPDATE users SET active = ? WHERE id = ?',
+      values: [isActive ? 1 : 0, userId]
+    });
+  }
+
+  return {
+    initDatabase,
+    getAllUsers,
+    verifyPin,
+    getAllUsersForManagement,
+    createUser,
+    updateUserInfo,
+    updateUserPin,
+    setUserActive
+  };
 })();
 
 window.AuthDB = AuthDB;

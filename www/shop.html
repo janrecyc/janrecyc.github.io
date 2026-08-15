@@ -11,6 +11,11 @@
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/nav.css">
 <link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/history.css">
+<!-- Phosphor icons — only needed for the "ประวัติการซื้อขาย" tab
+     (ported from ScrapPOS, see js/pages/history-tab.js); every other
+     icon on this page is still the template's own inline SVG. -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
 <div class="app">
@@ -31,6 +36,22 @@
   </div>
 </div>
 
+<!-- ══ HISTORY DETAIL SHEET ══ (only used by the "ประวัติการซื้อขาย"
+     tab — js/pages/history-tab.js — kept outside .content so it
+     survives #shop-mount being re-rendered on every tab switch) -->
+<div class="hd-backdrop" id="hd-backdrop" onclick="closeDetail()"></div>
+<div class="hd-sheet" id="hd-sheet">
+  <div class="hd-handle-row"><div class="hd-handle"></div></div>
+  <div class="hd-hero">
+    <div class="hd-icon" id="hd-icon"></div>
+    <div class="hd-title" id="hd-title">—</div>
+    <div class="hd-date" id="hd-date">—</div>
+    <div class="hd-amt" id="hd-amt">—</div>
+  </div>
+  <div class="hd-body" id="hd-body"></div>
+  <button class="hd-close-btn" onclick="closeDetail()">ปิด</button>
+</div>
+
 <script src="js/data/nav.js"></script>
 <script src="js/components/nav.js"></script>
 <script src="js/data/shop-items.js"></script>
@@ -38,6 +59,10 @@
 <script src="js/components/shop-item-list.js"></script>
 <script src="js/components/tab-filter.js"></script>
 <script src="js/components/search-bar.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/scrap-db/db.js"></script>
+<script src="js/scrap-db/local-rest.js"></script>
+<script src="js/pages/history-tab.js"></script>
 <script src="js/pages/shop-page.js"></script>
 <script>
   renderNav('shop');

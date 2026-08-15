@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<script src="js/auth/session.js"></script>
+<script src="js/auth/guard.js"></script>
+<script src="js/theme.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ตารางงาน</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/nav.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div class="app">
+  <div class="statusbar-spacer"></div>
+  <div class="shell">
+    <nav class="bottom-nav" id="nav-mount"></nav>
+    <main class="main">
+      <div class="top-bar" id="search-toggle-mount"></div>
+      <div class="page-header">
+        <span>ตารางงาน</span>
+      </div>
+      <div class="content">
+        <div id="search-mount"></div>
+        <div class="filter-tabs" id="filters-mount"></div>
+        <div id="schedule-mount"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/data/nav.js"></script>
+<script src="js/components/nav.js"></script>
+<script src="js/data/schedule-jobs.js"></script>
+<script src="js/data/schedule-tabs.js"></script>
+<script src="js/components/schedule-job-list.js"></script>
+<script src="js/components/tab-filter.js"></script>
+<script src="js/components/search-bar.js"></script>
+<script src="js/pages/schedule-page.js"></script>
+<script>
+  renderNav('schedule');
+  initSchedulePage();
+</script>
+</body>
+</html>

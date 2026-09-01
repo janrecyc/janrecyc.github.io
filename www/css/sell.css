@@ -188,8 +188,14 @@
 .kg-sheet {
   background: var(--calc-bg);
   border-radius: 28px 28px 0 0;
-  overflow: hidden;
   box-shadow: 0 -8px 60px rgba(0,0,0,0.55), 0 -1px 0 rgba(255,255,255,0.08);
+  /* Was overflow:hidden with no height cap — fine in portrait (content
+     fits), but in landscape the viewport is short enough that the sheet's
+     natural height (header + display + numpad) overflows past the top of
+     the screen with no way to reach it. Cap + scroll instead. */
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .kg-handle {

@@ -1,0 +1,142 @@
+/* ══════════════════════════════════════════
+   history.css — Styles for history.html (ประวัติการซื้อขาย)
+   ScrapPOS
+══════════════════════════════════════════ */
+
+/* ── Aliased to css/tokens.css (see css/dashboard.css for the same
+   pattern) so this tab follows the template's theme + purple brand
+   color. ScrapPOS's own history accent was already purple (#6C4CE0),
+   close to --nav-active, so unlike dashboard.css this needed no hue
+   shift — just pointed straight at the token. ── */
+:root {
+  --ink:       var(--text);
+  --ink2:      var(--text);
+  --ink3:      var(--text-dim);
+  --surface:   var(--bg);
+  --white:     var(--card);
+  --primary:   var(--nav-active);
+  --green:     #00C853;
+  --red:       #FF3B30;
+  --card-sh:   0 2px 20px rgba(10,10,30,0.07), 0 0 0 0.5px var(--border);
+}
+
+/* header/back-btn/status-bar/page-title dropped — this is now a tab
+   inside shop.html's own page-header + bottom nav-mount, not its own
+   standalone page. .scroll-body dropped too — .content (layout.css)
+   already scrolls via .main, no separate scroll region needed. */
+
+.hf-pills { display: flex; gap: 6px; margin-bottom: 4px; overflow-x: auto; scrollbar-width: none; }
+.hf-pills::-webkit-scrollbar { display: none; }
+.hf-pill {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 100px;
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  border: 1px solid rgba(10,10,30,0.08); background: var(--white); color: var(--ink2);
+  cursor: pointer; transition: all .15s;
+}
+.hf-pill.on { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 2px 8px rgba(108,76,224,0.25); }
+
+.tl-loading, .tl-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 80px 20px; color: var(--ink3); font-size: 14px; text-align: center;
+}
+.tl-loading i, .tl-empty i { font-size: 34px; }
+
+.tl-date-header {
+  font-size: 12.5px; font-weight: 700; color: var(--ink3);
+  padding: 14px 4px 8px; text-transform: none;
+}
+.tl-group:first-of-type + .tl-date-header,
+.tl-date-header:first-child { padding-top: 4px; }
+
+.tl-item {
+  display: flex; gap: 10px; cursor: pointer;
+}
+.tl-track {
+  display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 34px;
+}
+.tl-dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.tl-line {
+  width: 2px; flex: 1; min-height: 14px;
+  background: rgba(10,10,30,0.08);
+  margin: 2px 0;
+}
+.tl-card {
+  flex: 1; background: var(--white); border-radius: 16px;
+  padding: 12px 14px; margin-bottom: 10px;
+  box-shadow: var(--card-sh);
+}
+.tl-item:active .tl-card { transform: scale(0.98); }
+.tl-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tl-card-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+.tl-card-amt { font-size: 14px; font-weight: 800; white-space: nowrap; }
+.tl-card-amt.plus  { color: var(--green); }
+.tl-card-amt.minus { color: var(--red); }
+.tl-card-amt.neutral { color: var(--ink3); }
+.tl-card-sub { font-size: 12px; color: var(--ink3); margin-top: 3px; }
+
+/* ══ DETAIL SHEET ══ */
+.hd-backdrop {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(10,10,30,0.45); backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none; transition: opacity .22s;
+}
+.hd-backdrop.show { opacity: 1; pointer-events: all; }
+
+.hd-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 501;
+  background: var(--white); border-radius: 24px 24px 0 0;
+  transform: translateY(100%);
+  transition: transform .32s cubic-bezier(.22,1,.36,1);
+  padding-bottom: env(safe-area-inset-bottom,16px);
+  max-height: 82dvh; overflow-y: auto;
+}
+.hd-sheet.show { transform: translateY(0); }
+
+.hd-handle-row { display: flex; justify-content: center; padding: 12px 0 0; }
+.hd-handle { width: 36px; height: 4px; background: rgba(10,10,30,0.10); border-radius: 2px; }
+
+.hd-hero { display: flex; flex-direction: column; align-items: center; padding: 18px 20px 14px; text-align: center; }
+.hd-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; margin-bottom: 10px;
+}
+.hd-title { font-size: 15px; font-weight: 700; color: var(--ink2); }
+.hd-date  { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.hd-amt   { font-size: 30px; font-weight: 800; margin-top: 8px; }
+.hd-amt.plus  { color: var(--green); }
+.hd-amt.minus { color: var(--ink); }
+.hd-amt.neutral { color: var(--ink); }
+
+.hd-body { padding: 4px 20px 20px; border-top: 1px dashed rgba(10,10,30,0.10); margin-top: 4px; }
+
+.hd-factory {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: var(--ink2);
+  padding: 12px 0 4px;
+}
+.hd-sort-from {
+  font-size: 13px; color: var(--ink2); padding: 12px 0 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.hd-line {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid rgba(10,10,30,0.05);
+}
+.hd-line:last-child { border-bottom: none; }
+.hd-line-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.hd-line-detail { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+.hd-line-amt { font-size: 13.5px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.hd-note { font-size: 14px; color: var(--ink2); padding: 14px 0; text-align: center; }
+
+.hd-close-btn {
+  width: calc(100% - 40px); margin: 8px 20px 0;
+  padding: 13px; border-radius: 14px; border: none;
+  background: var(--surface); color: var(--ink2);
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer;
+}
